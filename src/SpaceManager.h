@@ -17,7 +17,9 @@
 //(cleaner to move it to target specific options)
 #define _SPACE_MANAGER_FOR_COCOS2D
 
-
+// 0x00 HI ME LO
+// 00   00 00 01
+#define SPACE_MANAGER_VERSION 0x00000001
 
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
 #import "cocos2d.h"
@@ -42,6 +44,7 @@ void defaultEachShape(void *ptr, void* data);
 	NSMutableArray	*_invocations;
 	Timer			*_timer;
 	
+	/* Helpful Shapes/Bodies */
 	cpShape			*topWall,*bottomWall,*rightWall,*leftWall;
 	cpBody			*_staticBody;
 	
@@ -49,10 +52,9 @@ void defaultEachShape(void *ptr, void* data);
 	int		_steps;
 	
 	/* Options:
-		-cleanupBodyDepenencies will also free contraints connected 
-		 to a free'd shape
-		-iterateStatic will update any cocosnodes attached to static shapes
-		-iterateFunc; default will update cocosnodes for pos and rot
+		-cleanupBodyDepenencies will also free contraints connected to a free'd shape
+		-iterateStatic will call _iterateFunc on static shapes
+		-iterateFunc; default will update cocosnodes for pos and rotation
 		-constantDt; set this to a non-zero number to always step the simulation with that dt
 	*/
 	BOOL				_cleanupBodyDependencies;
