@@ -71,35 +71,59 @@ void defaultEachShape(void *ptr, void* data);
 @property (readwrite, assign) cpFloat constantDt;
 @property (readwrite, assign) BOOL cleanupBodyDependencies;
 
+/*! initialization method
+	@param size The average size of shapes in space
+	@param count The expected number of shapes in a space (larger is better)
+ */
 -(id) initWithSize:(int)size count:(int)count;
 
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
+
+/*! Schedule a timed loop (against step:) using Cocos2d's default dt */
 -(void) start;
+
+/*! Schedule a timed loop (against step:) using dt */
 -(void) start:(float)dt;
+
+/* Stop the timed loop */
 -(void) stop;
-#endif
 
--(void) step: (ccTime) delta;
-
--(cpSpace*) getSpace;
-
+/*! Convenience method for adding a containment rect around the view */
 -(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat) elasticity inset:(cpVect)inset;
 
+#endif
+
+/*! Manually advance time within the space */
+-(void) step: (ccTime) delta;
+
+/*! Get chipmunk space object */
+-(cpSpace*) getSpace;
+
+/*! add a circle shape */
 -(cpShape*) addCircleAt:(cpVect)pos mass:(cpFloat)mass radius:(int)radius;
+
+/*! add a rectangle shape */
 -(cpShape*) addRectAt:(cpVect)pos mass:(cpFloat)mass width:(int)width height:(int)height rotation:(cpFloat)r;
+
+/*! add a polygon shape */
 -(cpShape*) addPolyAt:(cpVect)pos mass:(cpFloat)mass rotation:(cpFloat)r numPoints:(int)numPoints points:(cpVect)pt, ... ;
 
+/*! Retrieve the first shape found at this position matching layers and group */
 -(cpShape*) getShapeAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group;
+
+/*! Retrieve the first shape found at this position */
 -(cpShape*) getShapeAt:(cpVect)pos;
 
-/* Use if you need to call getShapes before you've actually started simulating */
+/*! Use if you need to call getShapes before you've actually started simulating */
 - (void) rehashActiveShapes;
+
+/*! Use if you move static shapes during simulation */
 - (void) rehashStaticShapes;
 
-/*! This function actually returns an Array of NSValues with pointers... (incompatability with C objects)
-	Use [value pointerValue] to pull out the cpShape
- */
+/*! Return an array of NSValues with a pointer to a cpShape */
 -(NSArray*) getShapesAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group;
+
+/*! @see getShapesAt:layers:group: */
 -(NSArray*) getShapesAt:(cpVect)pos;
 
 /*! Queries the space as to whether this two shapes are in persistent contact */
@@ -107,29 +131,49 @@ void defaultEachShape(void *ptr, void* data);
 
 /*! Will return an array of NSValues that point to the cpConstraints */
 -(NSArray*) getConstraints;
+
+/*! Will return an array of NSValues that point to the cpConstraints on given body */
 -(NSArray*) getConstraintsOnBody:(cpBody*)body;
 
-/*! Use schedule when removing & freeing shapes during collisions */
+/*! Schedule is used for removing & freeing shapes during collisions */
 -(void) scheduleToRemoveAndFreeShape:(cpShape*)shape;
+
+/*! Use when removing & freeing shapes */
 -(void) removeAndFreeShape:(cpShape*)shape;
 
-/*! Use schedule when removing shapes during collisions */
+/*! Schedule is used for removing shapes during collisions, ownership is given to caller */
 -(void) scheduleToRemoveShape:(cpShape*)shape;
+
+/*! Use when removing shapes, will pass ownership to caller */
 -(void) removeShape:(cpShape*)shape;
+
+/*! Manually add a shape to the space */
 -(void) addShape:(cpShape*)shape;
 
+/*! This will force a shape into a static shape */
 -(cpShape*) morphShapeToStatic:(cpShape*)shape;
+
+/*! This will force a shape active and give it the given mass */
 -(cpShape*) morphShapeToActive:(cpShape*)shape mass:(cpFloat)mass;
 
+/*! Unique Collision: will ignore the effects a collsion between types */
 -(void) ignoreCollionBetweenType:(unsigned int)type1 otherType:(unsigned int)type2;
+
+/*! Register a collision callback between types */
 -(void) addCollisionCallbackBetweenType:(unsigned int)type1 otherType:(unsigned int)type2 target:(id)target selector:(SEL)selector;
+
+/*! Unregister a collision callback between types */
 -(void) removeCollisionCallbackBetweenType:(unsigned int)type1 otherType:(unsigned int)type2;
 
+/*! Use when removing constraints, ownership is given to caller*/
 -(void) removeConstraint:(cpConstraint*)constraint;
+
+/*! This will remove and free the constraint */
 -(void) removeAndFreeConstraint:(cpConstraint*)constraint;
+
+/*! This will calculate all constraints on a body and remove & free them */
 -(void) removeAndFreeConstraintsOnBody:(cpBody*)body;
 
-/*! All our constraints that we can add */
 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2 restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp;
 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp;
 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody stiffness:(cpFloat)stiff;

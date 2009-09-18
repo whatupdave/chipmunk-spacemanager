@@ -165,6 +165,24 @@ static void updateBBCache(cpShape *shape, void *unused)
 	return _space;
 }
 
+#ifdef _SPACE_MANAGER_FOR_COCOS2D
+-(void) start:(ccTime)dt
+{
+	_timer = [Timer timerWithTarget:self selector:@selector(step:) interval:dt];
+	[[Scheduler sharedScheduler] scheduleTimer:_timer];
+}
+
+-(void) start
+{
+	[self start:0];
+}
+
+-(void) stop
+{
+	[[Scheduler sharedScheduler] unscheduleTimer:_timer];
+	_timer = nil;
+}
+
 -(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset
 {
 	CGSize  wins = [[Director sharedDirector] winSize];
@@ -194,23 +212,6 @@ static void updateBBCache(cpShape *shape, void *unused)
 	cpSpaceAddStaticShape(_space, rightWall);
 }
 
-#ifdef _SPACE_MANAGER_FOR_COCOS2D
--(void) start:(ccTime)dt
-{
-	_timer = [Timer timerWithTarget:self selector:@selector(step:) interval:dt];
-	[[Scheduler sharedScheduler] scheduleTimer:_timer];
-}
-
--(void) start
-{
-	[self start:0];
-}
-
--(void) stop
-{
-	[[Scheduler sharedScheduler] unscheduleTimer:_timer];
-	_timer = nil;
-}
 #endif
 
 -(void) step: (ccTime) delta
