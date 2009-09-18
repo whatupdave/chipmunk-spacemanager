@@ -671,7 +671,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 	//add the callback to chipmunk
 	cpSpaceAddCollisionPairFunc(_space, type1, type2, &collHandleInvocations, invocation);
 	
-	//we'll keep a ref so it won't disappear
+	//we'll keep a ref so it won't disappear, prob could just retain and clear hash later
 	[_invocations addObject:invocation];
 }
 
@@ -690,7 +690,8 @@ static void updateBBCache(cpShape *shape, void *unused)
 	}
 
 	//Remove the collision callback
-	cpSpaceRemoveCollisionPairFunc(_space, type1, type2);	
+	cpCollPairFunc *old_pair = (cpCollPairFunc *)cpHashSetRemove(_space->collFuncSet, hash, ids);
+	free(old_pair);	
 }
 
 @end

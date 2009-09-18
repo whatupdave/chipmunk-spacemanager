@@ -41,6 +41,7 @@
 		A65371571028CC6200651DC9 /* cpSpaceHash.c in Sources */ = {isa = PBXBuildFile; fileRef = A653713A1028CC6200651DC9 /* cpSpaceHash.c */; };
 		A65371581028CC6200651DC9 /* cpVect.c in Sources */ = {isa = PBXBuildFile; fileRef = A653713C1028CC6200651DC9 /* cpVect.c */; };
 		A65371591028CC6200651DC9 /* SConscript in Resources */ = {isa = PBXBuildFile; fileRef = A653713F1028CC6200651DC9 /* SConscript */; };
+		A66F2AE4106337A100BA0DB3 /* fps_images.png in Resources */ = {isa = PBXBuildFile; fileRef = A66F2AE3106337A100BA0DB3 /* fps_images.png */; };
 		A6727B63101F3EC500557968 /* staticcircle.png in Resources */ = {isa = PBXBuildFile; fileRef = A6727B61101F3EC500557968 /* staticcircle.png */; };
 		A6727B64101F3EC500557968 /* staticrect.png in Resources */ = {isa = PBXBuildFile; fileRef = A6727B62101F3EC500557968 /* staticrect.png */; };
 		A698F1541062700100BFB454 /* Action.m in Sources */ = {isa = PBXBuildFile; fileRef = A698F0DE1062700100BFB454 /* Action.m */; };
@@ -205,6 +206,7 @@
 		A653713D1028CC6200651DC9 /* cpVect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpVect.h; sourceTree = "<group>"; };
 		A653713E1028CC6200651DC9 /* prime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prime.h; sourceTree = "<group>"; };
 		A653713F1028CC6200651DC9 /* SConscript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SConscript; sourceTree = "<group>"; };
+		A66F2AE3106337A100BA0DB3 /* fps_images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images.png; sourceTree = "<group>"; };
 		A6727B61101F3EC500557968 /* staticcircle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = staticcircle.png; sourceTree = "<group>"; };
 		A6727B62101F3EC500557968 /* staticrect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = staticrect.png; sourceTree = "<group>"; };
 		A698F0DD1062700100BFB454 /* Action.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Action.h; sourceTree = "<group>"; };
@@ -449,6 +451,7 @@
 		99B89A5B0F9E6E6F0034B3BB /* External Source */ = {
 			isa = PBXGroup;
 			children = (
+				A66F2AE2106337A100BA0DB3 /* resources */,
 				A698F0DC1062700100BFB454 /* cocos2d */,
 				99B89ABC0F9E6E6F0034B3BB /* external */,
 			);
@@ -568,6 +571,14 @@
 				A65371271028CC6200651DC9 /* util.h */,
 			);
 			path = constraints;
+			sourceTree = "<group>";
+		};
+		A66F2AE2106337A100BA0DB3 /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				A66F2AE3106337A100BA0DB3 /* fps_images.png */,
+			);
+			path = resources;
 			sourceTree = "<group>";
 		};
 		A698F0DC1062700100BFB454 /* cocos2d */ = {
@@ -810,6 +821,7 @@
 				A698F1CA1062707B00BFB454 /* LICENSE in Resources */,
 				A698F1DD1062707B00BFB454 /* README in Resources */,
 				A698F1DE1062707B00BFB454 /* TODO in Resources */,
+				A66F2AE4106337A100BA0DB3 /* fps_images.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
