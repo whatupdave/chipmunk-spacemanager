@@ -55,6 +55,7 @@ if (shape)\
 #define CPCCNODE_FUNC_DECLARE	\
 @property (readwrite,assign) BOOL ignoreRotation;\
 @property (readwrite,assign) cpFloat integrationDt;\
+@property (readwrite,assign) BOOL autoFreeShape;\
 @property (readwrite,assign) cpShape *shape;\
 @property (readwrite,assign) SpaceManager *spaceManager;\
 -(void) applyImpulse:(cpVect)impulse;\
@@ -121,4 +122,12 @@ _implementation.spaceManager = spaceManager;\
 -(SpaceManager*) spaceManager\
 {\
 return _implementation.spaceManager;\
+}\
+-(void) setAutoFreeShape:(BOOL)autoFree\
+{\
+_implementation.autoFreeShape = autoFree;\
+}\
+-(BOOL) autoFreeShape\
+{\
+return _implementation.autoFreeShape;\
 }
