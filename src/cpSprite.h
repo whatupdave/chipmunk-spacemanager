@@ -19,18 +19,13 @@
 
 @interface cpSprite : Sprite 
 {
-	cpCCNode *_implementation;
+	CPCCNODE_MEM_VARS
 }
 
-@property (readwrite,assign) BOOL ignoreRotation;
-@property (readwrite,assign) cpFloat integrationDt;
-@property (readwrite,assign) cpShape *shape;
+CPCCNODE_FUNC_DECLARE
 
 + (id) spriteWithShape:(cpShape*)s file:(NSString*) filename;
 - (id) initWithShape:(cpShape*)s file:(NSString*) filename;
 
--(void) applyImpulse:(cpVect)impulse;
--(void) applyForce:(cpVect)force;
--(void) resetForces;
 
 @end

@@ -50,77 +50,12 @@
 	_smoothDraw = NO;	
 	_fillShape = YES;
 	_drawDecoration = YES;
-	_implementation = [[cpCCNode alloc] initWithShape:shape];
-	if (shape)
-		shape->data = self;
+	CPCCNODE_MEM_VARS_INIT(shape)
 	
 	return self;
 }
 
-- (void) dealloc
-{
-	[_implementation release];
-	[super dealloc];
-}
-
--(void)setRotation:(float)rot
-{	
-	[_implementation setRotation:rot oldRotation:rotation_];
-	[super setRotation:rot];
-}
-
--(void)setPosition:(cpVect)pos
-{
-	[_implementation setPosition:pos oldPosition:position_];	
-	[super setPosition:pos];
-}
-
--(void) applyImpulse:(cpVect)impulse
-{
-	[_implementation applyImpulse:impulse];
-}
-
--(void) applyForce:(cpVect)force
-{
-	[_implementation applyForce:force];
-}
-
--(void) resetForces
-{
-	[_implementation resetForces];
-}
-
-
-///property implementation
--(void) setIgnoreRotation:(BOOL)ignore
-{
-	_implementation.ignoreRotation = ignore;
-}
-
--(BOOL) ignoreRotation
-{
-	return _implementation.ignoreRotation;
-}
-
--(void) setIntegrationDt:(cpFloat)dt
-{
-	_implementation.integrationDt = dt;
-}
-
--(cpFloat) integrationDt
-{
-	return _implementation.integrationDt;
-}
-
--(void) setShape:(cpShape*)shape
-{
-	_implementation.shape = shape;
-}
-
--(cpShape*) shape
-{
-	return _implementation.shape;
-}
+CPCCNODE_FUNC_SRC
 
 - (void) draw
 {

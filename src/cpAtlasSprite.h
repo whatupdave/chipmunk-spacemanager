@@ -19,18 +19,12 @@
 
 @interface cpAtlasSprite : AtlasSprite 
 {
-	cpCCNode *_implementation;
+	CPCCNODE_MEM_VARS
 }
 
-@property (readwrite,assign) cpShape *shape;
-@property (readwrite, assign) BOOL ignoreRotation;
-@property (readwrite, assign) cpFloat integrationDt;
+CPCCNODE_FUNC_DECLARE
 
 + (id) spriteWithShape:(cpShape*)s manager:(AtlasSpriteManager*)sm rect:(CGRect)rect;
 - (id) initWithShape:(cpShape*)s manager:(AtlasSpriteManager*)sm rect:(CGRect)rect;
-
--(void) applyImpulse:(cpVect)impulse;
--(void) applyForce:(cpVect)force;
--(void) resetForces;
 
 @end

@@ -21,6 +21,7 @@
 @synthesize shape = _shape;
 @synthesize ignoreRotation = _ignoreRotation;
 @synthesize integrationDt = _integrationDt;
+@synthesize spaceManager = _spaceManager;
 
 - (id) init
 {
@@ -29,12 +30,18 @@
 
 - (id) initWithShape:(cpShape*)s
 {	
-	if (s)
-		_shape = s;
-
+	_shape = s;
 	_integrationDt = 1.0/60.0;
 	
 	return self;
+}
+
+-(void) dealloc
+{
+	if (_autoFreeShape)
+		[_spaceManager removeAndFreeShape:_shape];
+		
+	[super dealloc];
 }
 
 -(void)setRotation:(float)rot oldRotation:(float)oldRot

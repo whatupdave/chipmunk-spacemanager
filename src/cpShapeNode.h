@@ -20,10 +20,7 @@
 
 @interface cpShapeNode : CocosNode <CocosNodeRGBA>
 {
-@protected
-
-	cpCCNode *_implementation;
-	
+@protected	
 	ccColor3B _color;
 	GLubyte _opacity;
 	
@@ -32,11 +29,9 @@
 	BOOL	_smoothDraw;
 	BOOL	_fillShape;
 	BOOL	_drawDecoration;
-}
 	
-@property (readonly) cpShape* shape;
-@property (readwrite, assign) BOOL ignoreRotation;
-@property (readwrite, assign) cpFloat integrationDt;
+	CPCCNODE_MEM_VARS
+}
 @property (readwrite, assign) ccColor3B color;
 @property (readwrite, assign) GLubyte opacity;
 
@@ -45,6 +40,8 @@
 @property (readwrite, assign) BOOL smoothDraw;
 @property (readwrite, assign) BOOL fillShape;
 @property (readwrite, assign) BOOL drawDecoration;
+
+CPCCNODE_FUNC_DECLARE
 
 
 + (id) nodeWithShape:(cpShape*)shape;
