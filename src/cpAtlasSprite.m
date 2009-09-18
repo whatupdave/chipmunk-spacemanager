@@ -18,10 +18,6 @@
 
 @implementation cpAtlasSprite
 
-@synthesize shape = _shape;
-@synthesize ignoreRotation = _ignoreRotation;
-@synthesize integrateSetPosition = _integrateSetPosition;
-
 + (id) spriteWithShape:(cpShape*)s manager:(AtlasSpriteManager*)sm rect:(CGRect)rect
 {
 	return [[[self alloc] initWithShape:s manager:sm rect:rect] autorelease];
@@ -29,60 +25,79 @@
 
 -(id)initWithShape:(cpShape*)s manager:(AtlasSpriteManager*)sm rect:(CGRect)rect
 {
-	_shape = s;
-	s->data = self;	
+	[super initWithRect:rect spriteManager:sm];
+	_implementation = [[cpCCNode alloc] initWithShape:s];
+	if (s)
+		s->data = self;
+
+	
 	return self;
+}
+
+- (void) dealloc
+{
+	[_implementation release];
+	[super dealloc];
 }
 
 -(void)setRotation:(float)rot
 {	
-	if (!_ignoreRotation)
-	{
-		[super setRotation:rot];	
-		if (_shape != nil)
-			cpBodySetAngle(_shape->body, CC_DEGREES_TO_RADIANS(-self.rotation));
-	}
+	[_implementation setRotation:rot oldRotation:rotation_];
+	[super setRotation:rot];
 }
 
 -(void)setPosition:(cpVect)pos
 {
-	cpVect oldPos = self.position;
-	
+	[_implementation setPosition:pos oldPosition:position_];	
 	[super setPosition:pos];
-	if (_shape != nil)
-	{
-		if (cpvlength(cpvsub(_shape->body->p,pos)) != 0)
-		{
-			_shape->body->p = self.position;
-			
-			//Experimental (Euler integration)
-			if (_integrateSetPosition)
-			{
-				cpVect velocity = cpvmult(cpvsub(pos,oldPos), 30); //mult by 30 cause dt is 1/30
-				_shape->body->v = velocity;
-			}
-		}
-	}
 }
 
 -(void) applyImpulse:(cpVect)impulse
 {
-	if (_shape != nil)
-		cpBodyApplyImpulse(_shape->body, impulse, cpvzero);
+	[_implementation applyImpulse:impulse];
 }
 
 -(void) applyForce:(cpVect)force
 {
-	if (_shape != nil)
-		cpBodyApplyForce(_shape->body, force, cpvzero);	
+	[_implementation applyForce:force];
 }
 
 -(void) resetForces
 {
-	if (_shape != nil)
-		cpBodyResetForces(_shape->body);
+	[_implementation resetForces];
 }
 
+
+///property implementation
+-(void) setIgnoreRotation:(BOOL)ignore
+{
+	_implementation.ignoreRotation = ignore;
+}
+
+-(BOOL) ignoreRotation
+{
+	return _implementation.ignoreRotation;
+}
+
+-(void) setIntegrationDt:(cpFloat)dt
+{
+	_implementation.integrationDt = dt;
+}
+
+-(cpFloat) integrationDt
+{
+	return _implementation.integrationDt;
+}
+
+-(void) setShape:(cpShape*)shape
+{
+	_implementation.shape = shape;
+}
+
+-(cpShape*) shape
+{
+	return _implementation.shape;
+}
 
 
 @end

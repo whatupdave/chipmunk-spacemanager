@@ -15,12 +15,14 @@
 
 #import "cocos2d.h"
 #import "chipmunk.h"
+#import "cpCCNode.h"
 
 
 @interface cpShapeNode : CocosNode <CocosNodeRGBA>
 {
 @protected
-	cpShape *_shape;
+
+	cpCCNode *_implementation;
 	
 	ccColor3B _color;
 	GLubyte _opacity;
@@ -30,10 +32,11 @@
 	BOOL	_smoothDraw;
 	BOOL	_fillShape;
 	BOOL	_drawDecoration;
-	BOOL	_integrateSetPosition;
 }
 	
 @property (readonly) cpShape* shape;
+@property (readwrite, assign) BOOL ignoreRotation;
+@property (readwrite, assign) cpFloat integrationDt;
 @property (readwrite, assign) ccColor3B color;
 @property (readwrite, assign) GLubyte opacity;
 
@@ -42,7 +45,6 @@
 @property (readwrite, assign) BOOL smoothDraw;
 @property (readwrite, assign) BOOL fillShape;
 @property (readwrite, assign) BOOL drawDecoration;
-@property (readwrite, assign) BOOL integrateSetPosition;
 
 
 + (id) nodeWithShape:(cpShape*)shape;

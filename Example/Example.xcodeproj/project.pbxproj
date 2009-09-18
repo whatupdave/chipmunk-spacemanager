@@ -129,6 +129,7 @@
 		A698F27D1062C85500BFB454 /* cpShapeNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A698F2741062C85500BFB454 /* cpShapeNode.m */; };
 		A698F27E1062C85500BFB454 /* cpSprite.m in Sources */ = {isa = PBXBuildFile; fileRef = A698F2761062C85500BFB454 /* cpSprite.m */; };
 		A698F2801062C85500BFB454 /* SpaceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A698F27A1062C85500BFB454 /* SpaceManager.m */; };
+		A6A9BB501063C66200213DA8 /* cpCCNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A6A9BB4F1063C66200213DA8 /* cpCCNode.m */; };
 		A6AB8DBA10291373002785F7 /* rect.png in Resources */ = {isa = PBXBuildFile; fileRef = A6AB8DB910291373002785F7 /* rect.png */; };
 		A6AB8DCA10291735002785F7 /* inverted.png in Resources */ = {isa = PBXBuildFile; fileRef = A6AB8DC910291735002785F7 /* inverted.png */; };
 		B2D7CA2F0ECEC52D00721DAB /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2D7CA2E0ECEC52D00721DAB /* OpenGLES.framework */; };
@@ -363,6 +364,8 @@
 		A698F2761062C85500BFB454 /* cpSprite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cpSprite.m; sourceTree = "<group>"; };
 		A698F2791062C85500BFB454 /* SpaceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpaceManager.h; sourceTree = "<group>"; };
 		A698F27A1062C85500BFB454 /* SpaceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpaceManager.m; sourceTree = "<group>"; };
+		A6A9BB4E1063C66200213DA8 /* cpCCNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpCCNode.h; sourceTree = "<group>"; };
+		A6A9BB4F1063C66200213DA8 /* cpCCNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cpCCNode.m; sourceTree = "<group>"; };
 		A6AB8DB910291373002785F7 /* rect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rect.png; sourceTree = "<group>"; };
 		A6AB8DC910291735002785F7 /* inverted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = inverted.png; sourceTree = "<group>"; };
 		B2D7CA2E0ECEC52D00721DAB /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
@@ -759,6 +762,8 @@
 				A698F2761062C85500BFB454 /* cpSprite.m */,
 				A698F2791062C85500BFB454 /* SpaceManager.h */,
 				A698F27A1062C85500BFB454 /* SpaceManager.m */,
+				A6A9BB4E1063C66200213DA8 /* cpCCNode.h */,
+				A6A9BB4F1063C66200213DA8 /* cpCCNode.m */,
 			);
 			name = "Space Manager Src";
 			path = ../src;
@@ -937,6 +942,7 @@
 				A698F27D1062C85500BFB454 /* cpShapeNode.m in Sources */,
 				A698F27E1062C85500BFB454 /* cpSprite.m in Sources */,
 				A698F2801062C85500BFB454 /* SpaceManager.m in Sources */,
+				A6A9BB501063C66200213DA8 /* cpCCNode.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

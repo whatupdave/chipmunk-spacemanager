@@ -26,7 +26,6 @@
 
 @implementation cpShapeNode
 
-@synthesize shape = _shape;
 @synthesize color = _color;
 @synthesize opacity = _opacity;
 @synthesize pointSize = _pointSize;
@@ -34,7 +33,6 @@
 @synthesize smoothDraw = _smoothDraw;
 @synthesize fillShape = _fillShape;
 @synthesize drawDecoration = _drawDecoration;
-@synthesize integrateSetPosition = _integrateSetPosition;
 
 + (id) nodeWithShape:(cpShape*)shape
 {
@@ -45,7 +43,6 @@
 {
 	[super init];
 	
-	_shape = shape;
 	_color = ccBLACK;
 	_opacity = 255;
 	_pointSize = 3;
@@ -53,55 +50,76 @@
 	_smoothDraw = NO;	
 	_fillShape = YES;
 	_drawDecoration = YES;
-	_shape->data = self;
+	_implementation = [[cpCCNode alloc] initWithShape:shape];
+	if (shape)
+		shape->data = self;
 	
 	return self;
 }
 
+- (void) dealloc
+{
+	[_implementation release];
+	[super dealloc];
+}
+
 -(void)setRotation:(float)rot
 {	
-	[super setRotation:rot];	
-	if (_shape != nil)
-		cpBodySetAngle(_shape->body, -CC_DEGREES_TO_RADIANS(self.rotation));
+	[_implementation setRotation:rot oldRotation:rotation_];
+	[super setRotation:rot];
 }
 
 -(void)setPosition:(cpVect)pos
 {
-	cpVect oldPos = self.position;
-	
+	[_implementation setPosition:pos oldPosition:position_];	
 	[super setPosition:pos];
-	if (_shape != nil)
-	{
-		if (cpvlength(cpvsub(_shape->body->p,pos)) != 0)
-		{
-			_shape->body->p = self.position;
-			
-			//Experimental (Euler integration)
-			if (_integrateSetPosition)
-			{
-				cpVect velocity = cpvmult(cpvsub(pos,oldPos), 30); //mult by 30 cause dt is 1/30
-				_shape->body->v = velocity;
-			}
-		}
-	}
 }
 
 -(void) applyImpulse:(cpVect)impulse
 {
-	if (_shape != nil)
-		cpBodyApplyImpulse(_shape->body, impulse, cpvzero);
+	[_implementation applyImpulse:impulse];
 }
 
 -(void) applyForce:(cpVect)force
 {
-	if (_shape != nil)
-		cpBodyApplyForce(_shape->body, force, cpvzero);	
+	[_implementation applyForce:force];
 }
 
 -(void) resetForces
 {
-	if (_shape != nil)
-		cpBodyResetForces(_shape->body);
+	[_implementation resetForces];
+}
+
+
+///property implementation
+-(void) setIgnoreRotation:(BOOL)ignore
+{
+	_implementation.ignoreRotation = ignore;
+}
+
+-(BOOL) ignoreRotation
+{
+	return _implementation.ignoreRotation;
+}
+
+-(void) setIntegrationDt:(cpFloat)dt
+{
+	_implementation.integrationDt = dt;
+}
+
+-(cpFloat) integrationDt
+{
+	return _implementation.integrationDt;
+}
+
+-(void) setShape:(cpShape*)shape
+{
+	_implementation.shape = shape;
+}
+
+-(cpShape*) shape
+{
+	return _implementation.shape;
 }
 
 - (void) draw
@@ -127,7 +145,7 @@
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	
-	switch(_shape->klass->type)
+	switch(_implementation.shape->klass->type)
 	{
 		case CP_CIRCLE_SHAPE:
 			[self drawCircleShape];
@@ -179,7 +197,7 @@
 	};
 	static const int circleVAR_count = sizeof(circleVAR)/sizeof(GLfloat)/2;
 	
-	cpCircleShape *circle = (cpCircleShape*)_shape;
+	cpCircleShape *circle = (cpCircleShape*)_implementation.shape;
 	//cpBody *body = _shape->body;
 	int extraPtOffset = _drawDecoration ? 0 : 1;
 	
@@ -231,7 +249,7 @@
 	};
 	static const int pillVAR_count = sizeof(pillVAR)/sizeof(GLfloat)/2;
 	
-	cpSegmentShape *seg = (cpSegmentShape*)_shape;
+	cpSegmentShape *seg = (cpSegmentShape*)_implementation.shape;
 	
 	cpVect a = seg->a;//cpvadd(body->p, cpvrotate(seg->a, body->rot));
 	cpVect b = seg->b;//cpvadd(body->p, cpvrotate(seg->b, body->rot));
@@ -285,7 +303,7 @@
 
 - (void) drawPolyShape
 {
-	cpPolyShape *poly = (cpPolyShape*)_shape;
+	cpPolyShape *poly = (cpPolyShape*)_implementation.shape;
 	
 	int count = count=poly->numVerts;
 	GLfloat VAR[count*2];

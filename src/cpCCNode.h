@@ -1,10 +1,10 @@
 /*********************************************************************
  *	
- *	cpAtlasSprite
+ *	cpCCNode.h
  *
- *	cpAtlasSprite.h
+ *	Example
  *
- *	Chipmunk Atlas Sprite Object
+ *	Manage the space for the application
  *
  *	http://www.mobile-bros.com
  *
@@ -13,21 +13,27 @@
  *
  **********************************************************************/
 
-#import "cocos2d.h"
 #import "chipmunk.h"
-#import "cpCCNode.h"
+#import "cocos2d.h"
 
-@interface cpAtlasSprite : AtlasSprite 
-{
-	cpCCNode *_implementation;
+
+@interface cpCCNode : NSObject {
+
+@protected
+	cpShape* _shape;
+	BOOL	_ignoreRotation;
+	cpFloat	_integrationDt;
+	
 }
 
+@property (readwrite,assign) BOOL ignoreRotation;
+@property (readwrite,assign) cpFloat integrationDt;
 @property (readwrite,assign) cpShape *shape;
-@property (readwrite, assign) BOOL ignoreRotation;
-@property (readwrite, assign) cpFloat integrationDt;
 
-+ (id) spriteWithShape:(cpShape*)s manager:(AtlasSpriteManager*)sm rect:(CGRect)rect;
-- (id) initWithShape:(cpShape*)s manager:(AtlasSpriteManager*)sm rect:(CGRect)rect;
+- (id) initWithShape:(cpShape*)s;
+
+-(void)setRotation:(float)rot oldRotation:(float)oldRot;
+-(void)setPosition:(cpVect)pos oldPosition:(cpVect)oldPos;
 
 -(void) applyImpulse:(cpVect)impulse;
 -(void) applyForce:(cpVect)force;

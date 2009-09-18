@@ -15,17 +15,15 @@
 
 #import "cocos2d.h"
 #import "chipmunk.h"
+#import "cpCCNode.h"
 
 @interface cpSprite : Sprite 
 {
-@protected
-	cpShape* _shape;
-	BOOL	_ignoreRotation;
-	BOOL	_integrateSetPosition;
+	cpCCNode *_implementation;
 }
 
 @property (readwrite,assign) BOOL ignoreRotation;
-@property (readwrite,assign) BOOL integrateSetPosition;
+@property (readwrite,assign) cpFloat integrationDt;
 @property (readwrite,assign) cpShape *shape;
 
 + (id) spriteWithShape:(cpShape*)s file:(NSString*) filename;
