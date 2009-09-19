@@ -22,7 +22,14 @@
 	CPCCNODE_MEM_VARS
 }
 
-CPCCNODE_FUNC_DECLARE
+@property (readwrite,assign) BOOL ignoreRotation;
+@property (readwrite,assign) cpFloat integrationDt;
+@property (readwrite,assign) BOOL autoFreeShape;
+@property (readwrite,assign) cpShape *shape;
+@property (readwrite,assign) SpaceManager *spaceManager;
+
+-(void) applyImpulse:(cpVect)impulse;
+-(void) applyForce:(cpVect)force;
 
 + (id) spriteWithShape:(cpShape*)s manager:(AtlasSpriteManager*)sm rect:(CGRect)rect;
 - (id) initWithShape:(cpShape*)s manager:(AtlasSpriteManager*)sm rect:(CGRect)rect;
