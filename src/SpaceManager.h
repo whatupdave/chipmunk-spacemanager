@@ -64,11 +64,24 @@ void defaultEachShape(void *ptr, void* data);
 }
 
 @property (readwrite, assign) cpShape *topWall,*bottomWall,*rightWall,*leftWall;
+
+/*! Number of steps (across dt) perform on each step call */
 @property (readwrite, assign) int steps;
+
+/*! If this is set to YES/TRUE step will call iterateFunc on static shapes */
 @property (readwrite, assign) BOOL iterateStatic;
+
+/*! Set the iterateFunc; the default will update cocosnodes for pos and rotation */
 @property (readwrite, assign) cpSpaceHashIterator iterateFunc;
+
+/*! A staticBody for any particular reusable purpose */
 @property (readonly) cpBody *staticBody;
+
+/*! If this is set to anything other than zero, the step routine will use its
+ value as the dt (constant) */
 @property (readwrite, assign) cpFloat constantDt;
+
+/*! Setting this to YES/TRUE will also free contraints connected to a free'd shape */
 @property (readwrite, assign) BOOL cleanupBodyDependencies;
 
 /*! initialization method
@@ -85,7 +98,7 @@ void defaultEachShape(void *ptr, void* data);
 /*! Schedule a timed loop (against step:) using dt */
 -(void) start:(float)dt;
 
-/* Stop the timed loop */
+/*! Stop the timed loop */
 -(void) stop;
 
 /*! Convenience method for adding a containment rect around the view */
