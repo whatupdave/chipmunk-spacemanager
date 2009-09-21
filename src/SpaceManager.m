@@ -105,13 +105,17 @@ static void updateBBCache(cpShape *shape, void *unused)
 
 @implementation SpaceManager
 
+@synthesize space = _space;
 @synthesize topWall,bottomWall,rightWall,leftWall;
 @synthesize steps = _steps;
+@synthesize lastDt = _lastDt;
 @synthesize iterateStatic = _iterateStatic;
+@synthesize rehashStaticEveryStep = _rehashStaticEveryStep;
 @synthesize iterateFunc = _iterateFunc;
 @synthesize staticBody = _staticBody;
 @synthesize constantDt = _constantDt;
 @synthesize cleanupBodyDependencies = _cleanupBodyDependencies;
+//gravity and damping are written out manually
 
 -(id) init
 {
@@ -160,9 +164,30 @@ static void updateBBCache(cpShape *shape, void *unused)
 	[super dealloc];
 }
 
+/* Deprecated, will be replaced in 0.0.3 by space property */
 -(cpSpace*) getSpace
 {
 	return _space;
+}
+
+-(void) setGravity:(cpVect)gravity
+{
+	_space->gravity = gravity;
+}
+
+-(cpVect) gravity
+{
+	return _space->gravity;
+}
+
+-(void) setDamping:(cpFloat)damping
+{
+	_space->damping = damping;
+}
+
+-(cpFloat) damping
+{
+	return _space->damping;
 }
 
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
@@ -215,17 +240,19 @@ static void updateBBCache(cpShape *shape, void *unused)
 #endif
 
 -(void) step: (ccTime) delta
-{	
-	cpFloat dt;
-	
+{
 	if (_constantDt)
-		dt = _constantDt/_steps;
+		_lastDt = _constantDt/_steps;
 	else
-		dt = delta/(cpFloat)_steps;
+		_lastDt = delta/(cpFloat)_steps;
+	
+	//re-calculate static shape positions if this is set
+	if (_rehashStaticEveryStep)
+		cpSpaceRehashStatic(_space);
 	
 	//for the iterations given
 	for(int i=0; i<_steps; i++)
-		cpSpaceStep(_space, dt);
+		cpSpaceStep(_space, _lastDt);
 	
 	cpSpaceHashEach(_space->activeShapes, _iterateFunc, self);
 

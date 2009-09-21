@@ -17,6 +17,24 @@
 #import "cocos2d.h"
 #import "SpaceManager.h"
 
+/*****
+ Unfortunately we can't use multiple inheritance so we must
+ use a pattern similar to strategy or envelope/letter, basically
+ we've just added an instance of cpCCNode to whatever class
+ we wish its functionality to be in. Then we create the same
+ interface functions/properties and have then delegate to 
+ our instance of cpCCNode, macros are defined below to help
+ with this.
+ 
+ -rkb
+ *****/
+ 
+
+@protocol cpCCNodeDelegate<NSObject>
+@optional
+-(void) setShape:(cpShape*)shape;
+-(cpShape*) shape;
+@end
 
 @interface cpCCNode : NSObject {
 
@@ -45,13 +63,16 @@
 
 @end
 
+/* Macros for attempt at multiple inheritance */
 #define CPCCNODE_MEM_VARS cpCCNode *_implementation;
 
+//create our instance
 #define CPCCNODE_MEM_VARS_INIT(shape)	\
 _implementation = [[cpCCNode alloc] initWithShape:shape];\
 if (shape)\
 	shape->data = self;
 
+//Not using this one; it screws up documentation
 #define CPCCNODE_FUNC_DECLARE	\
 @property (readwrite,assign) BOOL ignoreRotation;\
 @property (readwrite,assign) cpFloat integrationDt;\
@@ -62,6 +83,7 @@ if (shape)\
 -(void) applyForce:(cpVect)force;\
 -(void) resetForces;
 
+//The interface definitions
 #define CPCCNODE_FUNC_SRC	\
 - (void) dealloc\
 {\

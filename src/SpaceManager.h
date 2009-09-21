@@ -51,25 +51,45 @@ void defaultEachShape(void *ptr, void* data);
 	/* Number of steps (across dt) perform on each step call */
 	int		_steps;
 	
+	/* The dt used last within step */
+	cpFloat	_lastDt;
+	
 	/* Options:
 		-cleanupBodyDepenencies will also free contraints connected to a free'd shape
 		-iterateStatic will call _iterateFunc on static shapes
+		-rehashStaticEveryStep will rehash static shapes at the end of every step
 		-iterateFunc; default will update cocosnodes for pos and rotation
 		-constantDt; set this to a non-zero number to always step the simulation with that dt
 	*/
 	BOOL				_cleanupBodyDependencies;
 	BOOL				_iterateStatic;
+	BOOL				_rehashStaticEveryStep;
 	cpSpaceHashIterator	_iterateFunc;
 	cpFloat				_constantDt;
 }
+
+/*! The actual chipmunk space */
+@property (readonly) cpSpace* space;
 
 @property (readwrite, assign) cpShape *topWall,*bottomWall,*rightWall,*leftWall;
 
 /*! Number of steps (across dt) perform on each step call */
 @property (readwrite, assign) int steps;
 
-/*! If this is set to YES/TRUE step will call iterateFunc on static shapes */
+/*! The dt value that was used in step last */
+@property (readonly) cpFloat lastDt;
+
+/*! The gravity of the space */
+@property (readwrite, assign) cpVect gravity;
+
+/*! The damping of the space (viscousity in "air") */
+@property (readwrite, assign) cpFloat damping;
+
+/*! If this is set to YES/TRUE then step will call iterateFunc on static shapes */
 @property (readwrite, assign) BOOL iterateStatic;
+
+/*! If this is set to YES/TRUE then step will call rehashStatic before stepping */
+@property (readwrite, assign) BOOL rehashStaticEveryStep;
 
 /*! Set the iterateFunc; the default will update cocosnodes for pos and rotation */
 @property (readwrite, assign) cpSpaceHashIterator iterateFunc;
@@ -109,8 +129,10 @@ void defaultEachShape(void *ptr, void* data);
 /*! Manually advance time within the space */
 -(void) step: (ccTime) delta;
 
-/*! Get chipmunk space object */
--(cpSpace*) getSpace;
+/*! Get chipmunk space object 
+	@deprecated Will be removed in v0.0.3. Use space property instead.
+ */
+-(cpSpace*) getSpace __attribute__((deprecated));
 
 /*! add a circle shape */
 -(cpShape*) addCircleAt:(cpVect)pos mass:(cpFloat)mass radius:(int)radius;

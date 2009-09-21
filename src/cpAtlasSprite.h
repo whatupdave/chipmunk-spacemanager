@@ -17,7 +17,7 @@
 #import "chipmunk.h"
 #import "cpCCNode.h"
 
-@interface cpAtlasSprite : AtlasSprite 
+@interface cpAtlasSprite : AtlasSprite<cpCCNodeDelegate>
 {
 	CPCCNODE_MEM_VARS;
 }

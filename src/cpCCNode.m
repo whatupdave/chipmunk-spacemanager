@@ -22,6 +22,7 @@
 @synthesize ignoreRotation = _ignoreRotation;
 @synthesize integrationDt = _integrationDt;
 @synthesize spaceManager = _spaceManager;
+@synthesize autoFreeShape = _autoFreeShape;
 
 - (id) init
 {
@@ -61,11 +62,17 @@
 		{
 			_shape->body->p = pos;
 			
-			//Experimental (Euler integration)
+			//Experimental, integrationDt should go away
 			if (_integrationDt)
 			{
-				cpVect velocity = cpvmult(cpvsub(pos,oldPos), 1.0/_integrationDt);
-				_shape->body->v = velocity;
+				if (_spaceManager)
+					cpBodyUpdateVelocity(_shape->body, _spaceManager.gravity, _spaceManager.damping,_spaceManager.lastDt);
+				else
+				{
+					//(Basic Euler integration)
+					cpVect velocity = cpvmult(cpvsub(pos,oldPos), 1.0/_integrationDt);
+					_shape->body->v = velocity;
+				}
 			}
 		}
 	}
