@@ -65,9 +65,9 @@
 			//Experimental, integrationDt should go away
 			if (_integrationDt)
 			{
-				if (_spaceManager)
-					cpBodyUpdateVelocity(_shape->body, _spaceManager.gravity, _spaceManager.damping,_spaceManager.lastDt);
-				else
+				//if (_spaceManager)
+				//	cpBodyUpdateVelocity(_shape->body, _spaceManager.gravity, _spaceManager.damping,_spaceManager.lastDt);
+				//else
 				{
 					//(Basic Euler integration)
 					cpVect velocity = cpvmult(cpvsub(pos,oldPos), 1.0/_integrationDt);

@@ -55,6 +55,9 @@
 	smgr = [[SpaceManager alloc] init];
 	//add four walls to our screen
 	[smgr addWindowContainmentWithFriction:1.0 elasticity:1.0 inset:cpvzero];
+	
+	//We'll be moving a static object, so tell it to rehashStaticShapes on every step
+	smgr.rehashStaticEveryStep = YES;
 
 
 	//ball shape
@@ -73,7 +76,14 @@
 	cpShape *staticRect = [smgr addRectAt:cpv(380,160) mass:STATIC_MASS width:50 height:50 rotation:0];
 	staticRect->collision_type = kRectCollisionType;
 	cpSprite *sRectSprite = [cpSprite spriteWithShape:staticRect file:@"staticrect.png"];
+	sRectSprite.integrationDt = 1.0/60.0;
+	sRectSprite.spaceManager = smgr;
 	[self addChild:sRectSprite];
+	
+	//Lets get our staticRect goin
+	[sRectSprite runAction:[RepeatForever actionWithAction:[Sequence actions:
+															[MoveBy actionWithDuration:2 position:ccp(50,0)],
+															[MoveBy actionWithDuration:2 position:ccp(-50,0)], nil]]];
 	
 	
 	//set up collisions, notice differing signatures

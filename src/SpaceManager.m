@@ -138,6 +138,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 	_staticBody = cpBodyNew(STATIC_MASS, INFINITY);
 	_steps = 2;
 	_iterateStatic = YES;
+	_rehashStaticEveryStep = YES;
 	_cleanupBodyDependencies = YES;
 	_constantDt = 0.0;
 	
