@@ -150,10 +150,13 @@ void defaultEachShape(void *ptr, void* data);
 -(cpShape*) getShapeAt:(cpVect)pos;
 
 /*! Use if you need to call getShapes before you've actually started simulating */
-- (void) rehashActiveShapes;
+-(void) rehashActiveShapes;
 
 /*! Use if you move static shapes during simulation */
-- (void) rehashStaticShapes;
+-(void) rehashStaticShapes;
+
+/*! */
+-(void) rehashStaticShape:(cpShape*)shape;
 
 /*! Return an array of NSValues with a pointer to a cpShape */
 -(NSArray*) getShapesAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group;

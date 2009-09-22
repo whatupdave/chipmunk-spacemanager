@@ -131,7 +131,6 @@
 		A698F2801062C85500BFB454 /* SpaceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A698F27A1062C85500BFB454 /* SpaceManager.m */; };
 		A6A9BB501063C66200213DA8 /* cpCCNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A6A9BB4F1063C66200213DA8 /* cpCCNode.m */; };
 		A6AB8DBA10291373002785F7 /* rect.png in Resources */ = {isa = PBXBuildFile; fileRef = A6AB8DB910291373002785F7 /* rect.png */; };
-		A6AB8DCA10291735002785F7 /* inverted.png in Resources */ = {isa = PBXBuildFile; fileRef = A6AB8DC910291735002785F7 /* inverted.png */; };
 		B2D7CA2F0ECEC52D00721DAB /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2D7CA2E0ECEC52D00721DAB /* OpenGLES.framework */; };
 		B2D7CA310ECEC52D00721DAB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2D7CA300ECEC52D00721DAB /* QuartzCore.framework */; };
 		C961DD6C0FB921F70097722B /* GameLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = C961DD6B0FB921F70097722B /* GameLayer.m */; };
@@ -367,7 +366,6 @@
 		A6A9BB4E1063C66200213DA8 /* cpCCNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpCCNode.h; sourceTree = "<group>"; };
 		A6A9BB4F1063C66200213DA8 /* cpCCNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cpCCNode.m; sourceTree = "<group>"; };
 		A6AB8DB910291373002785F7 /* rect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rect.png; sourceTree = "<group>"; };
-		A6AB8DC910291735002785F7 /* inverted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = inverted.png; sourceTree = "<group>"; };
 		B2D7CA2E0ECEC52D00721DAB /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		B2D7CA300ECEC52D00721DAB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		C961DD6A0FB921F70097722B /* GameLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameLayer.h; sourceTree = "<group>"; };
@@ -445,7 +443,6 @@
 		99B89A4C0F9E6E6F0034B3BB /* Base Resources */ = {
 			isa = PBXGroup;
 			children = (
-				A6AB8DC910291735002785F7 /* inverted.png */,
 				99B89A4F0F9E6E6F0034B3BB /* splash_developed_by.png */,
 			);
 			path = "Base Resources";
@@ -819,7 +816,6 @@
 				A65371411028CC6200651DC9 /* CMakeLists.txt in Resources */,
 				A65371591028CC6200651DC9 /* SConscript in Resources */,
 				A6AB8DBA10291373002785F7 /* rect.png in Resources */,
-				A6AB8DCA10291735002785F7 /* inverted.png in Resources */,
 				A698F1C71062707B00BFB454 /* ANNOUNCE in Resources */,
 				A698F1C81062707B00BFB454 /* CHANGES in Resources */,
 				A698F1C91062707B00BFB454 /* libpng-1.2.38.txt in Resources */,

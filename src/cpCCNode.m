@@ -58,22 +58,22 @@
 {	
 	if (_shape != nil)
 	{
+		//If we're out of sync with chipmunk
 		if (cpvlength(cpvsub(_shape->body->p,pos)) != 0)
 		{
 			_shape->body->p = pos;
 			
-			//Experimental, integrationDt should go away
+			//Experimental
 			if (_integrationDt)
 			{
-				//if (_spaceManager)
-				//	cpBodyUpdateVelocity(_shape->body, _spaceManager.gravity, _spaceManager.damping,_spaceManager.lastDt);
-				//else
-				{
-					//(Basic Euler integration)
-					cpVect velocity = cpvmult(cpvsub(pos,oldPos), 1.0/_integrationDt);
-					_shape->body->v = velocity;
-				}
+				//(Basic Euler integration)
+				cpVect velocity = cpvmult(cpvsub(pos,oldPos), 1.0/_integrationDt);
+				_shape->body->v = velocity;
 			}
+			
+			//If we're static, we need to tell our space that we've changed
+			if (_spaceManager && _shape->body->m == STATIC_MASS)
+				[_spaceManager rehashStaticShape:_shape];
 		}
 	}
 }

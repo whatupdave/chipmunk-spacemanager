@@ -34,8 +34,8 @@
 	[window setMultipleTouchEnabled:YES];
 
 	[Director useFastDirector];
-	[[Director sharedDirector] setLandscape: YES];
-	//[[Director sharedDirector] setDisplayFPS:YES];
+	[[Director sharedDirector] setDeviceOrientation:CCDeviceOrientationLandscapeLeft];
+	[[Director sharedDirector] setDisplayFPS:YES];
 
 	[[Director sharedDirector] attachInWindow:window];	
 	

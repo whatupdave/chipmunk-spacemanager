@@ -419,15 +419,23 @@ static void updateBBCache(cpShape *shape, void *unused)
 	return [self getShapeAt:pos layers:-1 group:0];
 }
 
-- (void) rehashStaticShapes
+-(void) rehashActiveShapes
+{
+	cpSpaceHashEach(_space->activeShapes, (cpSpaceHashIterator)&updateBBCache, NULL);
+	cpSpaceHashRehash(_space->activeShapes);
+}
+
+-(void) rehashStaticShapes
 {
 	cpSpaceRehashStatic(_space);
 }
 
-- (void) rehashActiveShapes
+-(void) rehashStaticShape:(cpShape*)shape
 {
-	cpSpaceHashEach(_space->activeShapes, (cpSpaceHashIterator)&updateBBCache, NULL);
-	cpSpaceHashRehash(_space->activeShapes);
+	cpSpaceHashRemove(_space->staticShapes, shape, shape->id);
+	//shapeRemovalArbiterReject(_space, shape); //I don't think this is necessary
+	cpShapeCacheBB(shape);
+	cpSpaceHashInsert(_space->staticShapes, shape, shape->id, shape->bb);
 }
 
 -(NSArray*) getShapesAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group
