@@ -7,6 +7,7 @@
 
 #import "GameLayer.h"
 #import "cpConstraintNode.h"
+#import "cpShapeNode.h"
 
 @interface GameLayer (PrivateMethods)
 - (void) setupExample;
@@ -107,6 +108,12 @@
 								otherType:kBallCollisionType 
 								   target:self 
 								 selector:@selector(handleCollisionWithCircle:ball:contactPts:numContacts:normalCoef:)];
+
+	//add a segment in for good measure
+	cpShape* seg = [smgr addSegmentAtWorldAnchor:cpv(100,260) toWorldAnchor:cpv(380,260) mass:STATIC_MASS radius:6];
+	cpShapeNode *segn = [cpShapeNode nodeWithShape:seg];
+	segn.color = ccBLUE;
+	[self addChild:segn];
 	
 	//collisions will change label text
 	label = [Label labelWithString:@"" fontName:@"Helvetica" fontSize:20];

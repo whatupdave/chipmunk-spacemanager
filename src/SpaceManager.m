@@ -409,6 +409,29 @@ static void updateBBCache(cpShape *shape, void *unused)
 	return shape;
 }
 
+-(cpShape*) addSegmentAtWorldAnchor:(cpVect)fromPos toWorldAnchor:(cpVect)toPos mass:(cpFloat)mass radius:(cpFloat)radius;
+{
+	cpVect pos = cpvmult(cpvsub(toPos,fromPos), .5);
+	return [self addSegmentAt:pos fromLocalAnchor:cpvsub(fromPos, pos) toLocalAnchor:cpvsub(toPos, pos) mass:mass radius:radius];
+}
+
+-(cpShape*) addSegmentAt:(cpVect)pos fromLocalAnchor:(cpVect)fromPos toLocalAnchor:(cpVect)toPos mass:(cpFloat)mass radius:(cpFloat)radius
+{
+	cpShape* shape;
+	cpFloat moment = STATIC_MASS;
+	
+	if (mass != STATIC_MASS)
+		moment = cpMomentForSegment(mass, fromPos, toPos);
+	
+	shape = cpSegmentShapeNew(cpBodyNew(mass, moment), fromPos, toPos, radius);
+	shape->body->p = pos;
+	
+	[self setupDefaultShape:shape];
+	[self addShape:shape];
+	
+	return shape;
+}
+
 -(cpShape*) getShapeAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group
 {
 	return cpSpacePointQueryFirst(_space, pos, layers, group);

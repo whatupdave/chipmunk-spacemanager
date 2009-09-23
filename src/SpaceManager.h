@@ -143,6 +143,12 @@ void defaultEachShape(void *ptr, void* data);
 /*! add a polygon shape */
 -(cpShape*) addPolyAt:(cpVect)pos mass:(cpFloat)mass rotation:(cpFloat)r numPoints:(int)numPoints points:(cpVect)pt, ... ;
 
+/* add a segment shape using world coordinates */
+-(cpShape*) addSegmentAtWorldAnchor:(cpVect)fromPos toWorldAnchor:(cpVect)toPos mass:(cpFloat)mass radius:(cpFloat)radius;
+
+/* add a segment shape using local coordinates */
+-(cpShape*) addSegmentAt:(cpVect)pos fromLocalAnchor:(cpVect)fromPos toLocalAnchor:(cpVect)toPos mass:(cpFloat)mass radius:(cpFloat)radius;
+
 /*! Retrieve the first shape found at this position matching layers and group */
 -(cpShape*) getShapeAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group;
 
@@ -155,7 +161,7 @@ void defaultEachShape(void *ptr, void* data);
 /*! Use if you move static shapes during simulation */
 -(void) rehashStaticShapes;
 
-/*! */
+/*! Use to only rehash one static shape */
 -(void) rehashStaticShape:(cpShape*)shape;
 
 /*! Return an array of NSValues with a pointer to a cpShape */
