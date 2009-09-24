@@ -80,6 +80,9 @@
 /*! Apply a constant force to our shape's body */
 -(void) applyForce:(cpVect)force;
 
+/*! Reset any forces accrued on this shape's body */
+-(void) resetForces;
+
 /*! Return an autoreleased node */
 + (id) nodeWithShape:(cpShape*)shape;
 

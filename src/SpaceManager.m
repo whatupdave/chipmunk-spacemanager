@@ -101,6 +101,9 @@ static void updateBBCache(cpShape *shape, void *unused)
 -(void) setupDefaultShape:(cpShape*) s;
 -(void) freeShapes;
 -(void) removeShapes;
+
+-(NSString*) writeShape:(cpShape*)shape;
+-(NSString*) writeConstraint:(cpConstraint*)shape;
 @end
 
 @implementation SpaceManager
@@ -123,14 +126,22 @@ static void updateBBCache(cpShape *shape, void *unused)
 }
 
 -(id) initWithSize:(int)size count:(int)count
+{
+	id this = [self initWithSpace:cpSpaceNew()];
+	
+	cpSpaceResizeStaticHash(_space, size, count);
+	cpSpaceResizeActiveHash(_space, size, count);
+	
+	return this;
+}
+
+-(id) initWithSpace:(cpSpace*)space
 {	
 	[super init];
 		
 	cpInitChipmunk();
 	
-	_space = cpSpaceNew();
-	cpSpaceResizeStaticHash(_space, size, count);
-	cpSpaceResizeActiveHash(_space, size, count);
+	_space = space;
 	
 	_space->gravity = cpv(0, -9.8*10);
 	_space->elasticIterations = _space->iterations;
@@ -163,6 +174,92 @@ static void updateBBCache(cpShape *shape, void *unused)
 	[_invocations release];
 	
 	[super dealloc];
+}
+
+- (void) loadSpaceFromFile:(NSString*)file
+{
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *dataPath = [[paths objectAtIndex:0] stringByAppendingPathComponent:file];
+	
+	[self loadSpaceFromPath:dataPath];
+}
+
+- (void) saveSpaceToFile:(NSString*)file
+{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *dataPath = [[paths objectAtIndex:0] stringByAppendingPathComponent:file];	
+	
+	[self saveSpaceToPath:dataPath];
+}
+
+- (void) loadSpaceFromPath:(NSString*)path
+{
+	if ([[NSFileManager defaultManager] fileExistsAtPath:path])
+	{
+		
+	}
+}
+
+- (void) saveSpaceToPath:(NSString*)path
+{
+	if (![[NSFileManager defaultManager] fileExistsAtPath:path])
+	{
+		//ERROR
+	}
+	
+	NSMutableString *fileContents = [NSMutableString stringWithString:@"<?xml version=""1.0"" encoding=""UTF-8""?>"];
+	[fileContents appendString:@"\n<space>"];
+	
+	//Write out active shapes
+	cpHashSet *activeSet = _space->activeShapes->handleSet;
+	for(int i=0; i<activeSet->size; i++)
+	{
+		cpHashSetBin *bin = activeSet->table[i];
+		while(bin)
+		{
+			cpHashSetBin *next = bin->next;
+			cpShape *shape = (cpShape*)bin->elt;
+			[fileContents appendString:[self writeShape:shape]];
+			bin = next;
+		}
+	}
+	
+	//Write out static shapes
+	cpHashSet *staticSet = _space->staticShapes->handleSet;
+	for(int i=0; i<staticSet->size; i++)
+	{
+		cpHashSetBin *bin = staticSet->table[i];
+		while(bin)
+		{
+			cpHashSetBin *next = bin->next;
+			cpShape *shape = (cpShape*)bin->elt;
+			[fileContents appendString:[self writeShape:shape]];
+			bin = next;
+		}
+	}
+	
+	//Write out constraints
+	for(int i=0; i<_space->constraints->num; i++)
+	{
+		cpConstraint *constraint = (cpConstraint *)_space->constraints->arr[i];
+		[fileContents appendString:[self writeConstraint:constraint]];
+	}
+	
+	[fileContents appendString:@"\n</space>"];
+	
+	[[NSFileManager defaultManager] createFileAtPath:path 
+											contents:[fileContents dataUsingEncoding:NSUTF8StringEncoding]
+										  attributes:nil];
+}
+
+-(NSString*) writeShape:(cpShape*)shape
+{
+	return [NSString stringWithFormat:@"\n<shape/>"];
+}
+
+-(NSString*) writeConstraint:(cpConstraint*)constraint
+{
+	return [NSString stringWithFormat:@"\n<constraint/>"];
 }
 
 /* Deprecated, will be replaced in 0.0.3 by space property */
@@ -484,6 +581,32 @@ static void updateBBCache(cpShape *shape, void *unused)
 	
 	//check the freshness, chipmunk keeps them around for cp_contact_persistence "3" times
 	return (arb && _space->stamp - arb->stamp < max_contact_staleness);
+}
+
+-(cpShape*) persistentContactOnShape:(cpShape*)shape;
+{
+	cpShape *contactShape = NULL;
+	int max_contact_staleness = cp_contact_persistence;
+	cpHashSet *contactSet = _space->contactSet;
+	for(int i=0; i<contactSet->size && !contactShape; i++)
+	{
+		cpHashSetBin *bin = contactSet->table[i];
+		while(bin && !contactShape)
+		{
+			cpHashSetBin *next = bin->next;
+			cpArbiter *arb = (cpArbiter *)bin->elt;
+			
+			if (arb && (arb->a == shape || arb->b == shape))
+			{	
+				if(_space->stamp - arb->stamp < max_contact_staleness)
+					contactShape = (arb->a == shape) ? arb->b : arb->a;
+			}
+			
+			bin = next;
+		}
+	}
+	
+	return contactShape;
 }
 
 -(NSArray*) getConstraints

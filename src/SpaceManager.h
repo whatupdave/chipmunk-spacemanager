@@ -110,6 +110,15 @@ void defaultEachShape(void *ptr, void* data);
  */
 -(id) initWithSize:(int)size count:(int)count;
 
+/* initialization method that takes a precreated space */
+-(id) initWithSpace:(cpSpace*)space;
+
+///Incomplete///
+-(void) loadSpaceFromFile:(NSString*)file;
+-(void) saveSpaceToFile:(NSString*)file;
+-(void) loadSpaceFromPath:(NSString*)path;
+-(void) saveSpaceToPath:(NSString*)path;
+
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
 
 /*! Schedule a timed loop (against step:) using Cocos2d's default dt */
@@ -172,6 +181,9 @@ void defaultEachShape(void *ptr, void* data);
 
 /*! Queries the space as to whether this two shapes are in persistent contact */
 -(BOOL) isPersistentContactOnShape:(cpShape*)shape contactShape:(cpShape*)shape2;
+
+/*! Queries the space as to whether this shape has ANY persistent contact */
+-(cpShape*) persistentContactOnShape:(cpShape*)shape;
 
 /*! Will return an array of NSValues that point to the cpConstraints */
 -(NSArray*) getConstraints;
