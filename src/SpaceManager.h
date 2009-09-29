@@ -201,7 +201,7 @@ void defaultEachShape(void *ptr, void* data);
 -(void) scheduleToRemoveShape:(cpShape*)shape;
 
 /*! Use when removing shapes, will pass ownership to caller */
--(void) removeShape:(cpShape*)shape;
+-(cpShape*) removeShape:(cpShape*)shape;
 
 /*! Manually add a shape to the space */
 -(void) addShape:(cpShape*)shape;
@@ -222,7 +222,7 @@ void defaultEachShape(void *ptr, void* data);
 -(void) removeCollisionCallbackBetweenType:(unsigned int)type1 otherType:(unsigned int)type2;
 
 /*! Use when removing constraints, ownership is given to caller*/
--(void) removeConstraint:(cpConstraint*)constraint;
+-(cpConstraint*) removeConstraint:(cpConstraint*)constraint;
 
 /*! This will remove and free the constraint */
 -(void) removeAndFreeConstraint:(cpConstraint*)constraint;

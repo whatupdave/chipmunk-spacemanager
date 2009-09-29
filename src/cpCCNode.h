@@ -34,6 +34,10 @@
 @optional
 -(void) setShape:(cpShape*)shape;
 -(cpShape*) shape;
+-(void) setIntegrationDt:(cpFloat)dt;
+-(cpFloat) integrationDt;
+-(void) setSpaceManager:(SpaceManager*)spaceManager;
+-(SpaceManager*) spaceManager;
 @end
 
 @interface cpCCNode : NSObject {

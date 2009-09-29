@@ -412,7 +412,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 		[self removeAndFreeConstraintsOnBody:shape->body];
 }
 
--(void) removeShape:(cpShape*) shape
+-(cpShape*) removeShape:(cpShape*) shape
 {
 	if (shape->body->m == STATIC_MASS)
 	{	
@@ -425,6 +425,8 @@ static void updateBBCache(cpShape *shape, void *unused)
 		cpSpaceRemoveBody(_space, shape->body);
 		cpSpaceRemoveShape(_space, shape);
 	}
+	
+	return shape;
 }
 
 -(void) scheduleToRemoveAndFreeShape:(cpShape*)shape
@@ -662,9 +664,10 @@ static void updateBBCache(cpShape *shape, void *unused)
 	return shape;
 }
 
--(void) removeConstraint:(cpConstraint*)constraint
+-(cpConstraint*) removeConstraint:(cpConstraint*)constraint
 {
 	cpSpaceRemoveConstraint(_space, constraint);	
+	return constraint;
 }
 
 -(void) removeAndFreeConstraint:(cpConstraint*)constraint
@@ -694,13 +697,13 @@ static void updateBBCache(cpShape *shape, void *unused)
 	}
 }
 
--(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2 restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp;
+-(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2 restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp
 {
 	cpConstraint *spring = cpDampedSpringNew(toBody, fromBody, anchr1, anchr2, rest, stiff, damp);
 	return cpSpaceAddConstraint(_space, spring);
 }
 
--(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp;
+-(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp
 {
 	return [self addSpringToBody:toBody fromBody:fromBody toBodyAnchor:cpvzero fromBodyAnchor:cpvzero restLength:rest stiffness:stiff damping:damp];
 }
