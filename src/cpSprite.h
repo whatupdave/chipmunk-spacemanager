@@ -46,10 +46,10 @@
 -(void) applyForce:(cpVect)force;
 
 /*! Return an autoreleased cpSprite */
-+ (id) spriteWithShape:(cpShape*)s file:(NSString*) filename;
++ (id) spriteWithShape:(cpShape*)shape file:(NSString*) filename;
 
 /*! Initialization method */
-- (id) initWithShape:(cpShape*)s file:(NSString*) filename;
+- (id) initWithShape:(cpShape*)shape file:(NSString*) filename;
 
 
 @end

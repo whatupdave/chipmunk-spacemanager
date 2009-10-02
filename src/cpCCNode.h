@@ -38,6 +38,8 @@
 -(cpFloat) integrationDt;
 -(void) setSpaceManager:(SpaceManager*)spaceManager;
 -(SpaceManager*) spaceManager;
+-(void) setAutoFreeShape:(BOOL)autofree;
+-(BOOL) autoFreeShape;
 @end
 
 @interface cpCCNode : NSObject {

@@ -39,6 +39,8 @@
 @synthesize pointSize = _pointSize;
 @synthesize lineWidth = _lineWidth;
 @synthesize smoothDraw = _smoothDraw;
+@synthesize autoFreeConstraint = _autoFreeConstraint;
+@synthesize spaceManager = _spaceManager;
 
 + (id) nodeWithConstraint:(cpConstraint*)c
 {
@@ -62,6 +64,8 @@
 
 - (void) dealloc
 {
+	if (_autoFreeConstraint)
+		[_spaceManager removeConstraint:_constraint];
 	[super dealloc];
 }
 
@@ -178,7 +182,7 @@
 	glColor4ub(_color.r, _color.g, _color.b, _opacity);
 	glPointSize(_pointSize);
 	glLineWidth(_lineWidth);
-	if (_smoothDraw)
+	if (_smoothDraw && _lineWidth <= 1) //OpelGL ES doesn't support smooth lineWidths > 1
 	{
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_POINT_SMOOTH);

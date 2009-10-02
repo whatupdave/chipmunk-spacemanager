@@ -46,9 +46,9 @@
 -(void) applyForce:(cpVect)force;
 
 /*! Return an autoreleased cpAtlasSprite */
-+ (id) spriteWithShape:(cpShape*)s manager:(AtlasSpriteManager*)sm rect:(CGRect)rect;
++ (id) spriteWithShape:(cpShape*)shape manager:(AtlasSpriteManager*)sm rect:(CGRect)rect;
 
 /*! Initialization method */
-- (id) initWithShape:(cpShape*)s manager:(AtlasSpriteManager*)sm rect:(CGRect)rect;
+- (id) initWithShape:(cpShape*)shape manager:(AtlasSpriteManager*)sm rect:(CGRect)rect;
 
 @end

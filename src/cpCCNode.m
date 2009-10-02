@@ -39,8 +39,8 @@
 
 -(void) dealloc
 {
-	if (_autoFreeShape)
-		[_spaceManager removeAndFreeShape:_shape];
+	if (_autoFreeShape && _shape)
+		[_spaceManager scheduleToRemoveAndFreeShape:_shape];
 		
 	[super dealloc];
 }

@@ -18,17 +18,19 @@
 
 @implementation cpAtlasSprite
 
-+ (id) spriteWithShape:(cpShape*)s manager:(AtlasSpriteManager*)sm rect:(CGRect)rect
++ (id) spriteWithShape:(cpShape*)shape manager:(AtlasSpriteManager*)sm rect:(CGRect)rect
 {
-	return [[[self alloc] initWithShape:s manager:sm rect:rect] autorelease];
+	return [[[self alloc] initWithShape:shape manager:sm rect:rect] autorelease];
 }
 
--(id)initWithShape:(cpShape*)s manager:(AtlasSpriteManager*)sm rect:(CGRect)rect
+-(id)initWithShape:(cpShape*)shape manager:(AtlasSpriteManager*)sm rect:(CGRect)rect
 {
 	[super initWithRect:rect spriteManager:sm];
 	
-	CPCCNODE_MEM_VARS_INIT(s)
-
+	CPCCNODE_MEM_VARS_INIT(shape)
+	
+	[self setPosition:shape->body->p];
+	[self setRotation:CC_RADIANS_TO_DEGREES(-shape->body->a)];
 	
 	return self;
 }
