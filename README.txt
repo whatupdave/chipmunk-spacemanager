@@ -10,11 +10,11 @@ Chipmunk is a simple, lightweight and fast 2D rigid body physics library written
 
 	BUILDING:
 
-OS X: There is an included XCode project file for building the static library and demo application. To remove SpaceManager's dependency on Cocos2d-iphone take out the define for _SPACE_MANAGER_FOR_COCOS2D found in the SpaceManager.h file; this will mean you need to provide your own _iterateFunc to the SpaceManager if you want it to update your view;
+OS X: There is an included XCode project file for building the demo application with SpaceManager. To remove SpaceManager's dependency on Cocos2d-iphone take out the define for _SPACE_MANAGER_FOR_COCOS2D found in the SpaceManager.h file; this will mean you need to provide your own _iterateFunc to the SpaceManager if you want it to update your view;
 
 	GETTING STARTED:
 
-Documentation coming soon...
+Documentation can be found in htmldoc/index.html
 
 A good starting point is to take a look at the included Example application. The example uses cocos2d and an unreleased version (as of Sept '09) of chipmunk that has more extensive joint support.
 	
