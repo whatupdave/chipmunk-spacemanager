@@ -60,8 +60,8 @@
 
 - (id) initWithShape:(cpShape*)s;
 
--(void)setRotation:(float)rot oldRotation:(float)oldRot;
--(void)setPosition:(cpVect)pos oldPosition:(cpVect)oldPos;
+-(void)setRotation:(float)rot;
+-(void)setPosition:(cpVect)pos;
 
 -(void) applyImpulse:(cpVect)impulse;
 -(void) applyForce:(cpVect)force;
@@ -98,12 +98,12 @@ if (shape)\
 }\
 -(void)setRotation:(float)rot\
 {\
-	[_implementation setRotation:rot oldRotation:rotation_];\
+	[_implementation setRotation:rot];\
 	[super setRotation:rot];\
 }\
 -(void)setPosition:(cpVect)pos\
 {\
-	[_implementation setPosition:pos oldPosition:position_];\
+	[_implementation setPosition:pos];\
 	[super setPosition:pos];\
 }\
 -(void) applyImpulse:(cpVect)impulse\

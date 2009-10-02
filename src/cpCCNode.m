@@ -45,7 +45,7 @@
 	[super dealloc];
 }
 
--(void)setRotation:(float)rot oldRotation:(float)oldRot
+-(void)setRotation:(float)rot
 {	
 	if (!_ignoreRotation)
 	{	
@@ -54,22 +54,19 @@
 	}
 }
 
--(void)setPosition:(cpVect)pos oldPosition:(cpVect)oldPos
+-(void)setPosition:(cpVect)pos
 {	
 	if (_shape != nil)
 	{
 		//If we're out of sync with chipmunk
 		if (cpvlength(cpvsub(_shape->body->p,pos)) != 0)
 		{
-			_shape->body->p = pos;
-			
-			//Experimental
+			//(Basic Euler integration)
 			if (_integrationDt)
-			{
-				//(Basic Euler integration)
-				cpVect velocity = cpvmult(cpvsub(pos,oldPos), 1.0/_integrationDt);
-				_shape->body->v = velocity;
-			}
+				cpBodySlew(_shape->body, pos, _integrationDt);
+			
+			//update position
+			_shape->body->p = pos;
 			
 			//If we're static, we need to tell our space that we've changed
 			if (_spaceManager && _shape->body->m == STATIC_MASS)
