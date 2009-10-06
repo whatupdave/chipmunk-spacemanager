@@ -40,6 +40,10 @@
 -(SpaceManager*) spaceManager;
 -(void) setAutoFreeShape:(BOOL)autofree;
 -(BOOL) autoFreeShape;
+
+-(void) applyImpulse:(cpVect)impulse;
+-(void) applyForce:(cpVect)force;
+-(void) resetForces;
 @end
 
 @interface cpCCNode : NSObject {
