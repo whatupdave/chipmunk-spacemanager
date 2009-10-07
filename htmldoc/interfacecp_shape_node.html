@@ -12,6 +12,7 @@
   <div class="tabs">
     <ul>
       <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
       <li class="current"><a href="annotated.html"><span>Data&nbsp;Structures</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
     </ul>
@@ -19,15 +20,27 @@
   <div class="tabs">
     <ul>
       <li><a href="annotated.html"><span>Data&nbsp;Structures</span></a></li>
+      <li><a href="hierarchy.html"><span>Class&nbsp;Hierarchy</span></a></li>
       <li><a href="functions.html"><span>Data&nbsp;Fields</span></a></li>
     </ul>
   </div>
 </div>
 <div class="contents">
-<h1>cpShapeNode Class Reference</h1><!-- doxytag: class="cpShapeNode" --><table border="0" cellpadding="0" cellspacing="0">
+<h1>cpShapeNode Class Reference</h1><!-- doxytag: class="cpShapeNode" --><!-- doxytag: inherits="cpCCNodeDelegate-p" --><div class="dynheader">
+Inheritance diagram for cpShapeNode:</div>
+<div class="dynsection">
+ <div class="center">
+  <img src="interfacecp_shape_node.gif" usemap="#cpShapeNode_map" alt=""/>
+  <map id="cpShapeNode_map" name="cpShapeNode_map">
+<area href="protocolcp_c_c_node_delegate-p.html" alt="&lt;cpCCNodeDelegate&gt;" shape="rect" coords="0,0,138,24"/>
+</map>
+ </div>
+</div>
+<table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">(void)&nbsp;</td><td class="memItemRight" valign="bottom">- <a class="el" href="interfacecp_shape_node.html#a7ed322476f16b95b6e9f09f7e7950337">applyImpulse:</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">(void)&nbsp;</td><td class="memItemRight" valign="bottom">- <a class="el" href="interfacecp_shape_node.html#a725e743fe385af0a355fa641e6838f0b">applyForce:</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">(void)&nbsp;</td><td class="memItemRight" valign="bottom">- <a class="el" href="interfacecp_shape_node.html#a9488aa5f026f7598ee38089bef18325d">resetForces</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">(id)&nbsp;</td><td class="memItemRight" valign="bottom">- <a class="el" href="interfacecp_shape_node.html#ab9c20d7bc6eb9726250f91950d8d5497">initWithShape:</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a23b92efd62fec39fcae623125f686b01"></a><!-- doxytag: member="cpShapeNode::drawCircleShape" ref="a23b92efd62fec39fcae623125f686b01" args="()" -->
 (void)&nbsp;</td><td class="memItemRight" valign="bottom">- <b>drawCircleShape</b></td></tr>
@@ -86,6 +99,8 @@ BOOL&nbsp;</td><td class="memItemRight" valign="bottom"><b>_drawDecoration</b></
 <div class="memdoc">
 <p>Apply a constant force to our shape's body </p>
 
+<p>Reimplemented from <a class="el" href="protocolcp_c_c_node_delegate-p.html">&lt;cpCCNodeDelegate&gt;</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a7ed322476f16b95b6e9f09f7e7950337"></a><!-- doxytag: member="cpShapeNode::applyImpulse:" ref="a7ed322476f16b95b6e9f09f7e7950337" args="(cpVect impulse)" -->
@@ -104,6 +119,8 @@ BOOL&nbsp;</td><td class="memItemRight" valign="bottom"><b>_drawDecoration</b></
 </div>
 <div class="memdoc">
 <p>Apply an impulse (think gun shot) to our shape's body </p>
+
+<p>Reimplemented from <a class="el" href="protocolcp_c_c_node_delegate-p.html">&lt;cpCCNodeDelegate&gt;</a>.</p>
 
 </div>
 </div>
@@ -142,6 +159,26 @@ BOOL&nbsp;</td><td class="memItemRight" valign="bottom"><b>_drawDecoration</b></
 </div>
 <div class="memdoc">
 <p>Return an autoreleased node </p>
+
+</div>
+</div>
+<a class="anchor" id="a9488aa5f026f7598ee38089bef18325d"></a><!-- doxytag: member="cpShapeNode::resetForces" ref="a9488aa5f026f7598ee38089bef18325d" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">- (void) resetForces </td>
+          <td></td>
+          <td class="paramname"></td>
+          <td>&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Reset any forces accrued on this shape's body </p>
+
+<p>Reimplemented from <a class="el" href="protocolcp_c_c_node_delegate-p.html">&lt;cpCCNodeDelegate&gt;</a>.</p>
 
 </div>
 </div>
@@ -319,7 +356,7 @@ BOOL&nbsp;</td><td class="memItemRight" valign="bottom"><b>_drawDecoration</b></
 <li>/Users/robertblackwood/Desktop/SpaceManager/trunk/src/cpShapeNode.m</li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Fri Sep 18 22:05:35 2009 for SpaceManager by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Oct 6 22:38:42 2009 for SpaceManager by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

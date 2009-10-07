@@ -12,6 +12,7 @@
   <div class="tabs">
     <ul>
       <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
       <li class="current"><a href="annotated.html"><span>Data&nbsp;Structures</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
     </ul>
@@ -19,18 +20,29 @@
   <div class="tabs">
     <ul>
       <li><a href="annotated.html"><span>Data&nbsp;Structures</span></a></li>
+      <li><a href="hierarchy.html"><span>Class&nbsp;Hierarchy</span></a></li>
       <li><a href="functions.html"><span>Data&nbsp;Fields</span></a></li>
     </ul>
   </div>
 </div>
 <div class="contents">
-<h1>cpSprite Class Reference</h1><!-- doxytag: class="cpSprite" --><table border="0" cellpadding="0" cellspacing="0">
+<h1>cpSprite Class Reference</h1><!-- doxytag: class="cpSprite" --><!-- doxytag: inherits="cpCCNodeDelegate-p" --><div class="dynheader">
+Inheritance diagram for cpSprite:</div>
+<div class="dynsection">
+ <div class="center">
+  <img src="interfacecp_sprite.gif" usemap="#cpSprite_map" alt=""/>
+  <map id="cpSprite_map" name="cpSprite_map">
+<area href="protocolcp_c_c_node_delegate-p.html" alt="&lt;cpCCNodeDelegate&gt;" shape="rect" coords="0,0,138,24"/>
+</map>
+ </div>
+</div>
+<table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">(void)&nbsp;</td><td class="memItemRight" valign="bottom">- <a class="el" href="interfacecp_sprite.html#a7ed322476f16b95b6e9f09f7e7950337">applyImpulse:</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">(void)&nbsp;</td><td class="memItemRight" valign="bottom">- <a class="el" href="interfacecp_sprite.html#a725e743fe385af0a355fa641e6838f0b">applyForce:</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">(id)&nbsp;</td><td class="memItemRight" valign="bottom">- <a class="el" href="interfacecp_sprite.html#ae22dbba6b56a5dbc18c0d1853f5d7c0f">initWithShape:file:</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">(id)&nbsp;</td><td class="memItemRight" valign="bottom">- <a class="el" href="interfacecp_sprite.html#a9e10f80476d79e57f17ce1cb3ee29b99">initWithShape:file:</a></td></tr>
 <tr><td colspan="2"><h2>Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">(id)&nbsp;</td><td class="memItemRight" valign="bottom">+ <a class="el" href="interfacecp_sprite.html#a83433826a8aa04d4b1dce872e9c09fc0">spriteWithShape:file:</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">(id)&nbsp;</td><td class="memItemRight" valign="bottom">+ <a class="el" href="interfacecp_sprite.html#ad30bb46e7fd4917852446d61e297b52d">spriteWithShape:file:</a></td></tr>
 <tr><td colspan="2"><h2>Protected Attributes</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae537fdae0545765556d12e913ce5585a"></a><!-- doxytag: member="cpSprite::CPCCNODE_MEM_VARS" ref="ae537fdae0545765556d12e913ce5585a" args="" -->
 &nbsp;</td><td class="memItemRight" valign="bottom"><b>CPCCNODE_MEM_VARS</b></td></tr>
@@ -59,6 +71,8 @@
 <div class="memdoc">
 <p>Apply a constant force to our shape's body </p>
 
+<p>Reimplemented from <a class="el" href="protocolcp_c_c_node_delegate-p.html">&lt;cpCCNodeDelegate&gt;</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a7ed322476f16b95b6e9f09f7e7950337"></a><!-- doxytag: member="cpSprite::applyImpulse:" ref="a7ed322476f16b95b6e9f09f7e7950337" args="(cpVect impulse)" -->
@@ -78,9 +92,11 @@
 <div class="memdoc">
 <p>Apply an impulse (think gun shot) to our shape's body </p>
 
+<p>Reimplemented from <a class="el" href="protocolcp_c_c_node_delegate-p.html">&lt;cpCCNodeDelegate&gt;</a>.</p>
+
 </div>
 </div>
-<a class="anchor" id="ae22dbba6b56a5dbc18c0d1853f5d7c0f"></a><!-- doxytag: member="cpSprite::initWithShape:file:" ref="ae22dbba6b56a5dbc18c0d1853f5d7c0f" args="(cpShape *s,[file] NSString *filename)" -->
+<a class="anchor" id="a9e10f80476d79e57f17ce1cb3ee29b99"></a><!-- doxytag: member="cpSprite::initWithShape:file:" ref="a9e10f80476d79e57f17ce1cb3ee29b99" args="(cpShape *shape,[file] NSString *filename)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -88,7 +104,7 @@
           <td class="memname">- (id) initWithShape: </td>
           <td></td>
           <td class="paramtype">(cpShape*)&nbsp;</td>
-          <td class="paramname"> <em>s</em></td>
+          <td class="paramname"> <em>shape</em></td>
         </tr>
         <tr>
           <td class="paramkey">file:</td>
@@ -108,7 +124,7 @@
 
 </div>
 </div>
-<a class="anchor" id="a83433826a8aa04d4b1dce872e9c09fc0"></a><!-- doxytag: member="cpSprite::spriteWithShape:file:" ref="a83433826a8aa04d4b1dce872e9c09fc0" args="(cpShape *s,[file] NSString *filename)" -->
+<a class="anchor" id="ad30bb46e7fd4917852446d61e297b52d"></a><!-- doxytag: member="cpSprite::spriteWithShape:file:" ref="ad30bb46e7fd4917852446d61e297b52d" args="(cpShape *shape,[file] NSString *filename)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -116,7 +132,7 @@
           <td class="memname">+ (id) spriteWithShape: </td>
           <td></td>
           <td class="paramtype">(cpShape*)&nbsp;</td>
-          <td class="paramname"> <em>s</em></td>
+          <td class="paramname"> <em>shape</em></td>
         </tr>
         <tr>
           <td class="paramkey">file:</td>
@@ -212,7 +228,7 @@
 <li>/Users/robertblackwood/Desktop/SpaceManager/trunk/src/cpSprite.m</li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Fri Sep 18 22:05:35 2009 for SpaceManager by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Oct 6 22:38:42 2009 for SpaceManager by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

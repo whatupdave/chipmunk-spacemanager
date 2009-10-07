@@ -12,6 +12,7 @@
   <div class="tabs">
     <ul>
       <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
       <li class="current"><a href="annotated.html"><span>Data&nbsp;Structures</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
     </ul>
@@ -19,19 +20,22 @@
   <div class="tabs">
     <ul>
       <li><a href="annotated.html"><span>Data&nbsp;Structures</span></a></li>
+      <li><a href="hierarchy.html"><span>Class&nbsp;Hierarchy</span></a></li>
       <li><a href="functions.html"><span>Data&nbsp;Fields</span></a></li>
     </ul>
   </div>
 </div>
 <div class="contents">
-<h1>cpCCNode Class Reference</h1><!-- doxytag: class="cpCCNode" --><table border="0" cellpadding="0" cellspacing="0">
+<h1>cpCCNode Class Reference</h1><!-- doxytag: class="cpCCNode" -->
+<p><code>#import &lt;<a class="el" href="cp_c_c_node_8h_source.html">cpCCNode.h</a>&gt;</code></p>
+<table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6cc09ea6b5fc586c6fc7683b618d4eb9"></a><!-- doxytag: member="cpCCNode::initWithShape:" ref="a6cc09ea6b5fc586c6fc7683b618d4eb9" args="(cpShape *s)" -->
 (id)&nbsp;</td><td class="memItemRight" valign="bottom">- <b>initWithShape:</b></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a119b044b86798548fd2cb16cd22ca074"></a><!-- doxytag: member="cpCCNode::setRotation:oldRotation:" ref="a119b044b86798548fd2cb16cd22ca074" args="(float rot,[oldRotation] float oldRot)" -->
-(void)&nbsp;</td><td class="memItemRight" valign="bottom">- <b>setRotation:oldRotation:</b></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4640a88b539410436f3ab9d4d9ff1d56"></a><!-- doxytag: member="cpCCNode::setPosition:oldPosition:" ref="a4640a88b539410436f3ab9d4d9ff1d56" args="(cpVect pos,[oldPosition] cpVect oldPos)" -->
-(void)&nbsp;</td><td class="memItemRight" valign="bottom">- <b>setPosition:oldPosition:</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1da51a18948b8cc79e5292b5cbc574bc"></a><!-- doxytag: member="cpCCNode::setRotation:" ref="a1da51a18948b8cc79e5292b5cbc574bc" args="(float rot)" -->
+(void)&nbsp;</td><td class="memItemRight" valign="bottom">- <b>setRotation:</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a16cbd0606850ee2c75dabaf5f547b314"></a><!-- doxytag: member="cpCCNode::setPosition:" ref="a16cbd0606850ee2c75dabaf5f547b314" args="(cpVect pos)" -->
+(void)&nbsp;</td><td class="memItemRight" valign="bottom">- <b>setPosition:</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7ed322476f16b95b6e9f09f7e7950337"></a><!-- doxytag: member="cpCCNode::applyImpulse:" ref="a7ed322476f16b95b6e9f09f7e7950337" args="(cpVect impulse)" -->
 (void)&nbsp;</td><td class="memItemRight" valign="bottom">- <b>applyImpulse:</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a725e743fe385af0a355fa641e6838f0b"></a><!-- doxytag: member="cpCCNode::applyForce:" ref="a725e743fe385af0a355fa641e6838f0b" args="(cpVect force)" -->
@@ -61,12 +65,14 @@ cpShape *&nbsp;</td><td class="memItemRight" valign="bottom"><b>shape</b></td></
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a36241cc405a9958ac284d1f7b446a355"></a><!-- doxytag: member="cpCCNode::spaceManager" ref="a36241cc405a9958ac284d1f7b446a355" args="" -->
 <a class="el" href="interface_space_manager.html">SpaceManager</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><b>spaceManager</b></td></tr>
 </table>
+<hr/><a name="_details"></a><h2>Detailed Description</h2>
+<p>Since we can not extend functionality from multiple class definitions, any class wishing to include this functionality must serve as a proxy and forward requests to a (member) object of this type, there are macros in this file aimed at helping achieve this </p>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>/Users/robertblackwood/Desktop/SpaceManager/trunk/src/<a class="el" href="cp_c_c_node_8h_source.html">cpCCNode.h</a></li>
 <li>/Users/robertblackwood/Desktop/SpaceManager/trunk/src/cpCCNode.m</li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Fri Sep 18 22:05:35 2009 for SpaceManager by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Oct 6 22:38:42 2009 for SpaceManager by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

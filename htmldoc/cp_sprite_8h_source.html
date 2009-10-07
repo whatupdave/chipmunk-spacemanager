@@ -12,6 +12,7 @@
   <div class="tabs">
     <ul>
       <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
       <li><a href="annotated.html"><span>Data&nbsp;Structures</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
     </ul>
@@ -40,33 +41,33 @@
 <a name="l00017"></a>00017 <span class="preprocessor">#import &quot;chipmunk.h&quot;</span>
 <a name="l00018"></a>00018 <span class="preprocessor">#import &quot;cpCCNode.h&quot;</span>
 <a name="l00019"></a>00019 
-<a name="l00020"></a><a class="code" href="interfacecp_sprite.html">00020</a> <span class="keyword">@interface </span><a class="code" href="interfacecp_sprite.html">cpSprite</a> : Sprite 
+<a name="l00020"></a><a class="code" href="interfacecp_sprite.html">00020</a> <span class="keyword">@interface </span><a class="code" href="interfacecp_sprite.html">cpSprite</a> : Sprite&lt;<a class="code" href="protocolcp_c_c_node_delegate-p.html">cpCCNodeDelegate</a>&gt;
 <a name="l00021"></a>00021 {
 <a name="l00022"></a>00022         CPCCNODE_MEM_VARS;
 <a name="l00023"></a>00023 }
 <a name="l00024"></a>00024 
-<a name="l00026"></a><a class="code" href="interfacecp_sprite.html#ac9d445e22a8f552be4df29724c93c8d6">00026</a> @property (readwrite,assign) BOOL ignoreRotation;
-<a name="l00027"></a>00027 
-<a name="l00030"></a><a class="code" href="interfacecp_sprite.html#a13238fc72af92de43dffff4dba901ade">00030</a> @property (readwrite,assign) cpFloat integrationDt;
-<a name="l00031"></a>00031 
-<a name="l00034"></a><a class="code" href="interfacecp_sprite.html#a32852324143b771927fe0e96b7eaf8d4">00034</a> @property (readwrite,assign) BOOL autoFreeShape;
-<a name="l00035"></a>00035 
-<a name="l00037"></a><a class="code" href="interfacecp_sprite.html#ab7cfe75e9b1836fb5f7adc460c8f3198">00037</a> @property (readwrite,assign) cpShape *shape;
-<a name="l00038"></a>00038 
-<a name="l00040"></a><a class="code" href="interfacecp_sprite.html#a36241cc405a9958ac284d1f7b446a355">00040</a> @property (readwrite,assign) <a class="code" href="interface_space_manager.html">SpaceManager</a> *spaceManager;
-<a name="l00041"></a>00041 
+<a name="l00026"></a>00026 @property (readwrite,assign) BOOL ignoreRotation;
+<a name="l00027"></a><a class="code" href="interfacecp_sprite.html#ac9d445e22a8f552be4df29724c93c8d6">00027</a> 
+<a name="l00030"></a>00030 @property (readwrite,assign) cpFloat integrationDt;
+<a name="l00031"></a><a class="code" href="interfacecp_sprite.html#a13238fc72af92de43dffff4dba901ade">00031</a> 
+<a name="l00034"></a>00034 @property (readwrite,assign) BOOL autoFreeShape;
+<a name="l00035"></a><a class="code" href="interfacecp_sprite.html#a32852324143b771927fe0e96b7eaf8d4">00035</a> 
+<a name="l00037"></a>00037 @property (readwrite,assign) cpShape *shape;
+<a name="l00038"></a><a class="code" href="interfacecp_sprite.html#ab7cfe75e9b1836fb5f7adc460c8f3198">00038</a> 
+<a name="l00040"></a>00040 @property (readwrite,assign) <a class="code" href="interface_space_manager.html">SpaceManager</a> *spaceManager;
+<a name="l00041"></a><a class="code" href="interfacecp_sprite.html#a36241cc405a9958ac284d1f7b446a355">00041</a> 
 <a name="l00043"></a>00043 -(<span class="keywordtype">void</span>) applyImpulse:(cpVect)impulse;
 <a name="l00044"></a>00044 
 <a name="l00046"></a>00046 -(<span class="keywordtype">void</span>) applyForce:(cpVect)force;
 <a name="l00047"></a>00047 
-<a name="l00049"></a>00049 + (<span class="keywordtype">id</span>) spriteWithShape:(cpShape*)s file:(NSString*) filename;
+<a name="l00049"></a>00049 + (<span class="keywordtype">id</span>) spriteWithShape:(cpShape*)shape file:(NSString*) filename;
 <a name="l00050"></a>00050 
-<a name="l00052"></a>00052 - (<span class="keywordtype">id</span>) initWithShape:(cpShape*)s file:(NSString*) filename;
+<a name="l00052"></a>00052 - (<span class="keywordtype">id</span>) initWithShape:(cpShape*)shape file:(NSString*) filename;
 <a name="l00053"></a>00053 
 <a name="l00054"></a>00054 
 <a name="l00055"></a>00055 @end
 </pre></div></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Fri Sep 18 22:05:35 2009 for SpaceManager by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Oct 6 22:38:42 2009 for SpaceManager by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

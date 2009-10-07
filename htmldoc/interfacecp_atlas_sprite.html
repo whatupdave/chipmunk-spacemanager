@@ -12,6 +12,7 @@
   <div class="tabs">
     <ul>
       <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
       <li class="current"><a href="annotated.html"><span>Data&nbsp;Structures</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
     </ul>
@@ -19,18 +20,29 @@
   <div class="tabs">
     <ul>
       <li><a href="annotated.html"><span>Data&nbsp;Structures</span></a></li>
+      <li><a href="hierarchy.html"><span>Class&nbsp;Hierarchy</span></a></li>
       <li><a href="functions.html"><span>Data&nbsp;Fields</span></a></li>
     </ul>
   </div>
 </div>
 <div class="contents">
-<h1>cpAtlasSprite Class Reference</h1><!-- doxytag: class="cpAtlasSprite" --><table border="0" cellpadding="0" cellspacing="0">
+<h1>cpAtlasSprite Class Reference</h1><!-- doxytag: class="cpAtlasSprite" --><!-- doxytag: inherits="cpCCNodeDelegate-p" --><div class="dynheader">
+Inheritance diagram for cpAtlasSprite:</div>
+<div class="dynsection">
+ <div class="center">
+  <img src="interfacecp_atlas_sprite.gif" usemap="#cpAtlasSprite_map" alt=""/>
+  <map id="cpAtlasSprite_map" name="cpAtlasSprite_map">
+<area href="protocolcp_c_c_node_delegate-p.html" alt="&lt;cpCCNodeDelegate&gt;" shape="rect" coords="0,0,138,24"/>
+</map>
+ </div>
+</div>
+<table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">(void)&nbsp;</td><td class="memItemRight" valign="bottom">- <a class="el" href="interfacecp_atlas_sprite.html#a7ed322476f16b95b6e9f09f7e7950337">applyImpulse:</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">(void)&nbsp;</td><td class="memItemRight" valign="bottom">- <a class="el" href="interfacecp_atlas_sprite.html#a725e743fe385af0a355fa641e6838f0b">applyForce:</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">(id)&nbsp;</td><td class="memItemRight" valign="bottom">- <a class="el" href="interfacecp_atlas_sprite.html#a024c847ad89fa0d95d696f12c626d1f8">initWithShape:manager:rect:</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">(id)&nbsp;</td><td class="memItemRight" valign="bottom">- <a class="el" href="interfacecp_atlas_sprite.html#aa8ca20d786600c1bcfc036916e60ef56">initWithShape:manager:rect:</a></td></tr>
 <tr><td colspan="2"><h2>Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">(id)&nbsp;</td><td class="memItemRight" valign="bottom">+ <a class="el" href="interfacecp_atlas_sprite.html#a82cec93e8b77ee76c8e15292a96756c2">spriteWithShape:manager:rect:</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">(id)&nbsp;</td><td class="memItemRight" valign="bottom">+ <a class="el" href="interfacecp_atlas_sprite.html#a0f16dcabd130ee32cdcdde7eb1311344">spriteWithShape:manager:rect:</a></td></tr>
 <tr><td colspan="2"><h2>Protected Attributes</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae537fdae0545765556d12e913ce5585a"></a><!-- doxytag: member="cpAtlasSprite::CPCCNODE_MEM_VARS" ref="ae537fdae0545765556d12e913ce5585a" args="" -->
 &nbsp;</td><td class="memItemRight" valign="bottom"><b>CPCCNODE_MEM_VARS</b></td></tr>
@@ -59,6 +71,8 @@
 <div class="memdoc">
 <p>Apply a constant force to our shape's body </p>
 
+<p>Reimplemented from <a class="el" href="protocolcp_c_c_node_delegate-p.html">&lt;cpCCNodeDelegate&gt;</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a7ed322476f16b95b6e9f09f7e7950337"></a><!-- doxytag: member="cpAtlasSprite::applyImpulse:" ref="a7ed322476f16b95b6e9f09f7e7950337" args="(cpVect impulse)" -->
@@ -78,9 +92,11 @@
 <div class="memdoc">
 <p>Apply an impulse (think gun shot) to our shape's body </p>
 
+<p>Reimplemented from <a class="el" href="protocolcp_c_c_node_delegate-p.html">&lt;cpCCNodeDelegate&gt;</a>.</p>
+
 </div>
 </div>
-<a class="anchor" id="a024c847ad89fa0d95d696f12c626d1f8"></a><!-- doxytag: member="cpAtlasSprite::initWithShape:manager:rect:" ref="a024c847ad89fa0d95d696f12c626d1f8" args="(cpShape *s,[manager] AtlasSpriteManager *sm,[rect] CGRect rect)" -->
+<a class="anchor" id="aa8ca20d786600c1bcfc036916e60ef56"></a><!-- doxytag: member="cpAtlasSprite::initWithShape:manager:rect:" ref="aa8ca20d786600c1bcfc036916e60ef56" args="(cpShape *shape,[manager] AtlasSpriteManager *sm,[rect] CGRect rect)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -88,7 +104,7 @@
           <td class="memname">- (id) initWithShape: </td>
           <td></td>
           <td class="paramtype">(cpShape*)&nbsp;</td>
-          <td class="paramname"> <em>s</em></td>
+          <td class="paramname"> <em>shape</em></td>
         </tr>
         <tr>
           <td class="paramkey">manager:</td>
@@ -114,7 +130,7 @@
 
 </div>
 </div>
-<a class="anchor" id="a82cec93e8b77ee76c8e15292a96756c2"></a><!-- doxytag: member="cpAtlasSprite::spriteWithShape:manager:rect:" ref="a82cec93e8b77ee76c8e15292a96756c2" args="(cpShape *s,[manager] AtlasSpriteManager *sm,[rect] CGRect rect)" -->
+<a class="anchor" id="a0f16dcabd130ee32cdcdde7eb1311344"></a><!-- doxytag: member="cpAtlasSprite::spriteWithShape:manager:rect:" ref="a0f16dcabd130ee32cdcdde7eb1311344" args="(cpShape *shape,[manager] AtlasSpriteManager *sm,[rect] CGRect rect)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -122,7 +138,7 @@
           <td class="memname">+ (id) spriteWithShape: </td>
           <td></td>
           <td class="paramtype">(cpShape*)&nbsp;</td>
-          <td class="paramname"> <em>s</em></td>
+          <td class="paramname"> <em>shape</em></td>
         </tr>
         <tr>
           <td class="paramkey">manager:</td>
@@ -224,7 +240,7 @@
 <li>/Users/robertblackwood/Desktop/SpaceManager/trunk/src/cpAtlasSprite.m</li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Fri Sep 18 22:05:35 2009 for SpaceManager by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Oct 6 22:38:42 2009 for SpaceManager by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>
