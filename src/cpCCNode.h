@@ -30,6 +30,11 @@
  *****/
  
 
+/*! Our protocol that our CocosNode objects follow, these include:
+	-cpSprite
+	-cpShapeNode
+	-cpAtlasSprite
+ */
 @protocol cpCCNodeDelegate<NSObject>
 @optional
 -(void) setShape:(cpShape*)shape;
@@ -46,6 +51,12 @@
 -(void) resetForces;
 @end
 
+/*! Since we can not extend functionality from multiple
+	class definitions, any class wishing to include this
+	functionality must serve as a proxy and forward requests
+	to a (member) object of this type, there are macros in this
+	file aimed at helping achieve this
+ */
 @interface cpCCNode : NSObject {
 
 @protected
