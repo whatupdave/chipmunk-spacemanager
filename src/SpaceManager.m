@@ -613,7 +613,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 
 -(NSArray*) getConstraints
 {
-	NSMutableArray *constraints = [[NSMutableArray alloc] init];
+	NSMutableArray *constraints = [[[NSMutableArray alloc] init] autorelease];
 	int num = _space->constraints->num;
 	
 	for (int i = 0; i < num; i++)
@@ -624,7 +624,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 
 -(NSArray*) getConstraintsOnBody:(cpBody*)body
 {
-	NSMutableArray *constraints = [[NSMutableArray alloc] init];
+	NSMutableArray *constraints = [[[NSMutableArray alloc] init] autorelease];
 	cpConstraint* constraint;
 	int num = _space->constraints->num;
 	

@@ -212,6 +212,9 @@ void defaultEachShape(void *ptr, void* data);
 /*! This will force a shape active and give it the given mass */
 -(cpShape*) morphShapeToActive:(cpShape*)shape mass:(cpFloat)mass;
 
+/*! */
+//-(void) mergeShape:(cpShape*)shape withShape:(cpShape*)shape2;
+
 /*! Unique Collision: will ignore the effects a collsion between types */
 -(void) ignoreCollionBetweenType:(unsigned int)type1 otherType:(unsigned int)type2;
 
