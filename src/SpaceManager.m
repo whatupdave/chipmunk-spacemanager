@@ -31,6 +31,7 @@ void defaultEachShape(void *ptr, void* data)
 	//do nothing.... idk
 }
 
+#ifdef _SPACE_MANAGER_FOR_COCOS2D
 static void eachShapeAsChildren(void *ptr, void* data)
 {
 	cpShape *shape = (cpShape*) ptr;
@@ -57,6 +58,7 @@ static void eachShapeAsChildren(void *ptr, void* data)
 		}
 	}
 }
+#endif
 
 static int collHandleInvocations(cpShape *a, cpShape *b, cpContact *contacts, int numContacts, cpFloat normal_coef, void *data)
 {
@@ -337,7 +339,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 
 #endif
 
--(void) step: (ccTime) delta
+-(void) step: (cpFloat) delta
 {
 	if (_constantDt)
 		_lastDt = _constantDt/_steps;

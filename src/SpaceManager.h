@@ -42,7 +42,9 @@ void defaultEachShape(void *ptr, void* data);
 	NSMutableArray	*_freeShapes;
 	NSMutableArray	*_removedShapes;
 	NSMutableArray	*_invocations;
+#ifdef _SPACE_MANAGER_FOR_COCOS2D
 	Timer			*_timer;
+#endif
 	
 	/* Helpful Shapes/Bodies */
 	cpShape			*topWall,*bottomWall,*rightWall,*leftWall;
@@ -136,7 +138,7 @@ void defaultEachShape(void *ptr, void* data);
 #endif
 
 /*! Manually advance time within the space */
--(void) step: (ccTime) delta;
+-(void) step: (cpFloat) delta;
 
 /*! Get chipmunk space object 
 	@deprecated Will be removed in v0.0.3. Use space property instead.
