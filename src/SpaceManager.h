@@ -146,10 +146,10 @@ void defaultEachShape(void *ptr, void* data);
 -(cpSpace*) getSpace __attribute__((deprecated));
 
 /*! add a circle shape */
--(cpShape*) addCircleAt:(cpVect)pos mass:(cpFloat)mass radius:(int)radius;
+-(cpShape*) addCircleAt:(cpVect)pos mass:(cpFloat)mass radius:(cpFloat)radius;
 
 /*! add a rectangle shape */
--(cpShape*) addRectAt:(cpVect)pos mass:(cpFloat)mass width:(int)width height:(int)height rotation:(cpFloat)r;
+-(cpShape*) addRectAt:(cpVect)pos mass:(cpFloat)mass width:(cpFloat)width height:(cpFloat)height rotation:(cpFloat)r;
 
 /*! add a polygon shape */
 -(cpShape*) addPolyAt:(cpVect)pos mass:(cpFloat)mass rotation:(cpFloat)r numPoints:(int)numPoints points:(cpVect)pt, ... ;

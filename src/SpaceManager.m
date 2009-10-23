@@ -450,7 +450,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 	s->data = nil;
 }
 
--(cpShape*) addCircleAt:(cpVect)pos mass:(cpFloat)mass radius:(int)radius
+-(cpShape*) addCircleAt:(cpVect)pos mass:(cpFloat)mass radius:(cpFloat)radius
 {
 	cpShape* shape;
 	cpFloat moment = STATIC_MASS;
@@ -467,13 +467,13 @@ static void updateBBCache(cpShape *shape, void *unused)
 	return shape;
 }
 
--(cpShape*) addRectAt:(cpVect)pos mass:(cpFloat)mass width:(int)width height:(int)height rotation:(cpFloat)r 
+-(cpShape*) addRectAt:(cpVect)pos mass:(cpFloat)mass width:(cpFloat)width height:(cpFloat)height rotation:(cpFloat)r 
 {	
 	return [self addPolyAt:pos mass:mass rotation:r numPoints:4 points:		
-																		cpv(-width/2,-height/2),	/* bottom-left */
-																		cpv(-width/2, height/2),	/* top-left */ 
-																		cpv( width/2, height/2),	/* top-right */
-																		cpv( width/2,-height/2)];	/* bottom-right */
+																		cpv(-width/2.0f,-height/2.0f),	/* bottom-left */
+																		cpv(-width/2.0f, height/2.0f),	/* top-left */ 
+																		cpv( width/2.0f, height/2.0f),	/* top-right */
+																		cpv( width/2.0f,-height/2.0f)];	/* bottom-right */
 }
 
 -(cpShape*) addPolyAt:(cpVect)pos mass:(cpFloat)mass rotation:(cpFloat)r numPoints:(int)numPoints points:(cpVect)pt, ...
