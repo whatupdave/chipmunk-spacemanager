@@ -40,7 +40,10 @@
 -(void) dealloc
 {
 	if (_autoFreeShape && _shape)
+	{
 		[_spaceManager scheduleToRemoveAndFreeShape:_shape];
+		_shape->data = NULL;
+	}
 		
 	[super dealloc];
 }
