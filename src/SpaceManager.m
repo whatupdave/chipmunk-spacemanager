@@ -513,7 +513,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 -(cpShape*) addSegmentAtWorldAnchor:(cpVect)fromPos toWorldAnchor:(cpVect)toPos mass:(cpFloat)mass radius:(cpFloat)radius;
 {
 	cpVect pos = cpvmult(cpvsub(toPos,fromPos), .5);
-	return [self addSegmentAt:pos fromLocalAnchor:cpvsub(fromPos, pos) toLocalAnchor:cpvsub(toPos, pos) mass:mass radius:radius];
+	return [self addSegmentAt:cpvadd(fromPos,pos) fromLocalAnchor:cpvmult(pos,-1) toLocalAnchor:pos mass:mass radius:radius];
 }
 
 -(cpShape*) addSegmentAt:(cpVect)pos fromLocalAnchor:(cpVect)fromPos toLocalAnchor:(cpVect)toPos mass:(cpFloat)mass radius:(cpFloat)radius
