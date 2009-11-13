@@ -39,11 +39,13 @@
 
 -(void) dealloc
 {
-	if (_autoFreeShape && _shape)
+	if (_shape)
 	{
-		[_spaceManager scheduleToRemoveAndFreeShape:_shape];
 		_shape->data = NULL;
+		if (_autoFreeShape)
+			[_spaceManager scheduleToRemoveAndFreeShape:_shape];
 	}
+	_shape = nil;
 		
 	[super dealloc];
 }
@@ -52,6 +54,7 @@
 {	
 	if (!_ignoreRotation)
 	{	
+		//Needs a calculation for angular velocity and such
 		if (_shape != nil)
 			cpBodySetAngle(_shape->body, -CC_DEGREES_TO_RADIANS(rot));
 	}

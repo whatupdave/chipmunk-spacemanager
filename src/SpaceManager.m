@@ -152,6 +152,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 	_steps = 2;
 	_iterateStatic = YES;
 	_rehashStaticEveryStep = NO;
+	_rehashNextStep = NO;
 	_cleanupBodyDependencies = YES;
 	_constantDt = 0.0;
 	
@@ -264,12 +265,6 @@ static void updateBBCache(cpShape *shape, void *unused)
 	return [NSString stringWithFormat:@"\n<constraint/>"];
 }
 
-/* Deprecated, will be replaced in 0.0.3 by space property */
--(cpSpace*) getSpace
-{
-	return _space;
-}
-
 -(void) setGravity:(cpVect)gravity
 {
 	_space->gravity = gravity;
@@ -347,8 +342,11 @@ static void updateBBCache(cpShape *shape, void *unused)
 		_lastDt = delta/(cpFloat)_steps;
 	
 	//re-calculate static shape positions if this is set
-	if (_rehashStaticEveryStep)
+	if (_rehashStaticEveryStep || _rehashNextStep)
+	{
 		cpSpaceRehashStatic(_space);
+		_rehashNextStep = NO;
+	}
 	
 	//for the iterations given
 	for(int i=0; i<_steps; i++)
@@ -360,6 +358,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 	if (_iterateStatic)
 		cpSpaceHashEach(_space->staticShapes, _iterateFunc, self);	
 	
+	//cleanup
 	[self freeShapes];
 	[self removeShapes];
 }
@@ -556,10 +555,12 @@ static void updateBBCache(cpShape *shape, void *unused)
 
 -(void) rehashStaticShape:(cpShape*)shape
 {
-	cpSpaceHashRemove(_space->staticShapes, shape, shape->id);
-	//shapeRemovalArbiterReject(_space, shape); //I don't think this is necessary
-	cpShapeCacheBB(shape);
-	cpSpaceHashInsert(_space->staticShapes, shape, shape->id, shape->bb);
+	_rehashNextStep = YES;
+	//NEEDS WORK, slows down simulation
+	//cpSpaceHashRemove(_space->staticShapes, shape, shape->id);
+	////shapeRemovalArbiterReject(_space, shape); //I don't think this is necessary
+	//cpShapeCacheBB(shape);
+	//cpSpaceHashInsert(_space->staticShapes, shape, shape->id, shape->bb);
 }
 
 -(NSArray*) getShapesAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group
@@ -690,6 +691,8 @@ static void updateBBCache(cpShape *shape, void *unused)
 		if (body == constraint->a || body == constraint->b)
 		{
 			//Need a callback prob for about to delete constraint
+			//reason: it's the only thing that may be deleted arbitrarily
+			//because of the cleanupBodyDependencies
 			
 			//more efficient to use this method of deletion
 			cpArrayDeleteIndex(array, i);

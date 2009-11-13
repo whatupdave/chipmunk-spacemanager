@@ -56,6 +56,9 @@ void defaultEachShape(void *ptr, void* data);
 	/* The dt used last within step */
 	cpFloat	_lastDt;
 	
+	/* hack to fix rehashing one static */
+	BOOL _rehashNextStep;
+	
 	/* Options:
 		-cleanupBodyDepenencies will also free contraints connected to a free'd shape
 		-iterateStatic will call _iterateFunc on static shapes
@@ -139,11 +142,6 @@ void defaultEachShape(void *ptr, void* data);
 
 /*! Manually advance time within the space */
 -(void) step: (cpFloat) delta;
-
-/*! Get chipmunk space object 
-	@deprecated Will be removed in v0.0.3. Use space property instead.
- */
--(cpSpace*) getSpace __attribute__((deprecated));
 
 /*! add a circle shape */
 -(cpShape*) addCircleAt:(cpVect)pos mass:(cpFloat)mass radius:(cpFloat)radius;
@@ -235,38 +233,49 @@ void defaultEachShape(void *ptr, void* data);
 /*! This will calculate all constraints on a body and remove & free them */
 -(void) removeAndFreeConstraintsOnBody:(cpBody*)body;
 
+/*! Add a spring to two bodies at the body anchor points */
 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2 restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp;
 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp;
 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody stiffness:(cpFloat)stiff;
 
+/*! Add a groove (aka sliding pin) between two bodies */
 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveAnchor1:(cpVect)groove1 grooveAnchor2:(cpVect)groove2 fromBodyAnchor:(cpVect)anchor2;
 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveLength:(cpFloat)length isHorizontal:(bool)horiz fromBodyAnchor:(cpVect)anchor2;
 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveLength:(cpFloat)length isHorizontal:(bool)horiz;
 
+/*! Add a sliding joint between two bodies */
 -(cpConstraint*) addSlideToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2 minLength:(cpFloat)min maxLength:(cpFloat)max;
 -(cpConstraint*) addSlideToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody minLength:(cpFloat)min maxLength:(cpFloat)max;
 
+/*! Create a pin (rod) between two bodies */
 -(cpConstraint*) addPinToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2;
 -(cpConstraint*) addPinToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody;
 
+/*! Add a shared point between two bodies that they may rotate around */
 -(cpConstraint*) addPivotToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2;
 -(cpConstraint*) addPivotToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody worldAnchor:(cpVect)anchr;
 -(cpConstraint*) addPivotToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody;
 
+/*! Add a motor that applys torque to a specified body(s) */
 -(cpConstraint*) addMotorToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody rate:(cpFloat)rate;
 -(cpConstraint*) addMotorToBody:(cpBody*)toBody rate:(cpFloat)rate;
 
+/*! Add gears between two bodies */
 -(cpConstraint*) addGearToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody phase:(cpFloat)phase ratio:(cpFloat)ratio;
 -(cpConstraint*) addGearToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody ratio:(cpFloat)ratio;
 
+/*! */
 -(cpConstraint*) addBreakableToConstraint:(cpConstraint*)breakConstraint maxForce:(cpFloat)max;
 
+/*! */
 -(cpConstraint*) addRotaryLimitToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody min:(cpFloat)min max:(cpFloat)max;
 -(cpConstraint*) addRotaryLimitToBody:(cpBody*)toBody min:(cpFloat)min max:(cpFloat)max;
 
+/*! */
 -(cpConstraint*) addRatchetToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody direction:(cpFloat)direction;
 -(cpConstraint*) addRatchetToBody:(cpBody*)toBody direction:(cpFloat)direction;
 
+/*! */
 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp;
 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp;
 
