@@ -212,6 +212,14 @@ void defaultEachShape(void *ptr, void* data);
 /*! This will force a shape active and give it the given mass */
 -(cpShape*) morphShapeToActive:(cpShape*)shape mass:(cpFloat)mass;
 
+/*! This will take a shape and split it into the number of pieces you specify,
+	@return An NSArray* of NSValues* with cpShape* as the value (the fragments) or nil if failed
+ */
+-(NSArray*) fragmentShape:(cpShape*)shape piecesNum:(int)pieces eachMass:(float)mass;
+-(NSArray*) fragmentRect:(cpPolyShape*)poly rowPiecesNum:(int)rows colPiecesNum:(int)cols eachMass:(float)mass;
+-(NSArray*) fragmentCircle:(cpCircleShape*)circle piecesNum:(int)pieces eachMass:(float)mass;
+-(NSArray*) fragmentSegment:(cpSegmentShape*)segment piecesNum:(int)pieces eachMass:(float)mass;
+
 /*! */
 //-(void) mergeShape:(cpShape*)shape withShape:(cpShape*)shape2;
 

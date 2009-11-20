@@ -469,10 +469,10 @@ static void updateBBCache(cpShape *shape, void *unused)
 -(cpShape*) addRectAt:(cpVect)pos mass:(cpFloat)mass width:(cpFloat)width height:(cpFloat)height rotation:(cpFloat)r 
 {	
 	return [self addPolyAt:pos mass:mass rotation:r numPoints:4 points:		
-																		cpv(-width/2.0f,-height/2.0f),	/* bottom-left */
-																		cpv(-width/2.0f, height/2.0f),	/* top-left */ 
-																		cpv( width/2.0f, height/2.0f),	/* top-right */
-																		cpv( width/2.0f,-height/2.0f)];	/* bottom-right */
+																	cpv(-width/2.0f, height/2.0f),	/* top-left */ 
+																	cpv( width/2.0f, height/2.0f),	/* top-right */
+																	cpv( width/2.0f,-height/2.0f),	/* bottom-right */
+																	cpv(-width/2.0f,-height/2.0f)];	/* bottom-left */
 }
 
 -(cpShape*) addPolyAt:(cpVect)pos mass:(cpFloat)mass rotation:(cpFloat)r numPoints:(int)numPoints points:(cpVect)pt, ...
@@ -665,6 +665,132 @@ static void updateBBCache(cpShape *shape, void *unused)
 	[self addShape:shape];
 	
 	return shape;
+}
+
+-(NSArray*) fragmentShape:(cpShape*)shape piecesNum:(int)pieces eachMass:(float)mass;
+{
+	cpShapeType type = shape->klass->type;
+	NSArray* fragments = nil;
+	
+	if (type == CP_CIRCLE_SHAPE)
+	{
+		cpCircleShape *circle = (cpCircleShape*)shape;
+		fragments = [self fragmentCircle:circle piecesNum:pieces eachMass:mass];
+	}
+	else if (type == CP_SEGMENT_SHAPE)
+	{
+		cpSegmentShape *segment = (cpSegmentShape*)shape;
+		fragments = [self fragmentSegment:segment piecesNum:pieces eachMass:mass];
+	}
+	else if (type == CP_POLY_SHAPE)
+	{
+		cpPolyShape *poly = (cpPolyShape*)shape;
+		
+		//get a square grid size number
+		pieces = (int)sqrt((double)pieces);
+		
+		//only support rects right now
+		fragments = [self fragmentRect:poly rowPiecesNum:pieces colPiecesNum:pieces eachMass:mass];
+	}
+	
+	return fragments;
+}
+
+-(NSArray*) fragmentRect:(cpPolyShape*)poly rowPiecesNum:(int)rows colPiecesNum:(int)cols eachMass:(float)mass;
+{
+	NSMutableArray* fragments = nil;
+	cpBody *body = ((cpShape*)poly)->body;
+	
+	if (poly->numVerts == 4)
+	{
+		fragments = [[[NSMutableArray alloc] init] autorelease];
+		cpShape *fragment;
+		
+		//use the opposing endpoints (diagonal) to calc width & height
+		float w = fabs(poly->verts[0].x - poly->verts[2].x);
+		float h = fabs(poly->verts[0].y - poly->verts[2].y);
+		
+		float fw = w/cols;
+		float fh = h/rows;
+		
+		for (int i = 0; i < cols; i++)
+		{
+			for (int j = 0; j < rows; j++)
+			{
+				cpVect pt = cpvadd(cpv(fw/2.0f,fh/2.0f), cpv((i*fw)-w/2.0f,(j*fh)-h/2.0f));
+		
+				pt = cpBodyLocal2World(body, pt);
+				
+				fragment = [self addRectAt:pt mass:mass width:fw height:fh rotation:body->a];
+				
+				[fragments addObject:[NSValue valueWithPointer:fragment]];
+			}
+		}
+		
+		[self scheduleToRemoveAndFreeShape:(cpShape*)poly];
+	}
+	
+	return fragments;
+}
+
+-(NSArray*) fragmentCircle:(cpCircleShape*)circle piecesNum:(int)pieces eachMass:(float)mass
+{
+	NSMutableArray* fragments = [[[NSMutableArray alloc] init] autorelease];
+	
+	cpBody *body = ((cpShape*)circle)->body;
+	float radius = circle->r;
+	
+	
+	cpShape *fragment;
+	float radians = 2*M_PI/pieces;
+	float a = radians;
+	cpVect pt1, pt2, pt3, avg;
+	
+	pt1 = cpv(radius, 0);
+	
+	for (int i = 0; i < pieces; i++)
+	{		
+		pt2 = cpvmult(cpvforangle(a), radius);
+		
+		//get the centroid
+		avg = cpvmult(cpvadd(pt1,pt2), 1.0/3.0f);
+		pt3 = cpvadd(body->p, avg);
+		
+		fragment = [self addPolyAt:pt3 mass:mass rotation:0 numPoints:3 points:cpvsub(cpvzero,avg),cpvsub(pt2,avg),cpvsub(pt1,avg)];
+		[fragments addObject:[NSValue valueWithPointer:fragment]];
+		
+		pt1 = pt2;
+		a += radians;
+	}
+	
+	[self scheduleToRemoveAndFreeShape:(cpShape*)circle];
+	
+	return fragments;
+}
+
+-(NSArray*) fragmentSegment:(cpSegmentShape*)segment piecesNum:(int)pieces eachMass:(float)mass
+{
+	NSMutableArray* fragments = [[[NSMutableArray alloc] init] autorelease];
+	
+	cpBody *body = ((cpShape*)segment)->body;
+	
+	cpShape *fragment;
+	cpVect pt = segment->a;
+	cpVect diff = cpvsub(segment->b, segment->a);
+	cpVect dxdy = cpvmult(diff, 1.0f/(float)pieces);
+	float len = cpvlength(dxdy);
+	float rad = cpvtoangle(diff);
+	
+	for (int i = 0; i < pieces; i++)
+	{
+		fragment = [self addRectAt:cpBodyLocal2World(body,pt) mass:mass width:len height:segment->r*2 rotation:rad];
+		[fragments addObject:[NSValue valueWithPointer:fragment]];
+		pt = cpvadd(pt, dxdy);
+	}
+	
+	[self scheduleToRemoveAndFreeShape:(cpShape*)segment];
+	
+	return fragments;	
 }
 
 -(cpConstraint*) removeConstraint:(cpConstraint*)constraint

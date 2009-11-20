@@ -7,24 +7,69 @@
 
 #import "GameLayer.h"
 #import "cpConstraintNode.h"
-#import "cpShapeNode.h"
-
-@interface GameLayer (PrivateMethods)
-- (void) setupExample;
-- (int) handleCollisionWithRect:(cpShape*)rect;
-- (int) handleCollisionWithCircle:(cpShape*)circle 
-							 ball:(cpShape*)ball 
-					   contactPts:(cpContact*)contacts 
-					  numContacts:(int)numContacts 
-					   normalCoef:(cpFloat)coef;
-@end
 
 #define kBallCollisionType		1
 #define kCircleCollisionType	2
 #define kRectCollisionType		3
+#define kFragShapeCollisionType	4
 
+static int handleCollisionWithFragmentingRect(cpShape *a, cpShape *b, cpContact *contacts, int numContacts, cpFloat normal_coef, void *data)
+{
+	GameLayer *game = (GameLayer*)data;
+	if (game.fragShapeNode)
+	{
+		SpaceManager *smgr = game.smgr;
+		[game.label setString:@"You hit the Fragmenting Rectangle!"];
+		
+		//fragment our shape
+		NSArray *frags = [smgr fragmentShape:game.fragShapeNode.shape piecesNum:16 eachMass:1];
+		
+		//step over all pieces
+		for (NSValue *fVal in frags)
+		{
+			//retrieve the shape and attach it to a cocosnode
+			cpShape *fshape = [fVal pointerValue];
+			cpShapeNode *fnode = [cpShapeNode nodeWithShape:fshape];
+			fnode.color = ccORANGE;
+			[game addChild:fnode];
+		}
+		
+		//cleanup old shape
+		game.fragShapeNode.shape->data = NULL;
+		[game removeChild:game.fragShapeNode cleanup:YES];
+		game.fragShapeNode = nil;
+	}
+	
+	return 0;
+}
+
+static int handleCollisionWithRect(cpShape *a, cpShape *b, cpContact *contacts, int numContacts, cpFloat normal_coef, void *data)
+
+{
+	GameLayer *game = (GameLayer*)data;
+	[game.label setString:@"You hit the Rectangle!"];
+	//1 to accept collision, 0 to ignore it
+	return 1;
+}
+
+static int handleCollisionWithCircle(cpShape *a, cpShape *b, cpContact *contacts, int numContacts, cpFloat normal_coef, void *data)
+
+{
+	GameLayer *game = (GameLayer*)data;
+	[game.label setString:@"You hit the Circle!"];
+	return 1;
+}
+
+
+@interface GameLayer (PrivateMethods)
+- (void) setupExample;
+@end
 
 @implementation GameLayer
+
+@synthesize label;
+@synthesize smgr;
+@synthesize fragShapeNode;
 
 - (id) init
 {
@@ -68,7 +113,7 @@
 	[self addChild:ballSprite];
 	
 	//static shapes, STATIC_MASS is the key concept here
-	cpShape *staticCircle = [smgr addCircleAt:cpv(100,160) mass:STATIC_MASS radius:25];
+	cpShape *staticCircle = [smgr addCircleAt:cpv(100,60) mass:STATIC_MASS radius:25];
 	cpShape *staticRect = [smgr addRectAt:cpv(380,160) mass:STATIC_MASS width:50 height:50 rotation:0];
 	
 	//We need to assign a type for recognizing specific collisions
@@ -95,19 +140,12 @@
 	//  smgr.rehashStaticEveryStep = YES;
 	//
 	// Setting this would make the smgr recalculate all static shapes positions every step
-	sRectSprite.integrationDt = 1.0/55.0;
+	sRectSprite.integrationDt = 1.0/50.0;
 	sRectSprite.spaceManager = smgr;
 	
-	//set up collisions, notice differing signatures in selectors (it's ok!)
-	[smgr addCollisionCallbackBetweenType:kRectCollisionType 
-								otherType:kBallCollisionType 
-								   target:self 
-								 selector:@selector(handleCollisionWithRect:)];
-	
-	[smgr addCollisionCallbackBetweenType:kCircleCollisionType 
-								otherType:kBallCollisionType 
-								   target:self 
-								 selector:@selector(handleCollisionWithCircle:ball:contactPts:numContacts:normalCoef:)];
+	//set up collisions, chipmunk way because obj-c way is not reliable
+	cpSpaceAddCollisionPairFunc(smgr.space, kRectCollisionType, kBallCollisionType, &handleCollisionWithRect, self);
+	cpSpaceAddCollisionPairFunc(smgr.space, kCircleCollisionType, kBallCollisionType, &handleCollisionWithCircle, self);
 
 	//add a segment in for good measure
 	cpShape* seg = [smgr addSegmentAtWorldAnchor:cpv(100,260) toWorldAnchor:cpv(380,260) mass:STATIC_MASS radius:6];
@@ -161,7 +199,19 @@
 	[self addChild:jn2];
 	[self addChild:jn3];
 	[self addChild:jn4];
-
+	
+	
+	//NEW! Fragmenting Shapes... will fragment on collision
+	cpShape *fragShape = [smgr addRectAt:cpv(100, 180) mass:STATIC_MASS width:60 height:60 rotation:35];
+	//cpShape *fragShape = [smgr addCircleAt:cpv(100,180) mass:STATIC_MASS radius:30];
+	//cpShape *fragShape = [smgr addSegmentAt:cpv(100,180) fromLocalAnchor:cpv(-30,30) toLocalAnchor:cpv(30,-30) mass:STATIC_MASS radius:5];
+	fragShape->collision_type = kFragShapeCollisionType;
+	fragShapeNode = [cpShapeNode nodeWithShape:fragShape];
+	fragShapeNode.color = ccORANGE;
+	[self addChild:fragShapeNode];
+	
+	cpSpaceAddCollisionPairFunc(smgr.space, kFragShapeCollisionType, kBallCollisionType, &handleCollisionWithFragmentingRect, self);
+	
 	//start the manager!
 	[smgr start]; 	
 }
@@ -177,23 +227,6 @@
 	[ballSprite applyImpulse:ccpMult(forceVect, 1.2)];
 
 	return kEventHandled;
-}
-
-- (int) handleCollisionWithRect:(cpShape*)rect
-{
-	[label setString:@"You hit the Rectangle!"];
-	//1 to accept collision, 0 to ignore it
-	return 1;
-}
-
-- (int) handleCollisionWithCircle:(cpShape*)circle 
-							 ball:(cpShape*)ball 
-					   contactPts:(cpContact*)contacts 
-					  numContacts:(int)numContacts 
-					   normalCoef:(cpFloat)coef
-{
-	[label setString:@"You hit the Circle!"];
-	return 1;
 }
 
 @end
