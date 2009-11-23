@@ -111,6 +111,7 @@ static int handleCollisionWithCircle(cpShape *a, cpShape *b, cpContact *contacts
 	ball->collision_type = kBallCollisionType;
 	ballSprite = [cpSprite spriteWithShape:ball file:@"ball.png"];
 	[self addChild:ballSprite];
+	ballSprite.ignoreRotation = YES;
 	
 	//static shapes, STATIC_MASS is the key concept here
 	cpShape *staticCircle = [smgr addCircleAt:cpv(100,60) mass:STATIC_MASS radius:25];

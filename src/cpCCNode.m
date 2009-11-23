@@ -50,7 +50,7 @@
 	[super dealloc];
 }
 
--(void)setRotation:(float)rot
+-(BOOL)setRotation:(float)rot
 {	
 	if (!_ignoreRotation)
 	{	
@@ -58,6 +58,8 @@
 		if (_shape != nil)
 			cpBodySetAngle(_shape->body, -CC_DEGREES_TO_RADIANS(rot));
 	}
+	
+	return !_ignoreRotation;
 }
 
 -(void)setPosition:(cpVect)pos

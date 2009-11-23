@@ -75,7 +75,7 @@
 
 - (id) initWithShape:(cpShape*)s;
 
--(void)setRotation:(float)rot;
+-(BOOL)setRotation:(float)rot;
 -(void)setPosition:(cpVect)pos;
 
 -(void) applyImpulse:(cpVect)impulse;
@@ -113,8 +113,8 @@ if (shape)\
 }\
 -(void)setRotation:(float)rot\
 {\
-	[_implementation setRotation:rot];\
-	[super setRotation:rot];\
+	if([_implementation setRotation:rot])\
+		[super setRotation:rot];\
 }\
 -(void)setPosition:(cpVect)pos\
 {\
