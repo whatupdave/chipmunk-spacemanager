@@ -166,6 +166,9 @@ static void updateBBCache(cpShape *shape, void *unused)
 
 -(void) dealloc
 {	
+	if (_timer != nil)
+		[self stop];
+	
 	if (_space != nil)
 	{
 		cpSpaceFreeChildren(_space);

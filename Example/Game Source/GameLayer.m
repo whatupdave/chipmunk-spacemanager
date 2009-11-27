@@ -16,29 +16,14 @@
 static int handleCollisionWithFragmentingRect(cpShape *a, cpShape *b, cpContact *contacts, int numContacts, cpFloat normal_coef, void *data)
 {
 	GameLayer *game = (GameLayer*)data;
-	if (game.fragShapeNode)
-	{
-		SpaceManager *smgr = game.smgr;
-		[game.label setString:@"You hit the Fragmenting Rectangle!"];
-		
-		//fragment our shape
-		NSArray *frags = [smgr fragmentShape:game.fragShapeNode.shape piecesNum:16 eachMass:1];
-		
-		//step over all pieces
-		for (NSValue *fVal in frags)
-		{
-			//retrieve the shape and attach it to a cocosnode
-			cpShape *fshape = [fVal pointerValue];
-			cpShapeNode *fnode = [cpShapeNode nodeWithShape:fshape];
-			fnode.color = ccORANGE;
-			[game addChild:fnode];
-		}
-		
-		//cleanup old shape
-		game.fragShapeNode.shape->data = NULL;
-		[game removeChild:game.fragShapeNode cleanup:YES];
-		game.fragShapeNode = nil;
-	}
+	
+	// Its bad to add shapes on a collision.. schedule for later, cheesy
+	// Chipmunk is at this very moment correcting delayed adding/removal
+	// of shapes [on collisions] and it will fix this ugliness.
+	id action = [Sequence actions:
+				 [DelayTime actionWithDuration:.0001],
+				 [CallFunc actionWithTarget:game selector:@selector(doFragmentingAction)],nil];
+	[game runAction:action];
 	
 	return 0;
 }
@@ -63,13 +48,15 @@ static int handleCollisionWithCircle(cpShape *a, cpShape *b, cpContact *contacts
 
 @interface GameLayer (PrivateMethods)
 - (void) setupExample;
+- (void) setupStaticShapes;
+- (void) setupBallSlider;
+- (void) setupSawHorse;
+- (void) setupFragmentShape;
 @end
 
 @implementation GameLayer
 
 @synthesize label;
-@synthesize smgr;
-@synthesize fragShapeNode;
 
 - (id) init
 {
@@ -113,6 +100,23 @@ static int handleCollisionWithCircle(cpShape *a, cpShape *b, cpContact *contacts
 	[self addChild:ballSprite];
 	ballSprite.ignoreRotation = YES;
 	
+	//collisions will change label text
+	label = [Label labelWithString:@"" fontName:@"Helvetica" fontSize:20];
+	label.position = ccp(240,280);
+	[self addChild:label];
+	
+	//Experiment by commenting out these lines
+	[self setupStaticShapes];
+	[self setupBallSlider];
+	[self setupSawHorse];
+	[self setupFragmentShape];
+	
+	//start the manager!
+	[smgr start]; 	
+}
+
+- (void) setupStaticShapes
+{
 	//static shapes, STATIC_MASS is the key concept here
 	cpShape *staticCircle = [smgr addCircleAt:cpv(100,60) mass:STATIC_MASS radius:25];
 	cpShape *staticRect = [smgr addRectAt:cpv(380,160) mass:STATIC_MASS width:50 height:50 rotation:0];
@@ -147,19 +151,37 @@ static int handleCollisionWithCircle(cpShape *a, cpShape *b, cpContact *contacts
 	//set up collisions, chipmunk way because obj-c way is not reliable
 	cpSpaceAddCollisionPairFunc(smgr.space, kRectCollisionType, kBallCollisionType, &handleCollisionWithRect, self);
 	cpSpaceAddCollisionPairFunc(smgr.space, kCircleCollisionType, kBallCollisionType, &handleCollisionWithCircle, self);
-
+	
 	//add a segment in for good measure
 	cpShape* seg = [smgr addSegmentAtWorldAnchor:cpv(100,260) toWorldAnchor:cpv(380,260) mass:STATIC_MASS radius:6];
 	cpShapeNode *segn = [cpShapeNode nodeWithShape:seg];
 	segn.color = ccBLUE;
 	[self addChild:segn];
+}
+
+- (void) setupBallSlider
+{
+	//Our dangling rect on the slide joint
+	cpShape *weight = [smgr addRectAt:cpv(240,230) mass:2 width:10 height:60 rotation:0];
+	cpSprite *weightNode = [cpSprite spriteWithShape:weight file:@"rect.png"];
 	
-	//collisions will change label text
-	label = [Label labelWithString:@"" fontName:@"Helvetica" fontSize:20];
-	label.position = ccp(240,280);
-	[self addChild:label];
+	cpConstraint *joint = [smgr addSpringToBody:weight->body fromBody:ballSprite.shape->body toBodyAnchor:cpv(0,-30) fromBodyAnchor:cpv(0,0) restLength:0.0f stiffness:1.0f damping:0.0f];
+	cpConstraintNode *jointNode = [cpConstraintNode nodeWithConstraint:joint];
 	
-	//Set up two legs that'll form our teepee thing
+	cpConstraint *grooveJoint = [smgr addGrooveToBody:smgr.topWall->body fromBody:weight->body grooveAnchor1:cpv(80,250) grooveAnchor2:cpv(400, 250) fromBodyAnchor:cpv(0,50)];	
+	cpConstraintNode *grooveJointNode = [cpConstraintNode nodeWithConstraint:grooveJoint];
+	
+	jointNode.color = ccWHITE;
+	grooveJointNode.color = ccWHITE;
+
+	[self addChild:weightNode];
+	[self addChild:jointNode];
+	[self addChild:grooveJointNode];
+}
+
+- (void) setupSawHorse
+{	
+	//Set up two legs that'll form our sawhorse thing
 	cpShape *leg1 = [smgr addRectAt:cpv(220,80) mass:.5 width:10 height:60 rotation:CC_DEGREES_TO_RADIANS(-35.5)];
 	cpShape *leg2 = [smgr addRectAt:cpv(260,80) mass:.5 width:10 height:60 rotation:CC_DEGREES_TO_RADIANS(35.5)];
 	
@@ -169,39 +191,28 @@ static int handleCollisionWithCircle(cpShape *a, cpShape *b, cpContact *contacts
 	cpSprite *leg1s = [cpSprite spriteWithShape:leg1 file:@"rect.png"];
 	cpSprite *leg2s = [cpSprite spriteWithShape:leg2 file:@"rect.png"];
 
-	//Our dangling rect on the slide joint
-	cpShape *weight = [smgr addRectAt:cpv(240,230) mass:2 width:10 height:60 rotation:0];
-	cpSprite *weights = [cpSprite spriteWithShape:weight file:@"rect.png"];
-	
 	//Set up our joints
 	cpConstraint *joint1 = [smgr addPinToBody:leg1->body fromBody:leg2->body toBodyAnchor:cpv(5,30) fromBodyAnchor:cpv(-5,30)];
 	cpConstraint *joint2 = [smgr addSlideToBody:leg1->body fromBody:leg2->body minLength:30.0f maxLength:45.0f];	
-	cpConstraint *joint3 = [smgr addGrooveToBody:smgr.topWall->body fromBody:weight->body grooveAnchor1:cpv(80,250) grooveAnchor2:cpv(400, 250) fromBodyAnchor:cpv(0,50)];	
-	cpConstraint *joint4 = [smgr addSpringToBody:weight->body fromBody:ball->body toBodyAnchor:cpv(0,-30) fromBodyAnchor:cpv(0,0) restLength:0.0f stiffness:1.0f damping:0.0f];
 	
 	//Fun part, these babies will draw themselves depending on what joint type
 	cpConstraintNode *jn1 = [cpConstraintNode nodeWithConstraint:joint1];
 	cpConstraintNode *jn2 = [cpConstraintNode nodeWithConstraint:joint2];
-	cpConstraintNode *jn3 = [cpConstraintNode nodeWithConstraint:joint3];
-	cpConstraintNode *jn4 = [cpConstraintNode nodeWithConstraint:joint4];
 	
 	//make them white
 	jn1.color = ccWHITE;
 	jn2.color = ccWHITE;
-	jn3.color = ccWHITE;
-	jn4.color = ccWHITE;
 	
 	//Add all the CocosNodes
 	[self addChild:leg1s];
 	[self addChild:leg2s];
-	[self addChild:weights];
 	
 	[self addChild:jn1];
 	[self addChild:jn2];
-	[self addChild:jn3];
-	[self addChild:jn4];
-	
-	
+}	
+
+- (void) setupFragmentShape
+{
 	//NEW! Fragmenting Shapes... will fragment on collision
 	cpShape *fragShape = [smgr addRectAt:cpv(100, 180) mass:STATIC_MASS width:60 height:60 rotation:35];
 	//cpShape *fragShape = [smgr addCircleAt:cpv(100,180) mass:STATIC_MASS radius:30];
@@ -212,9 +223,32 @@ static int handleCollisionWithCircle(cpShape *a, cpShape *b, cpContact *contacts
 	[self addChild:fragShapeNode];
 	
 	cpSpaceAddCollisionPairFunc(smgr.space, kFragShapeCollisionType, kBallCollisionType, &handleCollisionWithFragmentingRect, self);
-	
-	//start the manager!
-	[smgr start]; 	
+}
+
+- (void) doFragmentingAction
+{
+	if (fragShapeNode)
+	{
+		[label setString:@"You hit the Fragmenting Shape!"];
+		
+		//fragment our shape
+		NSArray *frags = [smgr fragmentShape:fragShapeNode.shape piecesNum:16 eachMass:1];
+		
+		//step over all pieces
+		for (NSValue *fVal in frags)
+		{
+			//retrieve the shape and attach it to a cocosnode
+			cpShape *fshape = [fVal pointerValue];
+			cpShapeNode *fnode = [cpShapeNode nodeWithShape:fshape];
+			fnode.color = ccORANGE;
+			[self addChild:fnode];
+		}
+		
+		//cleanup old shape
+		fragShapeNode.shape->data = NULL;
+		[self removeChild:fragShapeNode cleanup:YES];
+		fragShapeNode = nil;
+	}
 }
 
 #pragma mark Touch Functions

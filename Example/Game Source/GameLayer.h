@@ -20,8 +20,8 @@
 }
 
 @property (readonly) Label *label;
-@property (readonly) SpaceManager *smgr;
-@property (readwrite,assign) cpShapeNode *fragShapeNode;
+
+- (void) doFragmentingAction;
 
 @end
 
