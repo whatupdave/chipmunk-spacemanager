@@ -292,8 +292,8 @@ void defaultEachShape(void *ptr, void* data);
 -(cpConstraint*) addRotaryLimitToBody:(cpBody*)toBody min:(cpFloat)min max:(cpFloat)max;
 
 /*! */
--(cpConstraint*) addRatchetToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody direction:(cpFloat)direction;
--(cpConstraint*) addRatchetToBody:(cpBody*)toBody direction:(cpFloat)direction;
+-(cpConstraint*) addRatchetToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody phase:(cpFloat)phase rachet:(cpFloat)ratchet;
+-(cpConstraint*) addRatchetToBody:(cpBody*)toBody phase:(cpFloat)phase rachet:(cpFloat)ratchet;
 
 /*! */
 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp;

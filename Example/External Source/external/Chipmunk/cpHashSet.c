@@ -34,26 +34,28 @@ cpHashSetDestroy(cpHashSet *set)
 		cpHashSetBin *bin = set->table[i];
 		while(bin){
 			cpHashSetBin *next = bin->next;
-			free(bin);
+			cpfree(bin);
 			bin = next;
 		}
 	}
 	
 	// Free the table.
-	free(set->table);
+	cpfree(set->table);
 }
 
 void
 cpHashSetFree(cpHashSet *set)
 {
-	if(set) cpHashSetDestroy(set);
-	free(set);
+	if(set){
+		cpHashSetDestroy(set);
+		cpfree(set);
+	}
 }
 
 cpHashSet *
 cpHashSetAlloc(void)
 {
-	return (cpHashSet *)calloc(1, sizeof(cpHashSet));
+	return (cpHashSet *)cpcalloc(1, sizeof(cpHashSet));
 }
 
 cpHashSet *
@@ -67,7 +69,7 @@ cpHashSetInit(cpHashSet *set, int size, cpHashSetEqlFunc eqlFunc, cpHashSetTrans
 	
 	set->default_value = NULL;
 	
-	set->table = (cpHashSetBin **)calloc(set->size, sizeof(cpHashSetBin *));
+	set->table = (cpHashSetBin **)cpcalloc(set->size, sizeof(cpHashSetBin *));
 	
 	return set;
 }
@@ -90,7 +92,7 @@ cpHashSetResize(cpHashSet *set)
 	// Get the next approximate doubled prime.
 	int newSize = next_prime(set->size + 1);
 	// Allocate a new table.
-	cpHashSetBin **newTable = (cpHashSetBin **)calloc(newSize, sizeof(cpHashSetBin *));
+	cpHashSetBin **newTable = (cpHashSetBin **)cpcalloc(newSize, sizeof(cpHashSetBin *));
 	
 	// Iterate over the chains.
 	for(int i=0; i<set->size; i++){
@@ -99,15 +101,15 @@ cpHashSetResize(cpHashSet *set)
 		while(bin){
 			cpHashSetBin *next = bin->next;
 			
-			int index = bin->hash%newSize;
-			bin->next = newTable[index];
-			newTable[index] = bin;
+			int idx = bin->hash%newSize;
+			bin->next = newTable[idx];
+			newTable[idx] = bin;
 			
 			bin = next;
 		}
 	}
 	
-	free(set->table);
+	cpfree(set->table);
 	
 	set->table = newTable;
 	set->size = newSize;
@@ -116,21 +118,21 @@ cpHashSetResize(cpHashSet *set)
 void *
 cpHashSetInsert(cpHashSet *set, cpHashValue hash, void *ptr, void *data)
 {
-	int index = hash%set->size;
+	int idx = hash%set->size;
 	
 	// Find the bin with the matching element.
-	cpHashSetBin *bin = set->table[index];
+	cpHashSetBin *bin = set->table[idx];
 	while(bin && !set->eql(ptr, bin->elt))
 		bin = bin->next;
 	
 	// Create it necessary.
 	if(!bin){
-		bin = (cpHashSetBin *)malloc(sizeof(cpHashSetBin));
+		bin = (cpHashSetBin *)cpmalloc(sizeof(cpHashSetBin));
 		bin->hash = hash;
 		bin->elt = set->trans(ptr, data); // Transform the pointer.
 		
-		bin->next = set->table[index];
-		set->table[index] = bin;
+		bin->next = set->table[idx];
+		set->table[idx] = bin;
 		
 		set->entries++;
 		
@@ -145,12 +147,12 @@ cpHashSetInsert(cpHashSet *set, cpHashValue hash, void *ptr, void *data)
 void *
 cpHashSetRemove(cpHashSet *set, cpHashValue hash, void *ptr)
 {
-	int index = hash%set->size;
+	int idx = hash%set->size;
 	
 	// Pointer to the previous bin pointer.
-	cpHashSetBin **prev_ptr = &set->table[index];
+	cpHashSetBin **prev_ptr = &set->table[idx];
 	// Pointer the the current bin.
-	cpHashSetBin *bin = set->table[index];
+	cpHashSetBin *bin = set->table[idx];
 	
 	// Find the bin
 	while(bin && !set->eql(ptr, bin->elt)){
@@ -167,7 +169,7 @@ cpHashSetRemove(cpHashSet *set, cpHashValue hash, void *ptr)
 		void *return_value = bin->elt;
 		
 //		*bin = (cpHashSetBin){};
-		free(bin);
+		cpfree(bin);
 		
 		return return_value;
 	}
@@ -178,8 +180,8 @@ cpHashSetRemove(cpHashSet *set, cpHashValue hash, void *ptr)
 void *
 cpHashSetFind(cpHashSet *set, cpHashValue hash, void *ptr)
 {	
-	int index = hash%set->size;
-	cpHashSetBin *bin = set->table[index];
+	int idx = hash%set->size;
+	cpHashSetBin *bin = set->table[idx];
 	while(bin && !set->eql(ptr, bin->elt))
 		bin = bin->next;
 		
@@ -200,7 +202,7 @@ cpHashSetEach(cpHashSet *set, cpHashSetIterFunc func, void *data)
 }
 
 void
-cpHashSetReject(cpHashSet *set, cpHashSetRejectFunc func, void *data)
+cpHashSetFilter(cpHashSet *set, cpHashSetFilterFunc func, void *data)
 {
 	// Iterate over all the chains.
 	for(int i=0; i<set->size; i++){
@@ -216,7 +218,7 @@ cpHashSetReject(cpHashSet *set, cpHashSetRejectFunc func, void *data)
 				(*prev_ptr) = next;
 
 				set->entries--;
-				free(bin);
+				cpfree(bin);
 			}
 			
 			bin = next;

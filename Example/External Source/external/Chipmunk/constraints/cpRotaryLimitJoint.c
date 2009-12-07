@@ -31,7 +31,7 @@ preStep(cpRotaryLimitJoint *joint, cpFloat dt, cpFloat dt_inv)
 	cpBody *b = joint->constraint.b;
 	
 	cpFloat dist = b->a - a->a;
-	cpFloat pdist = 0.0;
+	cpFloat pdist = 0.0f;
 	if(dist > joint->max) {
 		pdist = joint->max - dist;
 	} else if(dist < joint->min) {
@@ -99,7 +99,7 @@ CP_DefineClassGetter(cpRotaryLimitJoint)
 cpRotaryLimitJoint *
 cpRotaryLimitJointAlloc(void)
 {
-	return (cpRotaryLimitJoint *)malloc(sizeof(cpRotaryLimitJoint));
+	return (cpRotaryLimitJoint *)cpmalloc(sizeof(cpRotaryLimitJoint));
 }
 
 cpRotaryLimitJoint *

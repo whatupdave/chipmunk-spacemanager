@@ -20,6 +20,7 @@
  */
  
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "chipmunk.h"
 
@@ -31,10 +32,15 @@ extern "C" {
 }
 #endif
 
+char *cpVersionString = "5.0.0";
 
 void
 cpInitChipmunk(void)
 {
+#ifndef NDEBUG	
+	printf("Initializing Chipmunk v%s (Debug Enabled)\n", cpVersionString);
+#endif
+	
 	cpInitCollisionFuncs();
 }
 
@@ -56,7 +62,7 @@ cpMomentForSegment(cpFloat m, cpVect a, cpVect b)
 cpFloat
 cpMomentForPoly(cpFloat m, const int numVerts, cpVect *verts, cpVect offset)
 {
-	cpVect *tVerts = (cpVect *)calloc(numVerts, sizeof(cpVect));
+	cpVect *tVerts = (cpVect *)cpcalloc(numVerts, sizeof(cpVect));
 	for(int i=0; i<numVerts; i++)
 		tVerts[i] = cpvadd(verts[i], offset);
 	
@@ -73,6 +79,41 @@ cpMomentForPoly(cpFloat m, const int numVerts, cpVect *verts, cpVect offset)
 		sum2 += a;
 	}
 	
-	free(tVerts);
+	cpfree(tVerts);
 	return (m*sum1)/(6.0f*sum2);
 }
+
+// Create non static inlined copies of Chipmunk functions, useful for working with dynamic FFIs
+#define MAKE_REF(name) __typeof__(name) *_##name = name;
+MAKE_REF(cpv); // makes a variable named _cpv that contains the function pointer for cpv()
+MAKE_REF(cpvadd);
+MAKE_REF(cpvneg);
+MAKE_REF(cpvsub);
+MAKE_REF(cpvmult);
+MAKE_REF(cpvdot);
+MAKE_REF(cpvcross);
+MAKE_REF(cpvperp);
+MAKE_REF(cpvrperp);
+MAKE_REF(cpvproject);
+MAKE_REF(cpvrotate);
+MAKE_REF(cpvunrotate);
+MAKE_REF(cpvlengthsq);
+MAKE_REF(cpvlerp);
+MAKE_REF(cpvnormalize);
+MAKE_REF(cpvnormalize_safe);
+MAKE_REF(cpvclamp);
+MAKE_REF(cpvlerpconst);
+MAKE_REF(cpvdist);
+MAKE_REF(cpvnear);
+MAKE_REF(cpvdistsq);
+
+MAKE_REF(cpBBNew);
+MAKE_REF(cpBBintersects);
+MAKE_REF(cpBBcontainsBB);
+MAKE_REF(cpBBcontainsVect);
+MAKE_REF(cpBBmerge);
+MAKE_REF(cpBBexpand);
+
+MAKE_REF(cpBodyWorld2Local);
+MAKE_REF(cpBodyLocal2World);
+MAKE_REF(cpBodyApplyImpulse);

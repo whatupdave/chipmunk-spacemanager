@@ -60,16 +60,14 @@ static void eachShapeAsChildren(void *ptr, void* data)
 }
 #endif
 
-static int collHandleInvocations(cpShape *a, cpShape *b, cpContact *contacts, int numContacts, cpFloat normal_coef, void *data)
+static int collHandleInvocations(cpArbiter *arb, struct cpSpace *space, void *data)
 {
 	NSInvocation *invocation = (NSInvocation*)data;
 	
 	@try {
-		[invocation setArgument:&a atIndex:2];
-		[invocation setArgument:&b atIndex:3];
-		[invocation setArgument:&contacts atIndex:4];
-		[invocation setArgument:&numContacts atIndex:5];
-		[invocation setArgument:&normal_coef atIndex:6];
+		[invocation setArgument:&arb atIndex:2];
+		[invocation setArgument:&space atIndex:3];
+		[invocation setArgument:&data atIndex:4];
 	}
 	@catch (NSException *e) {
 		//No biggie, continue!
@@ -83,7 +81,7 @@ static int collHandleInvocations(cpShape *a, cpShape *b, cpContact *contacts, in
 	return retVal;
 }
 
-static int collIgnore(cpShape *a, cpShape *b, cpContact *contacts, int numContacts, cpFloat normal_coef, void *data)
+static int collIgnore(cpArbiter *arb, struct cpSpace *space, void *data)
 {
 	return 0;
 }
@@ -730,7 +728,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 			}
 		}
 		
-		[self scheduleToRemoveAndFreeShape:(cpShape*)poly];
+		[self removeAndFreeShape:(cpShape*)poly];
 	}
 	
 	return fragments;
@@ -766,7 +764,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 		a += radians;
 	}
 	
-	[self scheduleToRemoveAndFreeShape:(cpShape*)circle];
+	[self removeAndFreeShape:(cpShape*)circle];
 	
 	return fragments;
 }
@@ -791,7 +789,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 		pt = cpvadd(pt, dxdy);
 	}
 	
-	[self scheduleToRemoveAndFreeShape:(cpShape*)segment];
+	[self removeAndFreeShape:(cpShape*)segment];
 	
 	return fragments;	
 }
@@ -936,9 +934,10 @@ static void updateBBCache(cpShape *shape, void *unused)
 
 -(cpConstraint*) addBreakableToConstraint:(cpConstraint*)breakConstraint maxForce:(cpFloat)max
 {
-	cpConstraint *breakable = cpBreakableJointNew(breakConstraint, _space);
-	breakable->maxForce = max;
-	return cpSpaceAddConstraint(_space, breakable);
+	//cpConstraint *breakable = cpBreakableJointNew(breakConstraint, _space);
+	//breakable->maxForce = max;
+	//return cpSpaceAddConstraint(_space, breakable);
+	return NULL;
 }
 
 -(cpConstraint*) addRotaryLimitToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody min:(cpFloat)min max:(cpFloat)max
@@ -952,20 +951,21 @@ static void updateBBCache(cpShape *shape, void *unused)
 	return [self addRotaryLimitToBody:toBody fromBody:_staticBody min:min max:max];
 }
 
--(cpConstraint*) addRatchetToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody direction:(cpFloat)direction
+-(cpConstraint*) addRatchetToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody phase:(cpFloat)phase rachet:(cpFloat)ratchet
 {
-	cpConstraint *rachet = cpRatchetJointNew(toBody, fromBody, direction);
+	cpConstraint *rachet = cpRatchetJointNew(toBody, fromBody, phase, ratchet);
 	return cpSpaceAddConstraint(_space, rachet);
 }
 
--(cpConstraint*) addRatchetToBody:(cpBody*)toBody direction:(cpFloat)direction
+-(cpConstraint*) addRatchetToBody:(cpBody*)toBody phase:(cpFloat)phase rachet:(cpFloat)ratchet
 {
-	return [self addRatchetToBody:toBody fromBody:_staticBody direction:direction];
+	return [self addRatchetToBody:toBody fromBody:_staticBody phase:phase rachet:ratchet];
 }
 
 -(void) ignoreCollionBetweenType:(unsigned int)type1 otherType:(unsigned int)type2
 {
-	cpSpaceAddCollisionPairFunc(_space, type1, type2, &collIgnore, NULL);
+	cpSpaceAddCollisionHandler(_space, type1, type2, NULL, collIgnore, NULL, NULL, NULL);
+	//cpSpaceAddCollisionPairFunc(_space, type1, type2, &collIgnore, NULL);
 }
 
 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp
@@ -989,7 +989,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 	[invocation setSelector:selector];
 	
 	//add the callback to chipmunk
-	cpSpaceAddCollisionPairFunc(_space, type1, type2, &collHandleInvocations, invocation);
+	cpSpaceAddCollisionHandler(_space, type1, type2, NULL, collHandleInvocations, NULL, NULL, invocation);
 	
 	//we'll keep a ref so it won't disappear, prob could just retain and clear hash later
 	[_invocations addObject:invocation];
@@ -1000,7 +1000,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 	//Chipmunk hashes the invocation for us, we must pull it out
 	unsigned int ids[] = {type1, type2};
 	unsigned int hash = CP_HASH_PAIR(type1, type2);
-	cpCollPairFunc *pair = cpHashSetFind(_space->collFuncSet, hash, ids);
+	cpCollisionHandler *pair = cpHashSetFind(_space->collFuncSet, hash, ids);
 	
 	//delete the invocation, if there is one (invoke can be null)
 	if (pair != NULL)
@@ -1010,7 +1010,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 	}
 
 	//Remove the collision callback
-	cpCollPairFunc *old_pair = (cpCollPairFunc *)cpHashSetRemove(_space->collFuncSet, hash, ids);
+	cpCollisionHandler *old_pair = (cpCollisionHandler*)cpHashSetRemove(_space->collFuncSet, hash, ids);
 	free(old_pair);	
 }
 

@@ -15,13 +15,10 @@
 {
 	SpaceManager *smgr;
 	cpSprite *ballSprite;
-	cpShapeNode *fragShapeNode;
 	Label *label;
 }
 
 @property (readonly) Label *label;
-
-- (void) doFragmentingAction;
 
 @end
 

@@ -27,7 +27,7 @@
 cpBody*
 cpBodyAlloc(void)
 {
-	return (cpBody *)malloc(sizeof(cpBody));
+	return (cpBody *)cpmalloc(sizeof(cpBody));
 }
 
 cpBodyVelocityFunc cpBodyUpdateVelocityDefault = cpBodyUpdateVelocity;
@@ -70,8 +70,10 @@ void cpBodyDestroy(cpBody *body){}
 void
 cpBodyFree(cpBody *body)
 {
-	if(body) cpBodyDestroy(body);
-	free(body);
+	if(body){
+		cpBodyDestroy(body);
+		cpfree(body);
+	}
 }
 
 void
@@ -99,7 +101,7 @@ void
 cpBodySlew(cpBody *body, cpVect pos, cpFloat dt)
 {
 	cpVect delta = cpvsub(pos, body->p);
-	body->v = cpvmult(delta, 1.0/dt);
+	body->v = cpvmult(delta, 1.0f/dt);
 }
 
 void

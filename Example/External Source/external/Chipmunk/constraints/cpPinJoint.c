@@ -90,7 +90,7 @@ CP_DefineClassGetter(cpPinJoint);
 cpPinJoint *
 cpPinJointAlloc(void)
 {
-	return (cpPinJoint *)malloc(sizeof(cpPinJoint));
+	return (cpPinJoint *)cpmalloc(sizeof(cpPinJoint));
 }
 
 cpPinJoint *
@@ -105,7 +105,7 @@ cpPinJointInit(cpPinJoint *joint, cpBody *a, cpBody *b, cpVect anchr1, cpVect an
 	cpVect p2 = cpvadd(b->p, cpvrotate(anchr2, b->rot));
 	joint->dist = cpvlength(cpvsub(p2, p1));
 
-	joint->jnAcc = 0.0;
+	joint->jnAcc = 0.0f;
 	
 	return joint;
 }

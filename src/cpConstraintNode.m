@@ -24,7 +24,7 @@
 - (void) drawPivotJoint:(cpPivotJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b;
 - (void) drawGrooveJoint:(cpGrooveJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b;
 - (void) drawSpringJoint:(cpDampedSpring*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b;
-- (void) drawBreakableJoint:(cpBreakableJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b;
+//- (void) drawBreakableJoint:(cpBreakableJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b;
 - (void) drawMotorJoint:(cpSimpleMotor*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b;
 - (void) drawGearJoint:(cpGearJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b;
 
@@ -112,12 +112,12 @@
 		apt = cpBodyLocal2World(body_a, joint->grv_a);
 		bpt = cpBodyLocal2World(body_a, joint->grv_b);
 	}
-	else if(klass == cpBreakableJointGetClass())
-	{
+	//else if(klass == cpBreakableJointGetClass())
+	//{
 		//This works... but it uses the assumption that data is a cpConstraintNode
-		cpBreakableJoint *joint = (cpBreakableJoint*)constraint;
-		return [(cpConstraintNode*)joint->delegate->data containsPoint:pt padding:padding constraint:joint->delegate];
-	}
+		//cpBreakableJoint *joint = (cpBreakableJoint*)constraint;
+		//return [(cpConstraintNode*)joint->delegate->data containsPoint:pt padding:padding constraint:joint->delegate];
+	//}
 	else if (klass == cpSimpleMotorGetClass())
 	{
 		apt = bpt = body_a->p;
@@ -209,9 +209,9 @@
 		[self drawPivotJoint:(cpPivotJoint*)_constraint bodyA:body_a bodyB:body_b];
 	else if(klass == cpGrooveJointGetClass())
 		[self drawGrooveJoint:(cpGrooveJoint*)_constraint bodyA:body_a bodyB:body_b];
-	else if(klass == cpBreakableJointGetClass())
-	{
-	}
+	//else if(klass == cpBreakableJointGetClass())
+	//{
+	//}
 	else if (klass == cpSimpleMotorGetClass())
 		[self drawMotorJoint:(cpSimpleMotor*)_constraint bodyA:body_a bodyB:body_b];
 	else if (klass == cpGearJointGetClass())
@@ -374,10 +374,10 @@
 	free(array);
 }
 
-- (void) drawBreakableJoint:(cpBreakableJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
+/*- (void) drawBreakableJoint:(cpBreakableJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
 {
 	
-}
+}*/
 
 - (void) drawMotorJoint:(cpSimpleMotor*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
 {

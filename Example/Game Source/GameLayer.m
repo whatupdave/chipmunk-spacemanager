@@ -13,23 +13,39 @@
 #define kRectCollisionType		3
 #define kFragShapeCollisionType	4
 
-static int handleCollisionWithFragmentingRect(cpShape *a, cpShape *b, cpContact *contacts, int numContacts, cpFloat normal_coef, void *data)
+static int handleCollisionWithFragmentingRect(cpArbiter *arb, struct cpSpace *space, void *data)
 {
 	GameLayer *game = (GameLayer*)data;
-	
-	// Its bad to add shapes on a collision.. schedule for later, cheesy
-	// Chipmunk is at this very moment correcting delayed adding/removal
-	// of shapes [on collisions] and it will fix this ugliness.
-	id action = [Sequence actions:
-				 [DelayTime actionWithDuration:.0001],
-				 [CallFunc actionWithTarget:game selector:@selector(doFragmentingAction)],nil];
-	[game runAction:action];
-	
-	return 0;
+	[game.label setString:@"You hit the Fragmenting Shape!"];	
+	return 1;
 }
 
-static int handleCollisionWithRect(cpShape *a, cpShape *b, cpContact *contacts, int numContacts, cpFloat normal_coef, void *data)
+static void handleFragmentingAction(cpArbiter *arb, struct cpSpace *space, void *data)
+{
+	CP_ARBITER_GET_SHAPES(arb,a,b);
+	
+	GameLayer *game = (GameLayer*)data;
+	cpShapeNode *fragShapeNode = (cpShapeNode*)(a->data);
 
+	//fragment our shape
+	NSArray *frags = [fragShapeNode.spaceManager fragmentShape:fragShapeNode.shape piecesNum:16 eachMass:1];
+	fragShapeNode.shape = NULL;
+	
+	//step over all pieces
+	for (NSValue *fVal in frags)
+	{
+		//retrieve the shape and attach it to a cocosnode
+		cpShape *fshape = [fVal pointerValue];
+		cpShapeNode *fnode = [cpShapeNode nodeWithShape:fshape];
+		fnode.color = fragShapeNode.color;
+		[game addChild:fnode];
+	}
+	
+	//cleanup old shape
+	[game removeChild:fragShapeNode cleanup:YES];
+}
+
+static int handleCollisionWithRect(cpArbiter *arb, struct cpSpace *space, void *data)
 {
 	GameLayer *game = (GameLayer*)data;
 	[game.label setString:@"You hit the Rectangle!"];
@@ -37,8 +53,7 @@ static int handleCollisionWithRect(cpShape *a, cpShape *b, cpContact *contacts, 
 	return 1;
 }
 
-static int handleCollisionWithCircle(cpShape *a, cpShape *b, cpContact *contacts, int numContacts, cpFloat normal_coef, void *data)
-
+static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void *data)
 {
 	GameLayer *game = (GameLayer*)data;
 	[game.label setString:@"You hit the Circle!"];
@@ -149,8 +164,8 @@ static int handleCollisionWithCircle(cpShape *a, cpShape *b, cpContact *contacts
 	sRectSprite.spaceManager = smgr;
 	
 	//set up collisions, chipmunk way because obj-c way is not reliable
-	cpSpaceAddCollisionPairFunc(smgr.space, kRectCollisionType, kBallCollisionType, &handleCollisionWithRect, self);
-	cpSpaceAddCollisionPairFunc(smgr.space, kCircleCollisionType, kBallCollisionType, &handleCollisionWithCircle, self);
+	cpSpaceAddCollisionHandler(smgr.space, kRectCollisionType, kBallCollisionType, NULL, &handleCollisionWithRect, NULL, NULL, self);
+	cpSpaceAddCollisionHandler(smgr.space, kRectCollisionType, kBallCollisionType, NULL, &handleCollisionWithCircle, NULL, NULL, self);
 	
 	//add a segment in for good measure
 	cpShape* seg = [smgr addSegmentAtWorldAnchor:cpv(100,260) toWorldAnchor:cpv(380,260) mass:STATIC_MASS radius:6];
@@ -218,38 +233,20 @@ static int handleCollisionWithCircle(cpShape *a, cpShape *b, cpContact *contacts
 	//cpShape *fragShape = [smgr addCircleAt:cpv(100,180) mass:STATIC_MASS radius:30];
 	//cpShape *fragShape = [smgr addSegmentAt:cpv(100,180) fromLocalAnchor:cpv(-30,30) toLocalAnchor:cpv(30,-30) mass:STATIC_MASS radius:5];
 	fragShape->collision_type = kFragShapeCollisionType;
-	fragShapeNode = [cpShapeNode nodeWithShape:fragShape];
+	cpShapeNode *fragShapeNode = [cpShapeNode nodeWithShape:fragShape];
 	fragShapeNode.color = ccORANGE;
+	fragShapeNode.spaceManager = smgr;
 	[self addChild:fragShapeNode];
 	
-	cpSpaceAddCollisionPairFunc(smgr.space, kFragShapeCollisionType, kBallCollisionType, &handleCollisionWithFragmentingRect, self);
+	cpSpaceAddCollisionHandler(smgr.space, 
+							   kFragShapeCollisionType, kBallCollisionType, 
+							   NULL, 
+							   handleCollisionWithFragmentingRect, 
+							   NULL, 
+							   handleFragmentingAction, 
+							   self);
 }
 
-- (void) doFragmentingAction
-{
-	if (fragShapeNode)
-	{
-		[label setString:@"You hit the Fragmenting Shape!"];
-		
-		//fragment our shape
-		NSArray *frags = [smgr fragmentShape:fragShapeNode.shape piecesNum:16 eachMass:1];
-		
-		//step over all pieces
-		for (NSValue *fVal in frags)
-		{
-			//retrieve the shape and attach it to a cocosnode
-			cpShape *fshape = [fVal pointerValue];
-			cpShapeNode *fnode = [cpShapeNode nodeWithShape:fshape];
-			fnode.color = ccORANGE;
-			[self addChild:fnode];
-		}
-		
-		//cleanup old shape
-		fragShapeNode.shape->data = NULL;
-		[self removeChild:fragShapeNode cleanup:YES];
-		fragShapeNode = nil;
-	}
-}
 
 #pragma mark Touch Functions
 - (BOOL)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event

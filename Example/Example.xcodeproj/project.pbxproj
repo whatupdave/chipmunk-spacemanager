@@ -17,7 +17,6 @@
 		A63E697F101E006200468EA6 /* ball.png in Resources */ = {isa = PBXBuildFile; fileRef = A63E697E101E006200468EA6 /* ball.png */; };
 		A65371401028CC6200651DC9 /* chipmunk.c in Sources */ = {isa = PBXBuildFile; fileRef = A65371091028CC6200651DC9 /* chipmunk.c */; };
 		A65371411028CC6200651DC9 /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = A653710D1028CC6200651DC9 /* CMakeLists.txt */; };
-		A65371421028CC6200651DC9 /* cpBreakableJoint.c in Sources */ = {isa = PBXBuildFile; fileRef = A653710F1028CC6200651DC9 /* cpBreakableJoint.c */; };
 		A65371431028CC6200651DC9 /* cpConstraint.c in Sources */ = {isa = PBXBuildFile; fileRef = A65371111028CC6200651DC9 /* cpConstraint.c */; };
 		A65371441028CC6200651DC9 /* cpDampedRotarySpring.c in Sources */ = {isa = PBXBuildFile; fileRef = A65371131028CC6200651DC9 /* cpDampedRotarySpring.c */; };
 		A65371451028CC6200651DC9 /* cpDampedSpring.c in Sources */ = {isa = PBXBuildFile; fileRef = A65371151028CC6200651DC9 /* cpDampedSpring.c */; };
@@ -157,8 +156,6 @@
 		A653710B1028CC6200651DC9 /* chipmunk_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk_types.h; sourceTree = "<group>"; };
 		A653710C1028CC6200651DC9 /* chipmunk_unsafe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chipmunk_unsafe.h; sourceTree = "<group>"; };
 		A653710D1028CC6200651DC9 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
-		A653710F1028CC6200651DC9 /* cpBreakableJoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpBreakableJoint.c; sourceTree = "<group>"; };
-		A65371101028CC6200651DC9 /* cpBreakableJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpBreakableJoint.h; sourceTree = "<group>"; };
 		A65371111028CC6200651DC9 /* cpConstraint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpConstraint.c; sourceTree = "<group>"; };
 		A65371121028CC6200651DC9 /* cpConstraint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpConstraint.h; sourceTree = "<group>"; };
 		A65371131028CC6200651DC9 /* cpDampedRotarySpring.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpDampedRotarySpring.c; sourceTree = "<group>"; };
@@ -544,8 +541,6 @@
 		A653710E1028CC6200651DC9 /* constraints */ = {
 			isa = PBXGroup;
 			children = (
-				A653710F1028CC6200651DC9 /* cpBreakableJoint.c */,
-				A65371101028CC6200651DC9 /* cpBreakableJoint.h */,
 				A65371111028CC6200651DC9 /* cpConstraint.c */,
 				A65371121028CC6200651DC9 /* cpConstraint.h */,
 				A65371131028CC6200651DC9 /* cpDampedRotarySpring.c */,
@@ -837,7 +832,6 @@
 				99B89AFB0F9E6E6F0034B3BB /* main.m in Sources */,
 				C961DD6C0FB921F70097722B /* GameLayer.m in Sources */,
 				A65371401028CC6200651DC9 /* chipmunk.c in Sources */,
-				A65371421028CC6200651DC9 /* cpBreakableJoint.c in Sources */,
 				A65371431028CC6200651DC9 /* cpConstraint.c in Sources */,
 				A65371441028CC6200651DC9 /* cpDampedRotarySpring.c in Sources */,
 				A65371451028CC6200651DC9 /* cpDampedSpring.c in Sources */,

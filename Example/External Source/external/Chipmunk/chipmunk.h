@@ -47,8 +47,21 @@ cpfabs(cpFloat n)
 }
 
 static inline cpFloat
-cpfclamp(cpFloat f, cpFloat min, cpFloat max){
+cpfclamp(cpFloat f, cpFloat min, cpFloat max)
+{
 	return cpfmin(cpfmax(f, min), max);
+}
+
+static inline cpFloat
+cpflerp(cpFloat f1, cpFloat f2, cpFloat t)
+{
+	return f1*(1.0f - t) + f2*t;
+}
+
+static inline cpFloat
+cpflerpconst(cpFloat f1, cpFloat f2, cpFloat d)
+{
+	return f1 + cpfclamp(f2 - f1, -d, d);
 }
 
 #ifndef INFINITY
@@ -60,10 +73,21 @@ cpfclamp(cpFloat f, cpFloat min, cpFloat max){
 		};
 		static union MSVC_EVIL_FLOAT_HACK INFINITY_HACK = {{0x00, 0x00, 0x80, 0x7F}};
 		#define INFINITY (INFINITY_HACK.Value)
-	#else
+	#endif
+	
+	#ifdef __GNUC__
+		#define INFINITY (__builtin_inf())
+	#endif
+	
+	#ifndef INFINITY
 		#define INFINITY (1e1000)
 	#endif
 #endif
+
+#define cpmalloc malloc
+#define cpcalloc calloc
+#define cprealloc realloc
+#define cpfree free
 
 #include "cpVect.h"
 #include "cpBB.h"
@@ -85,6 +109,7 @@ cpfclamp(cpFloat f, cpFloat min, cpFloat max){
 #define CP_HASH_COEF (3344921057ul)
 #define CP_HASH_PAIR(A, B) ((cpHashValue)(A)*CP_HASH_COEF ^ (cpHashValue)(B)*CP_HASH_COEF)
 
+extern char *cpVersionString;
 void cpInitChipmunk(void);
 
 // Calculate the moment of inertia for a circle, r1 and r2 are the inner and outer diameters.
