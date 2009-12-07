@@ -242,8 +242,8 @@ static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void
 							   kFragShapeCollisionType, kBallCollisionType, 
 							   NULL, 
 							   handleCollisionWithFragmentingRect, 
-							   NULL, 
 							   handleFragmentingAction, 
+							   NULL, 
 							   self);
 }
 
