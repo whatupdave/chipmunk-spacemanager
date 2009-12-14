@@ -19,13 +19,13 @@
  * SOFTWARE.
  */
  
-//typedef struct cpVect{
-//	cpFloat x,y;
-//} cpVect;
-
+/*typedef struct cpVect{
+	cpFloat x,y;
+} cpVect;
+*/
 #import <CoreGraphics/CGGeometry.h>
 typedef CGPoint cpVect;
-
+ 
 static const cpVect cpvzero={0.0f,0.0f};
 
 static inline cpVect
