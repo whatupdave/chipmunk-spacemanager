@@ -80,7 +80,7 @@ static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void
 	isTouchEnabled = YES;
 	
 	//add a background
-	Sprite *background = [Sprite spriteWithFile:@"splash_developed_by.png"];
+	CCSprite *background = [CCSprite spriteWithFile:@"splash_developed_by.png"];
 	background.position = ccp(240,160);
 	[self addChild:background];
 	
@@ -116,7 +116,7 @@ static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void
 	ballSprite.ignoreRotation = YES;
 	
 	//collisions will change label text
-	label = [Label labelWithString:@"" fontName:@"Helvetica" fontSize:20];
+	label = [CCLabel labelWithString:@"" fontName:@"Helvetica" fontSize:20];
 	label.position = ccp(240,280);
 	[self addChild:label];
 	
@@ -149,9 +149,9 @@ static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void
 	[self addChild:sRectSprite];
 	
 	//Lets get our staticRect moving
-	[sRectSprite runAction:[RepeatForever actionWithAction:[Sequence actions:
-															[MoveBy actionWithDuration:2 position:ccp(60,0)],
-															[MoveBy actionWithDuration:2 position:ccp(-60,0)], nil]]];
+	[sRectSprite runAction:[CCRepeatForever actionWithAction:[CCSequence actions:
+															[CCMoveBy actionWithDuration:2 position:ccp(60,0)],
+															[CCMoveBy actionWithDuration:2 position:ccp(-60,0)], nil]]];
 	
 	// This will cause the rectangle to update it's velocity based on the movement we're giving it
 	// It's important to set the spacemanger here, as static shapes need to report when they've

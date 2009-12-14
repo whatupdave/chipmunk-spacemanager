@@ -17,7 +17,7 @@
 #import "chipmunk.h"
 #import "cpCCNode.h"
 
-@interface cpSprite : Sprite<cpCCNodeDelegate>
+@interface cpSprite : CCSprite<cpCCNodeDelegate>
 {
 	CPCCNODE_MEM_VARS;
 }

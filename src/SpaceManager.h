@@ -43,7 +43,7 @@ void defaultEachShape(void *ptr, void* data);
 	NSMutableArray	*_removedShapes;
 	NSMutableArray	*_invocations;
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
-	Timer			*_timer;
+	CCTimer			*_timer;
 #endif
 	
 	/* Helpful Shapes/Bodies */

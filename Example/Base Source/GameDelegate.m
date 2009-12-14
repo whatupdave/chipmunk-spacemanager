@@ -33,19 +33,19 @@
 	[window setUserInteractionEnabled:YES];
 	[window setMultipleTouchEnabled:YES];
 
-	[Director useFastDirector];
-	[[Director sharedDirector] setDeviceOrientation:CCDeviceOrientationLandscapeLeft];
-	[[Director sharedDirector] setDisplayFPS:YES];
+	[CCDirector setDirectorType:CCDirectorTypeThreadMainLoop];
+	[[CCDirector sharedDirector] setDeviceOrientation:CCDeviceOrientationLandscapeLeft];
+	[[CCDirector sharedDirector] setDisplayFPS:YES];
 
-	[[Director sharedDirector] attachInWindow:window];	
+	[[CCDirector sharedDirector] attachInWindow:window];	
 	
 	[window makeKeyAndVisible];
 
-	Scene *game = [Scene node];
+	CCScene *game = [CCScene node];
 	GameLayer *layer = [GameLayer node];
 	[game addChild:layer];
 	
-	[[Director sharedDirector] runWithScene:game];
+	[[CCDirector sharedDirector] runWithScene:game];
 }
 
 - (void)applicationWillTerminate:(UIApplication*)application
@@ -61,19 +61,19 @@
 
 -(void) applicationWillResignActive:(UIApplication *)application
 {
-	[[Director sharedDirector] pause];
+	[[CCDirector sharedDirector] pause];
 }
 
 
 -(void) applicationDidBecomeActive:(UIApplication *)application
 {
-	[[Director sharedDirector] resume];
+	[[CCDirector sharedDirector] resume];
 }
 
 
 - (void)applicationDidReceiveMemoryWarning:(UIApplication *)application
 {
-	[[TextureMgr sharedTextureMgr] removeAllTextures];
+	[[CCTextureCache sharedTextureCache] removeAllTextures];
 }
 
 

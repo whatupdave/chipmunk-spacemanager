@@ -20,7 +20,7 @@ void defaultEachShape(void *ptr, void* data)
 	cpShape *shape = (cpShape*) ptr;
 
 #ifdef _SPACE_MANAGER_FOR_COCOS2D	
-	CocosNode *node = shape->data;
+	CCNode *node = shape->data;
 	if(node) 
 	{
 		cpBody *body = shape->body;
@@ -36,11 +36,11 @@ static void eachShapeAsChildren(void *ptr, void* data)
 {
 	cpShape *shape = (cpShape*) ptr;
 	
-	CocosNode *node = shape->data;
+	CCNode *node = shape->data;
 	if(node) 
 	{
 		cpBody *body = shape->body;
-		CocosNode *parent = node.parent;
+		CCNode *parent = node.parent;
 		if (parent)
 		{
 			[node setPosition:[node.parent convertToNodeSpace:body->p]];
@@ -289,8 +289,8 @@ static void updateBBCache(cpShape *shape, void *unused)
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
 -(void) start:(ccTime)dt
 {
-	_timer = [Timer timerWithTarget:self selector:@selector(step:) interval:dt];
-	[[Scheduler sharedScheduler] scheduleTimer:_timer];
+	_timer = [CCTimer timerWithTarget:self selector:@selector(step:) interval:dt];
+	[[CCScheduler sharedScheduler] scheduleTimer:_timer];
 }
 
 -(void) start
@@ -300,13 +300,13 @@ static void updateBBCache(cpShape *shape, void *unused)
 
 -(void) stop
 {
-	[[Scheduler sharedScheduler] unscheduleTimer:_timer];
+	[[CCScheduler sharedScheduler] unscheduleTimer:_timer];
 	_timer = nil;
 }
 
 -(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset
 {
-	CGSize  wins = [[Director sharedDirector] winSize];
+	CGSize  wins = [[CCDirector sharedDirector] winSize];
 	
 	// bottom
 	bottomWall = cpSegmentShapeNew(_staticBody, cpv(inset.x,inset.y), cpv(wins.width-inset.x,inset.y), 1.0f);

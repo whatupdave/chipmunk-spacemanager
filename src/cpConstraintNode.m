@@ -15,7 +15,7 @@
 
 #import <OpenGLES/ES1/gl.h>
 #import "cpConstraintNode.h"
-#import "DrawingPrimitives.h"
+#import "CCDrawingPrimitives.h"
 
 
 @interface cpConstraintNode(PrivateMethods)
@@ -381,7 +381,7 @@
 
 - (void) drawMotorJoint:(cpSimpleMotor*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
 {
-	drawCircle(body_a->p, 4.0, 0, 12, NO);
+	ccDrawCircle(body_a->p, 4.0, 0, 12, NO);
 	//drawCircle(body_b->p, 4.0, 0, 12, NO);
 }
 
@@ -392,8 +392,8 @@
 	cpFloat radius1 = fabs(5.0 / ratio);
 	cpFloat radius2 = fabs(5.0 * ratio);
 	
-	drawCircle(body_a->p, radius1, 0, radius1*2+3, NO);
-	drawCircle(body_b->p, radius2, 0, radius2*2+3, NO);
+	ccDrawCircle(body_a->p, radius1, 0, radius1*2+3, NO);
+	ccDrawCircle(body_b->p, radius2, 0, radius2*2+3, NO);
 	
 	cpVect a = cpv(0,radius1);
 	cpVect b = cpv(0,radius2);

@@ -17,7 +17,7 @@
 #import "chipmunk.h"
 #import "SpaceManager.h"
 
-@interface cpConstraintNode : CocosNode <CocosNodeRGBA>
+@interface cpConstraintNode : CCNode <CCRGBAProtocol>
 {
 	cpConstraint *_constraint;
 	

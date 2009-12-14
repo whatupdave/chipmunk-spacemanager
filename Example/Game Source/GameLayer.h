@@ -11,14 +11,14 @@
 #import "cpShapeNode.h"
 
 #pragma mark GameLayer Class
-@interface GameLayer : Layer
+@interface GameLayer : CCLayer
 {
 	SpaceManager *smgr;
 	cpSprite *ballSprite;
-	Label *label;
+	CCLabel *label;
 }
 
-@property (readonly) Label *label;
+@property (readonly) CCLabel *label;
 
 @end
 

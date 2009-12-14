@@ -14,7 +14,7 @@
  **********************************************************************/
 
 #import "cpShapeNode.h"
-#import "DrawingPrimitives.h"
+#import "CCDrawingPrimitives.h"
 
 
 @interface cpShapeNode (PrivateMethods)

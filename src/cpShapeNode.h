@@ -18,7 +18,7 @@
 #import "cpCCNode.h"
 
 
-@interface cpShapeNode : CocosNode <CocosNodeRGBA, cpCCNodeDelegate>
+@interface cpShapeNode : CCNode <CCRGBAProtocol, cpCCNodeDelegate>
 {
 @protected	
 	ccColor3B _color;

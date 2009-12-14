@@ -65,6 +65,7 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 
 #import "EAGLView.h"
 #import "OpenGL_Internal.h"
+#import "ccMacros.h"
 
 //CLASS IMPLEMENTATIONS:
 
@@ -197,6 +198,8 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 
 - (void) dealloc
 {
+	CCLOG(@"cocos2d: deallocing %@", self);
+
 	[self _destroySurface];
 	
 	[_context release];
@@ -211,14 +214,12 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 	
 	if(_autoresize && ((roundf(bounds.size.width) != _size.width) || (roundf(bounds.size.height) != _size.height))) {
 		[self _destroySurface];
-#if __DEBUG__
-		REPORT_ERROR(@"Resizing surface from %fx%f to %fx%f", _size.width, _size.height, roundf(bounds.size.width), roundf(bounds.size.height));
-#endif
+		CCLOG(@"cocos2d: Resizing surface from %fx%f to %fx%f", _size.width, _size.height, roundf(bounds.size.width), roundf(bounds.size.height));
 		[self _createSurface];
 	}
 }
 
-- (void) setAutoresizesEAGLSurface:(BOOL)autoresizesEAGLSurface;
+- (void) setAutoresizesEAGLSurface:(BOOL)autoresizesEAGLSurface
 {
 	_autoresize = autoresizesEAGLSurface;
 	if(_autoresize)
@@ -228,7 +229,7 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 - (void) setCurrentContext
 {
 	if(![EAGLContext setCurrentContext:_context]) {
-		printf("Failed to set current context %p in %s\n", _context, __FUNCTION__);
+		CCLOG(@"cocos2d: Failed to set current context %p in %s\n", _context, __FUNCTION__);
 	}
 }
 
@@ -240,7 +241,7 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 - (void) clearCurrentContext
 {
 	if(![EAGLContext setCurrentContext:nil])
-		printf("Failed to clear current context in %s\n", __FUNCTION__);
+		CCLOG(@"cocos2d: Failed to clear current context in %s\n", __FUNCTION__);
 }
 
 - (void) swapBuffers
@@ -251,7 +252,7 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 	if(oldContext != _context)
 		[EAGLContext setCurrentContext:_context];
 
-#if DEBUG
+#if COCOS2D_DEBUG
 	CHECK_GL_ERROR();
 #endif
 	
@@ -260,7 +261,7 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 	//glBindRenderbufferOES(GL_RENDERBUFFER_OES, _framebuffer);
 	
 	if(![_context presentRenderbuffer:GL_RENDERBUFFER_OES])
-		printf("Failed to swap renderbuffer in %s\n", __FUNCTION__);
+		CCLOG(@"cocos2d: Failed to swap renderbuffer in %s\n", __FUNCTION__);
 
 	if(oldContext != _context)
 		[EAGLContext setCurrentContext:oldContext];
