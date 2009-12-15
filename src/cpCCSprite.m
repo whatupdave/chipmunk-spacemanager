@@ -13,10 +13,10 @@
  *
  **********************************************************************/
 
-#import "cpSprite.h"
+#import "cpCCSprite.h"
 
 
-@implementation cpSprite
+@implementation cpCCSprite
 
 + (id) spriteWithShape:(cpShape*)shape file:(NSString*) filename
 {
@@ -28,9 +28,6 @@
 	[super initWithFile:filename];
 	
 	CPCCNODE_MEM_VARS_INIT(shape)
-	
-	[self setPosition:shape->body->p];
-	[self setRotation:CC_RADIANS_TO_DEGREES(-shape->body->a)];
 	
 	return self;
 }

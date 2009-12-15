@@ -108,6 +108,7 @@
 		A66F2AE4106337A100BA0DB3 /* fps_images.png in Resources */ = {isa = PBXBuildFile; fileRef = A66F2AE3106337A100BA0DB3 /* fps_images.png */; };
 		A6727B63101F3EC500557968 /* staticcircle.png in Resources */ = {isa = PBXBuildFile; fileRef = A6727B61101F3EC500557968 /* staticcircle.png */; };
 		A6727B64101F3EC500557968 /* staticrect.png in Resources */ = {isa = PBXBuildFile; fileRef = A6727B62101F3EC500557968 /* staticrect.png */; };
+		A687E33F10D736A500163E9A /* cpCCNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A687E33E10D736A500163E9A /* cpCCNode.m */; };
 		A698F19B1062702B00BFB454 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A698F19A1062702B00BFB454 /* libz.dylib */; };
 		A698F1C71062707B00BFB454 /* ANNOUNCE in Resources */ = {isa = PBXBuildFile; fileRef = A698F1AD1062707B00BFB454 /* ANNOUNCE */; };
 		A698F1C81062707B00BFB454 /* CHANGES in Resources */ = {isa = PBXBuildFile; fileRef = A698F1AE1062707B00BFB454 /* CHANGES */; };
@@ -134,9 +135,9 @@
 		A698F1DE1062707B00BFB454 /* TODO in Resources */ = {isa = PBXBuildFile; fileRef = A698F1C61062707B00BFB454 /* TODO */; };
 		A698F27C1062C85500BFB454 /* cpConstraintNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A698F2721062C85500BFB454 /* cpConstraintNode.m */; };
 		A698F27D1062C85500BFB454 /* cpShapeNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A698F2741062C85500BFB454 /* cpShapeNode.m */; };
-		A698F27E1062C85500BFB454 /* cpSprite.m in Sources */ = {isa = PBXBuildFile; fileRef = A698F2761062C85500BFB454 /* cpSprite.m */; };
+		A698F27E1062C85500BFB454 /* cpCCSprite.m in Sources */ = {isa = PBXBuildFile; fileRef = A698F2761062C85500BFB454 /* cpCCSprite.m */; };
 		A698F2801062C85500BFB454 /* SpaceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A698F27A1062C85500BFB454 /* SpaceManager.m */; };
-		A6A9BB501063C66200213DA8 /* cpCCNode.m in Sources */ = {isa = PBXBuildFile; fileRef = A6A9BB4F1063C66200213DA8 /* cpCCNode.m */; };
+		A6A9BB501063C66200213DA8 /* cpCCNodeImpl.m in Sources */ = {isa = PBXBuildFile; fileRef = A6A9BB4F1063C66200213DA8 /* cpCCNodeImpl.m */; };
 		A6AB8DBA10291373002785F7 /* rect.png in Resources */ = {isa = PBXBuildFile; fileRef = A6AB8DB910291373002785F7 /* rect.png */; };
 		B2D7CA2F0ECEC52D00721DAB /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2D7CA2E0ECEC52D00721DAB /* OpenGLES.framework */; };
 		B2D7CA310ECEC52D00721DAB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2D7CA300ECEC52D00721DAB /* QuartzCore.framework */; };
@@ -354,6 +355,8 @@
 		A66F2AE3106337A100BA0DB3 /* fps_images.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fps_images.png; sourceTree = "<group>"; };
 		A6727B61101F3EC500557968 /* staticcircle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = staticcircle.png; sourceTree = "<group>"; };
 		A6727B62101F3EC500557968 /* staticrect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = staticrect.png; sourceTree = "<group>"; };
+		A687E33D10D736A500163E9A /* cpCCNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpCCNode.h; sourceTree = "<group>"; };
+		A687E33E10D736A500163E9A /* cpCCNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cpCCNode.m; sourceTree = "<group>"; };
 		A698F19A1062702B00BFB454 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		A698F1AD1062707B00BFB454 /* ANNOUNCE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ANNOUNCE; sourceTree = "<group>"; };
 		A698F1AE1062707B00BFB454 /* CHANGES */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CHANGES; sourceTree = "<group>"; };
@@ -384,12 +387,12 @@
 		A698F2721062C85500BFB454 /* cpConstraintNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cpConstraintNode.m; sourceTree = "<group>"; };
 		A698F2731062C85500BFB454 /* cpShapeNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpShapeNode.h; sourceTree = "<group>"; };
 		A698F2741062C85500BFB454 /* cpShapeNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cpShapeNode.m; sourceTree = "<group>"; };
-		A698F2751062C85500BFB454 /* cpSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpSprite.h; sourceTree = "<group>"; };
-		A698F2761062C85500BFB454 /* cpSprite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cpSprite.m; sourceTree = "<group>"; };
+		A698F2751062C85500BFB454 /* cpCCSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpCCSprite.h; sourceTree = "<group>"; };
+		A698F2761062C85500BFB454 /* cpCCSprite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cpCCSprite.m; sourceTree = "<group>"; };
 		A698F2791062C85500BFB454 /* SpaceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpaceManager.h; sourceTree = "<group>"; };
 		A698F27A1062C85500BFB454 /* SpaceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpaceManager.m; sourceTree = "<group>"; };
-		A6A9BB4E1063C66200213DA8 /* cpCCNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpCCNode.h; sourceTree = "<group>"; };
-		A6A9BB4F1063C66200213DA8 /* cpCCNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cpCCNode.m; sourceTree = "<group>"; };
+		A6A9BB4E1063C66200213DA8 /* cpCCNodeImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpCCNodeImpl.h; sourceTree = "<group>"; };
+		A6A9BB4F1063C66200213DA8 /* cpCCNodeImpl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = cpCCNodeImpl.m; sourceTree = "<group>"; };
 		A6AB8DB910291373002785F7 /* rect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rect.png; sourceTree = "<group>"; };
 		B2D7CA2E0ECEC52D00721DAB /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		B2D7CA300ECEC52D00721DAB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -802,16 +805,18 @@
 		A698F26E1062C85500BFB454 /* Space Manager Src */ = {
 			isa = PBXGroup;
 			children = (
+				A687E33D10D736A500163E9A /* cpCCNode.h */,
+				A687E33E10D736A500163E9A /* cpCCNode.m */,
 				A698F2711062C85500BFB454 /* cpConstraintNode.h */,
 				A698F2721062C85500BFB454 /* cpConstraintNode.m */,
 				A698F2731062C85500BFB454 /* cpShapeNode.h */,
 				A698F2741062C85500BFB454 /* cpShapeNode.m */,
-				A698F2751062C85500BFB454 /* cpSprite.h */,
-				A698F2761062C85500BFB454 /* cpSprite.m */,
+				A698F2751062C85500BFB454 /* cpCCSprite.h */,
+				A698F2761062C85500BFB454 /* cpCCSprite.m */,
 				A698F2791062C85500BFB454 /* SpaceManager.h */,
 				A698F27A1062C85500BFB454 /* SpaceManager.m */,
-				A6A9BB4E1063C66200213DA8 /* cpCCNode.h */,
-				A6A9BB4F1063C66200213DA8 /* cpCCNode.m */,
+				A6A9BB4E1063C66200213DA8 /* cpCCNodeImpl.h */,
+				A6A9BB4F1063C66200213DA8 /* cpCCNodeImpl.m */,
 			);
 			name = "Space Manager Src";
 			path = ../src;
@@ -929,9 +934,9 @@
 				A698F1DC1062707B00BFB454 /* pngwutil.c in Sources */,
 				A698F27C1062C85500BFB454 /* cpConstraintNode.m in Sources */,
 				A698F27D1062C85500BFB454 /* cpShapeNode.m in Sources */,
-				A698F27E1062C85500BFB454 /* cpSprite.m in Sources */,
+				A698F27E1062C85500BFB454 /* cpCCSprite.m in Sources */,
 				A698F2801062C85500BFB454 /* SpaceManager.m in Sources */,
-				A6A9BB501063C66200213DA8 /* cpCCNode.m in Sources */,
+				A6A9BB501063C66200213DA8 /* cpCCNodeImpl.m in Sources */,
 				A64BD3DF10D5F3C10090526C /* CCAction.m in Sources */,
 				A64BD3E010D5F3C10090526C /* CCActionManager.m in Sources */,
 				A64BD3E110D5F3C10090526C /* CCAtlasNode.m in Sources */,
@@ -997,6 +1002,7 @@
 				A64BD44410D5F5B60090526C /* FontManager.m in Sources */,
 				A64BD44510D5F5B60090526C /* ZAttributedString.m in Sources */,
 				A64BD44610D5F5B60090526C /* ZFont.m in Sources */,
+				A687E33F10D736A500163E9A /* cpCCNode.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

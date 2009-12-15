@@ -17,7 +17,7 @@
 #import "chipmunk.h"
 #import "cpCCNode.h"
 
-@interface cpSprite : CCSprite<cpCCNodeDelegate>
+@interface cpCCSprite : CCSprite<cpCCNodeProtocol>
 {
 	CPCCNODE_MEM_VARS;
 }
@@ -45,11 +45,17 @@
 /*! Apply a constant force to our shape's body */
 -(void) applyForce:(cpVect)force;
 
+/*! Reset any forces accrued on this shape's body */
+-(void) resetForces;
+
 /*! Return an autoreleased cpSprite */
 + (id) spriteWithShape:(cpShape*)shape file:(NSString*) filename;
 
 /*! Initialization method */
 - (id) initWithShape:(cpShape*)shape file:(NSString*) filename;
 
-
 @end
+
+#if CC_COMPATIBILITY_WITH_0_8
+typedef cpCCSprite cpSprite;
+#endif

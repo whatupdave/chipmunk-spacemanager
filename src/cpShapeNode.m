@@ -1,7 +1,5 @@
 /*********************************************************************
  *	
- *	cpShapeNode
- *
  *	cpShapeNode.m
  *
  *	Provide Drawing for Shapes
@@ -51,9 +49,6 @@
 	_fillShape = YES;
 	_drawDecoration = YES;
 	CPCCNODE_MEM_VARS_INIT(shape)
-	
-	[self setPosition:shape->body->p];
-	[self setRotation:CC_RADIANS_TO_DEGREES(-shape->body->a)];
 	
 	return self;
 }

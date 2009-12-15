@@ -2,10 +2,6 @@
  *	
  *	cpCCNode.h
  *
- *	Example
- *
- *	Manage the space for the application
- *
  *	http://www.mobile-bros.com
  *
  *	Created by Robert Blackwood on 02/22/2009.
@@ -16,161 +12,49 @@
 #import "chipmunk.h"
 #import "cocos2d.h"
 #import "SpaceManager.h"
+#import "cpCCNodeImpl.h"
 
-/*****
- Unfortunately we can't use multiple inheritance so we must
- use a pattern similar to strategy or envelope/letter, basically
- we've just added an instance of cpCCNode to whatever class
- we wish its functionality to be in. Then we create the same
- interface functions/properties and have then delegate to 
- our instance of cpCCNode, macros are defined below to help
- with this.
- 
- -rkb
- *****/
- 
+//If you include this file you also get these
+#import "cpCCSprite.h"
+#import "cpShapeNode.h"
+#import "cpConstraintNode.h"
 
-/*! Our protocol that our CocosNode objects follow, these include:
-	-cpSprite
-	-cpShapeNode
-	-cpAtlasSprite
- */
-@protocol cpCCNodeDelegate<NSObject>
-@optional
--(void) setShape:(cpShape*)shape;
--(cpShape*) shape;
--(void) setIntegrationDt:(cpFloat)dt;
--(cpFloat) integrationDt;
--(void) setSpaceManager:(SpaceManager*)spaceManager;
--(SpaceManager*) spaceManager;
--(void) setAutoFreeShape:(BOOL)autofree;
--(BOOL) autoFreeShape;
-
--(void) applyImpulse:(cpVect)impulse;
--(void) applyForce:(cpVect)force;
--(void) resetForces;
-@end
-
-/*! Since we can not extend functionality from multiple
-	class definitions, any class wishing to include this
-	functionality must serve as a proxy and forward requests
-	to a (member) object of this type, there are macros in this
-	file aimed at helping achieve this
- */
-@interface cpCCNode : NSObject {
-
-@protected
-	cpShape*		_shape;
-	SpaceManager*	_spaceManager;
-	BOOL			_ignoreRotation;
-	BOOL		_autoFreeShape;
-	cpFloat		_integrationDt;	
+@interface cpCCNode : CCNode<cpCCNodeProtocol>
+{
+	CPCCNODE_MEM_VARS;
 }
 
+/*! Use if you do not want the sprite to rotate with the shape */
 @property (readwrite,assign) BOOL ignoreRotation;
-@property (readwrite,assign) BOOL autoFreeShape;
+
+/*! If this is anything other than zero, a position change will update the
+ shapes velocity using integrationDt to calculate it */
 @property (readwrite,assign) cpFloat integrationDt;
+
+/*! If this is set to true & spaceManager is set, then the shape
+ is deleted when dealloc is called */
+@property (readwrite,assign) BOOL autoFreeShape;
+
+/*! The shape we're connected to */
 @property (readwrite,assign) cpShape *shape;
+
+/*! The space manager, set this if you want autoFreeShape to work */
 @property (readwrite,assign) SpaceManager *spaceManager;
 
-- (id) initWithShape:(cpShape*)s;
-
--(BOOL)setRotation:(float)rot;
--(void)setPosition:(cpVect)pos;
-
+/*! Apply an impulse (think gun shot) to our shape's body */
 -(void) applyImpulse:(cpVect)impulse;
+
+/*! Apply a constant force to our shape's body */
 -(void) applyForce:(cpVect)force;
+
+/*! Reset any forces accrued on this shape's body */
 -(void) resetForces;
+
+/*! perform a self alloc with the given shape */
++ (id) nodeWithShape:(cpShape*)shape;
+
+/*! init with the given shape */
+- (id) initWithShape:(cpShape*)shape;
 
 @end
 
-/* Macros for attempt at multiple inheritance */
-#define CPCCNODE_MEM_VARS cpCCNode *_implementation;
-
-//create our instance
-#define CPCCNODE_MEM_VARS_INIT(shape)	\
-_implementation = [[cpCCNode alloc] initWithShape:shape];\
-if (shape)\
-	shape->data = self;
-
-//Not using this one; it screws up documentation
-#define CPCCNODE_FUNC_DECLARE	\
-@property (readwrite,assign) BOOL ignoreRotation;\
-@property (readwrite,assign) cpFloat integrationDt;\
-@property (readwrite,assign) BOOL autoFreeShape;\
-@property (readwrite,assign) cpShape *shape;\
-@property (readwrite,assign) SpaceManager *spaceManager;\
--(void) applyImpulse:(cpVect)impulse;\
--(void) applyForce:(cpVect)force;\
--(void) resetForces;
-
-//The interface definitions
-#define CPCCNODE_FUNC_SRC	\
-- (void) dealloc\
-{\
-	[_implementation release];\
-	[super dealloc];\
-}\
--(void)setRotation:(float)rot\
-{\
-	if([_implementation setRotation:rot])\
-		[super setRotation:rot];\
-}\
--(void)setPosition:(cpVect)pos\
-{\
-	[_implementation setPosition:pos];\
-	[super setPosition:pos];\
-}\
--(void) applyImpulse:(cpVect)impulse\
-{\
-	[_implementation applyImpulse:impulse];\
-}\
--(void) applyForce:(cpVect)force\
-{\
-	[_implementation applyForce:force];\
-}\
-\
--(void) resetForces\
-{\
-	[_implementation resetForces];\
-}\
--(void) setIgnoreRotation:(BOOL)ignore\
-{\
-	_implementation.ignoreRotation = ignore;\
-}\
--(BOOL) ignoreRotation\
-{\
-	return _implementation.ignoreRotation;\
-}\
--(void) setIntegrationDt:(cpFloat)dt\
-{\
-	_implementation.integrationDt = dt;\
-}\
--(cpFloat) integrationDt\
-{\
-	return _implementation.integrationDt;\
-}\
--(void) setShape:(cpShape*)shape\
-{\
-	_implementation.shape = shape;\
-}\
--(cpShape*) shape\
-{\
-	return _implementation.shape;\
-}\
--(void) setSpaceManager:(SpaceManager*)spaceManager\
-{\
-_implementation.spaceManager = spaceManager;\
-}\
--(SpaceManager*) spaceManager\
-{\
-return _implementation.spaceManager;\
-}\
--(void) setAutoFreeShape:(BOOL)autoFree\
-{\
-_implementation.autoFreeShape = autoFree;\
-}\
--(BOOL) autoFreeShape\
-{\
-return _implementation.autoFreeShape;\
-}

@@ -7,14 +7,14 @@
 
 #import "cocos2d.h"
 #import "SpaceManager.h"
-#import "cpSprite.h"
+#import "cpCCSprite.h"
 #import "cpShapeNode.h"
 
 #pragma mark GameLayer Class
 @interface GameLayer : CCLayer
 {
 	SpaceManager *smgr;
-	cpSprite *ballSprite;
+	cpCCSprite *ballSprite;
 	CCLabel *label;
 }
 

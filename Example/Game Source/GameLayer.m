@@ -111,7 +111,7 @@ static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void
 	//active shape, ball shape
 	cpShape *ball = [smgr addCircleAt:cpv(240,160) mass:1.0 radius:10];
 	ball->collision_type = kBallCollisionType;
-	ballSprite = [cpSprite spriteWithShape:ball file:@"ball.png"];
+	ballSprite = [cpCCSprite spriteWithShape:ball file:@"ball.png"];
 	[self addChild:ballSprite];
 	ballSprite.ignoreRotation = YES;
 	
@@ -141,8 +141,8 @@ static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void
 	staticCircle->collision_type = kCircleCollisionType;
 	
 	//Connect our shapes to sprites
-	cpSprite *sCircleSprite = [cpSprite spriteWithShape:staticCircle file:@"staticcircle.png"];
-	cpSprite *sRectSprite = [cpSprite spriteWithShape:staticRect file:@"staticrect.png"];
+	cpCCSprite *sCircleSprite = [cpCCSprite spriteWithShape:staticCircle file:@"staticcircle.png"];
+	cpCCSprite *sRectSprite = [cpCCSprite spriteWithShape:staticRect file:@"staticrect.png"];
 	
 	//Add our sprites
 	[self addChild:sCircleSprite];
@@ -178,7 +178,7 @@ static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void
 {
 	//Our dangling rect on the slide joint
 	cpShape *weight = [smgr addRectAt:cpv(240,230) mass:2 width:10 height:60 rotation:0];
-	cpSprite *weightNode = [cpSprite spriteWithShape:weight file:@"rect.png"];
+	cpCCSprite *weightNode = [cpCCSprite spriteWithShape:weight file:@"rect.png"];
 	
 	cpConstraint *joint = [smgr addSpringToBody:weight->body fromBody:ballSprite.shape->body toBodyAnchor:cpv(0,-30) fromBodyAnchor:cpv(0,0) restLength:0.0f stiffness:1.0f damping:0.0f];
 	cpConstraintNode *jointNode = [cpConstraintNode nodeWithConstraint:joint];
@@ -203,8 +203,8 @@ static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void
 	//Shapes in a group do not affect each other
 	leg1->group = 1;
 	leg2->group = 1;
-	cpSprite *leg1s = [cpSprite spriteWithShape:leg1 file:@"rect.png"];
-	cpSprite *leg2s = [cpSprite spriteWithShape:leg2 file:@"rect.png"];
+	cpCCSprite *leg1s = [cpCCSprite spriteWithShape:leg1 file:@"rect.png"];
+	cpCCSprite *leg2s = [cpCCSprite spriteWithShape:leg2 file:@"rect.png"];
 
 	//Set up our joints
 	cpConstraint *joint1 = [smgr addPinToBody:leg1->body fromBody:leg2->body toBodyAnchor:cpv(5,30) fromBodyAnchor:cpv(-5,30)];

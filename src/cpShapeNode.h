@@ -1,7 +1,5 @@
 /*********************************************************************
  *	
- *	cpShapeNode
- *
  *	cpShapeNode.h
  *
  *	Provide Drawing for Shapes
@@ -18,7 +16,7 @@
 #import "cpCCNode.h"
 
 
-@interface cpShapeNode : CCNode <CCRGBAProtocol, cpCCNodeDelegate>
+@interface cpShapeNode : CCNode <CCRGBAProtocol, cpCCNodeProtocol>
 {
 @protected	
 	ccColor3B _color;
