@@ -31,6 +31,14 @@
 
 void defaultEachShape(void *ptr, void* data);
 
+//Collision Moments
+typedef enum { 
+	COLLISION_BEGIN, 
+	COLLISION_PRESOLVE, 
+	COLLISION_POSTSOLVE, 
+	COLLISION_SEPARATE
+} CollisionMoment;
+
 @interface SpaceManager : NSObject
 {
 	
@@ -39,8 +47,6 @@ void defaultEachShape(void *ptr, void* data);
 	cpSpace			*_space;
 	
 	/* Internal devices */
-	NSMutableArray	*_freeShapes;
-	NSMutableArray	*_removedShapes;
 	NSMutableArray	*_invocations;
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
 	CCTimer			*_timer;
@@ -179,10 +185,11 @@ void defaultEachShape(void *ptr, void* data);
 /*! @see getShapesAt:layers:group: */
 -(NSArray*) getShapesAt:(cpVect)pos;
 
-/*! Queries the space as to whether this two shapes are in persistent contact */
+/*! Queries the space as to whether these two shapes are in persistent contact */
 -(BOOL) isPersistentContactOnShape:(cpShape*)shape contactShape:(cpShape*)shape2;
 
-/*! Queries the space as to whether this shape has ANY persistent contact */
+/*! Queries the space as to whether this shape has ANY persistent contact, It will return
+ the first shape it finds or NULL if nothing is found*/
 -(cpShape*) persistentContactOnShape:(cpShape*)shape;
 
 /*! Will return an array of NSValues that point to the cpConstraints */

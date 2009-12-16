@@ -60,14 +60,14 @@ static void eachShapeAsChildren(void *ptr, void* data)
 }
 #endif
 
-static int collHandleInvocations(cpArbiter *arb, struct cpSpace *space, void *data)
+static int handleInvocations(CollisionMoment moment, cpArbiter *arb, struct cpSpace *space, void *data)
 {
 	NSInvocation *invocation = (NSInvocation*)data;
 	
 	@try {
-		[invocation setArgument:&arb atIndex:2];
-		[invocation setArgument:&space atIndex:3];
-		[invocation setArgument:&data atIndex:4];
+		[invocation setArgument:&moment atIndex:2];
+		[invocation setArgument:&arb atIndex:3];
+		[invocation setArgument:&space atIndex:4];
 	}
 	@catch (NSException *e) {
 		//No biggie, continue!
@@ -75,11 +75,36 @@ static int collHandleInvocations(cpArbiter *arb, struct cpSpace *space, void *da
 	
 	[invocation invoke];
 	
-	BOOL retVal;
-	[invocation getReturnValue:&retVal];
+	//default is yes, thats what it is in chipmunk
+	BOOL retVal = YES;
+	
+	//not sure how heavy these methods are...
+	if ([[invocation methodSignature]  methodReturnLength] > 0)
+		[invocation getReturnValue:&retVal];
 	
 	return retVal;
 }
+
+static int collBegin(cpArbiter *arb, struct cpSpace *space, void *data)
+{
+	return handleInvocations(COLLISION_BEGIN, arb, space, data);
+}
+
+static int collPreSolve(cpArbiter *arb, struct cpSpace *space, void *data)
+{
+	return handleInvocations(COLLISION_PRESOLVE, arb, space, data);
+}
+
+static void collPostSolve(cpArbiter *arb, struct cpSpace *space, void *data)
+{
+	handleInvocations(COLLISION_POSTSOLVE, arb, space, data);
+}
+
+static void collSeparate(cpArbiter *arb, struct cpSpace *space, void *data)
+{
+	handleInvocations(COLLISION_SEPARATE, arb, space, data);
+}
+
 
 static int collIgnore(cpArbiter *arb, struct cpSpace *space, void *data)
 {
@@ -96,11 +121,19 @@ static void updateBBCache(cpShape *shape, void *unused)
 	cpShapeCacheBB(shape);
 }
 
+static void removeShape(cpSpace *space, void *obj, void *data)
+{
+	[(SpaceManager*)(data) removeShape:(cpShape*)(obj)];
+}
+
+static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
+{
+	[(SpaceManager*)(data) removeAndFreeShape:(cpShape*)(obj)];
+}
+
 /* Private Method Declarations */
 @interface SpaceManager (PrivateMethods)
 -(void) setupDefaultShape:(cpShape*) s;
--(void) freeShapes;
--(void) removeShapes;
 
 -(NSString*) writeShape:(cpShape*)shape;
 -(NSString*) writeConstraint:(cpConstraint*)shape;
@@ -155,8 +188,6 @@ static void updateBBCache(cpShape *shape, void *unused)
 	_constantDt = 0.0;
 	
 	_iterateFunc = &defaultEachShape;
-	_freeShapes = [[NSMutableArray alloc] init];
-	_removedShapes = [[NSMutableArray alloc] init];
 	_invocations = [[NSMutableArray alloc] init];
 	
 	return self;
@@ -173,8 +204,6 @@ static void updateBBCache(cpShape *shape, void *unused)
 		cpSpaceFree(_space);
 	}	
 	
-	[_freeShapes release];
-	[_removedShapes release];
 	[_invocations release];
 	
 	[super dealloc];
@@ -358,47 +387,12 @@ static void updateBBCache(cpShape *shape, void *unused)
 	//Since static shapes are stationary, you do not really need this (only for the first sync)
 	if (_iterateStatic)
 		cpSpaceHashEach(_space->staticShapes, _iterateFunc, self);	
-	
-	//cleanup
-	[self freeShapes];
-	[self removeShapes];
 }
 
 
 -(void) scheduleToRemoveShape:(cpShape*)shape
 {
-	if (shape != nil)
-	{
-		//NSArray's like NSObjects
-		NSValue *nsv = [NSValue valueWithPointer:shape];
-		[_removedShapes addObject:nsv];
-	}
-}
-
--(void) removeShapes
-{
-	cpShape* shape;
-	int count = [_removedShapes count];
-	
-	for (int i = 0; i < count; i++)
-	{
-		shape = (cpShape*)[[_removedShapes objectAtIndex:i] pointerValue];
-		[self removeShape:shape];
-	}
-}
-
--(void) freeShapes
-{
-	cpShape* shape;
-	int count = [_freeShapes count];
-	
-	for (int i = 0; i < count; i++)
-	{
-		shape = (cpShape*)[[_freeShapes objectAtIndex:i] pointerValue];
-		[self removeAndFreeShape:shape];
-	}
-	
-	[_freeShapes removeAllObjects];
+	cpSpaceAddPostStepCallback(_space, removeShape, shape, self);
 }
 
 -(void) removeAndFreeShape:(cpShape*)shape
@@ -433,12 +427,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 
 -(void) scheduleToRemoveAndFreeShape:(cpShape*)shape
 {
-	if (shape != nil)
-	{
-		//NSArray's like NSObjects
-		NSValue *nsv = [NSValue valueWithPointer:shape];
-		[_freeShapes addObject:nsv];
-	}
+	cpSpaceAddPostStepCallback(_space, removeAndFreeShape, shape, self);
 }
 
 -(void) setupDefaultShape:(cpShape*) s
@@ -989,7 +978,7 @@ static void updateBBCache(cpShape *shape, void *unused)
 	[invocation setSelector:selector];
 	
 	//add the callback to chipmunk
-	cpSpaceAddCollisionHandler(_space, type1, type2, NULL, collHandleInvocations, NULL, NULL, invocation);
+	cpSpaceAddCollisionHandler(_space, type1, type2, collBegin, collPreSolve, collPostSolve, collSeparate, invocation);
 	
 	//we'll keep a ref so it won't disappear, prob could just retain and clear hash later
 	[_invocations addObject:invocation];

@@ -13,60 +13,16 @@
 #define kRectCollisionType		3
 #define kFragShapeCollisionType	4
 
-static int handleCollisionWithFragmentingRect(cpArbiter *arb, struct cpSpace *space, void *data)
-{
-	GameLayer *game = (GameLayer*)data;
-	[game.label setString:@"You hit the Fragmenting Shape!"];	
-	return 1;
-}
-
-static void handleFragmentingAction(cpArbiter *arb, struct cpSpace *space, void *data)
-{
-	CP_ARBITER_GET_SHAPES(arb,a,b);
-	
-	GameLayer *game = (GameLayer*)data;
-	cpShapeNode *fragShapeNode = (cpShapeNode*)(a->data);
-
-	//fragment our shape
-	NSArray *frags = [fragShapeNode.spaceManager fragmentShape:fragShapeNode.shape piecesNum:16 eachMass:1];
-	fragShapeNode.shape = NULL;
-	
-	//step over all pieces
-	for (NSValue *fVal in frags)
-	{
-		//retrieve the shape and attach it to a cocosnode
-		cpShape *fshape = [fVal pointerValue];
-		cpShapeNode *fnode = [cpShapeNode nodeWithShape:fshape];
-		fnode.color = fragShapeNode.color;
-		[game addChild:fnode];
-	}
-	
-	//cleanup old shape
-	[game removeChild:fragShapeNode cleanup:YES];
-}
-
-static int handleCollisionWithRect(cpArbiter *arb, struct cpSpace *space, void *data)
-{
-	GameLayer *game = (GameLayer*)data;
-	[game.label setString:@"You hit the Rectangle!"];
-	//1 to accept collision, 0 to ignore it
-	return 1;
-}
-
-static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void *data)
-{
-	GameLayer *game = (GameLayer*)data;
-	[game.label setString:@"You hit the Circle!"];
-	return 1;
-}
-
-
 @interface GameLayer (PrivateMethods)
 - (void) setupExample;
 - (void) setupStaticShapes;
 - (void) setupBallSlider;
 - (void) setupSawHorse;
 - (void) setupFragmentShape;
+
+- (BOOL) handleCollisionWithRect:(CollisionMoment)moment arbiter:(cpArbiter*)arb space:(cpSpace*)space;
+- (BOOL) handleCollisionWithCircle:(CollisionMoment)moment arbiter:(cpArbiter*)arb space:(cpSpace*)space;
+- (void) handleCollisionWithFragmentingRect:(CollisionMoment)moment arbiter:(cpArbiter*)arb space:(cpSpace*)space;
 @end
 
 @implementation GameLayer
@@ -163,9 +119,15 @@ static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void
 	sRectSprite.integrationDt = 1.0/50.0;
 	sRectSprite.spaceManager = smgr;
 	
-	//set up collisions, chipmunk way because obj-c way is not reliable
-	cpSpaceAddCollisionHandler(smgr.space, kRectCollisionType, kBallCollisionType, NULL, &handleCollisionWithRect, NULL, NULL, self);
-	cpSpaceAddCollisionHandler(smgr.space, kRectCollisionType, kBallCollisionType, NULL, &handleCollisionWithCircle, NULL, NULL, self);
+	//set up collisions
+	[smgr addCollisionCallbackBetweenType:kRectCollisionType 
+								otherType:kBallCollisionType 
+								   target:self 
+								 selector:@selector(handleCollisionWithRect:arbiter:space:)];
+	[smgr addCollisionCallbackBetweenType:kCircleCollisionType 
+								otherType:kBallCollisionType 
+								   target:self 
+								 selector:@selector(handleCollisionWithCircle:arbiter:space:)];
 	
 	//add a segment in for good measure
 	cpShape* seg = [smgr addSegmentAtWorldAnchor:cpv(100,260) toWorldAnchor:cpv(380,260) mass:STATIC_MASS radius:6];
@@ -238,13 +200,10 @@ static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void
 	fragShapeNode.spaceManager = smgr;
 	[self addChild:fragShapeNode];
 	
-	cpSpaceAddCollisionHandler(smgr.space, 
-							   kFragShapeCollisionType, kBallCollisionType, 
-							   NULL, 
-							   handleCollisionWithFragmentingRect, 
-							   handleFragmentingAction, 
-							   NULL, 
-							   self);
+	[smgr addCollisionCallbackBetweenType:kFragShapeCollisionType 
+								otherType:kBallCollisionType 
+								   target:self 
+								 selector:@selector(handleCollisionWithFragmentingRect:arbiter:space:)];
 }
 
 
@@ -259,6 +218,49 @@ static int handleCollisionWithCircle(cpArbiter *arb, struct cpSpace *space, void
 	[ballSprite applyImpulse:ccpMult(forceVect, 1.2)];
 
 	return kEventHandled;
+}
+
+- (BOOL) handleCollisionWithRect:(CollisionMoment)moment arbiter:(cpArbiter*)arb space:(cpSpace*)space
+{
+	if (moment == COLLISION_BEGIN)
+		[label setString:@"You hit the Rectangle!"];
+	return YES;
+}
+
+- (BOOL) handleCollisionWithCircle:(CollisionMoment)moment arbiter:(cpArbiter*)arb space:(cpSpace*)space
+{
+	if (moment == COLLISION_BEGIN)
+		[label setString:@"You hit the Circle!"];
+	return YES;
+}
+
+- (void) handleCollisionWithFragmentingRect:(CollisionMoment)moment arbiter:(cpArbiter*)arb space:(cpSpace*)space
+{
+	if (moment == COLLISION_POSTSOLVE)
+	{
+		[label setString:@"You hit the Fragmenting Shape!"];
+		
+		CP_ARBITER_GET_SHAPES(arb,a,b);
+		
+		cpShapeNode *fragShapeNode = (cpShapeNode*)(a->data);
+		
+		//fragment our shape
+		NSArray *frags = [fragShapeNode.spaceManager fragmentShape:fragShapeNode.shape piecesNum:16 eachMass:1];
+		fragShapeNode.shape = NULL;
+		
+		//step over all pieces
+		for (NSValue *fVal in frags)
+		{
+			//retrieve the shape and attach it to a cocosnode
+			cpShape *fshape = [fVal pointerValue];
+			cpShapeNode *fnode = [cpShapeNode nodeWithShape:fshape];
+			fnode.color = fragShapeNode.color;
+			[self addChild:fnode];
+		}
+		
+		//cleanup old shape
+		[self removeChild:fragShapeNode cleanup:YES];
+	}
 }
 
 @end

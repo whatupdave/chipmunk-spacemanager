@@ -32,6 +32,15 @@
 	return self;
 }
 
+-(id) initWithShape:(cpShape*)shape spriteSheet:(CCSpriteSheet*)spriteSheet rect:(CGRect)rect
+{
+	[self initWithTexture:[spriteSheet.textureAtlas texture] rect:rect];
+	[self setParentIsSpriteSheet:YES];
+	[self setTextureAtlas:textureAtlas_];
+
+	return self;
+}
+
 CPCCNODE_FUNC_SRC
 
 @end
