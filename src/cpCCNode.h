@@ -14,11 +14,6 @@
 #import "SpaceManager.h"
 #import "cpCCNodeImpl.h"
 
-//If you include this file you also get these
-#import "cpCCSprite.h"
-#import "cpShapeNode.h"
-#import "cpConstraintNode.h"
-
 @interface cpCCNode : CCNode<cpCCNodeProtocol>
 {
 	CPCCNODE_MEM_VARS;

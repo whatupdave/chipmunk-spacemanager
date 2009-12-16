@@ -32,14 +32,10 @@
 @synthesize fillShape = _fillShape;
 @synthesize drawDecoration = _drawDecoration;
 
-+ (id) nodeWithShape:(cpShape*)shape
-{
-	return [[[self alloc] initWithShape:shape] autorelease];
-}
 
 - (id) initWithShape:(cpShape*)shape;
 {
-	[super init];
+	[super initWithShape:shape];
 	
 	_color = ccBLACK;
 	_opacity = 255;
@@ -48,12 +44,9 @@
 	_smoothDraw = NO;	
 	_fillShape = YES;
 	_drawDecoration = YES;
-	CPCCNODE_MEM_VARS_INIT(shape)
 	
 	return self;
 }
-
-CPCCNODE_FUNC_SRC
 
 - (void) draw
 {
