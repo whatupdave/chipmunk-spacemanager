@@ -116,6 +116,20 @@ static void collectAllShapes(cpShape *shape, NSMutableArray *outShapes)
 	[outShapes addObject:[NSValue valueWithPointer:shape]];
 }
 
+static void collectAllSegmentQueryInfos(cpShape *shape, cpFloat t, cpVect n, NSMutableArray *outInfos)
+{
+	cpSegmentQueryInfo *info = (cpSegmentQueryInfo*)malloc(sizeof(cpSegmentQueryInfo));
+	info->shape = shape;
+	info->t = t;
+	info->n = n;
+	[outInfos addObject:[NSValue valueWithPointer:info]];
+}
+	 
+static void collectAllSegmentQueryShapes(cpShape *shape, cpFloat t, cpVect n, NSMutableArray *outShapes)
+{
+	[outShapes addObject:[NSValue valueWithPointer:shape]];
+}
+
 static void updateBBCache(cpShape *shape, void *unused)
 {
 	cpShapeCacheBB(shape);
@@ -130,6 +144,25 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 {
 	[(SpaceManager*)(data) removeAndFreeShape:(cpShape*)(obj)];
 }
+
+@interface RayCastInfoArray : NSMutableArray
+@end
+
+@implementation RayCastInfoArray
+
+- (void) dealloc
+{
+	for (NSValue *value in self)
+	{
+		cpSegmentQueryInfo *info = (cpSegmentQueryInfo*)[value pointerValue];
+		free(info);
+	}
+	
+	[super dealloc];
+}
+
+@end
+
 
 /* Private Method Declarations */
 @interface SpaceManager (PrivateMethods)
@@ -581,6 +614,59 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	return [self getShapesAt:pos layers:0 group:0];
 }
 
+-(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group
+{
+	return cpSpaceSegmentQueryFirst(_space, start, end, layers, group, NULL);
+}
+
+-(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end
+{
+	return [self getShapeFromRayCastSegment:start end:end layers:-1 group:0];
+}
+
+-(cpSegmentQueryInfo) getInfoFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group
+{
+	cpSegmentQueryInfo info;
+	cpSpaceSegmentQueryFirst(_space, start, end, layers, group, &info);
+	
+	return info;
+}
+	 
+-(cpSegmentQueryInfo) getInfoFromRayCastSegment:(cpVect)start end:(cpVect)end
+{
+	return [self getInfoFromRayCastSegment:start end:end layers:-1 group:0];
+}
+
+-(NSArray*) getShapesFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group
+{
+	RayCastInfoArray *array = [[RayCastInfoArray alloc] autorelease];
+	
+	if (cpSpaceSegmentQuery(_space, start, end, layers, group, (cpSpaceSegmentQueryFunc)collectAllSegmentQueryShapes, array))
+		return array;
+	else 
+		return nil;
+}
+
+-(NSArray*) getShapesFromRayCastSegment:(cpVect)start end:(cpVect)end
+{
+	return [self getShapesFromRayCastSegment:start end:end layers:-1 group:0];
+}
+
+-(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group
+{
+	RayCastInfoArray *array = [[RayCastInfoArray alloc] autorelease];
+	
+	if (cpSpaceSegmentQuery(_space, start, end, layers, group, (cpSpaceSegmentQueryFunc)collectAllSegmentQueryInfos, array))
+		return array;
+	else 
+		return nil;
+}
+
+-(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end
+{
+	return [self getInfosFromRayCastSegment:start end:end layers:-1 group:0];
+}
+
 -(BOOL) isPersistentContactOnShape:(cpShape*)shape contactShape:(cpShape*)shape2
 {
 	cpShape *shape_pair[] = {shape, shape2};
@@ -596,12 +682,23 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 -(cpShape*) persistentContactOnShape:(cpShape*)shape;
 {
 	cpShape *contactShape = NULL;
+	cpArbiter *arb = [self persistentContactInfoOnShape:shape];
+	
+	if (arb)
+		contactShape = (arb->a == shape) ? arb->b : arb->a;
+	
+	return contactShape;
+}
+
+-(cpArbiter*) persistentContactInfoOnShape:(cpShape*)shape;
+{
+	cpArbiter *retArb = NULL;
 	int max_contact_staleness = cp_contact_persistence;
 	cpHashSet *contactSet = _space->contactSet;
-	for(int i=0; i<contactSet->size && !contactShape; i++)
+	for(int i=0; i<contactSet->size && !retArb; i++)
 	{
 		cpHashSetBin *bin = contactSet->table[i];
-		while(bin && !contactShape)
+		while(bin && !retArb)
 		{
 			cpHashSetBin *next = bin->next;
 			cpArbiter *arb = (cpArbiter *)bin->elt;
@@ -609,14 +706,14 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 			if (arb && (arb->a == shape || arb->b == shape))
 			{	
 				if(_space->stamp - arb->stamp < max_contact_staleness)
-					contactShape = (arb->a == shape) ? arb->b : arb->a;
+					retArb = arb;
 			}
 			
 			bin = next;
 		}
 	}
 	
-	return contactShape;
+	return retArb;
 }
 
 -(NSArray*) getConstraints

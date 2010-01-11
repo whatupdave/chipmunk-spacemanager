@@ -39,6 +39,8 @@ typedef enum {
 	COLLISION_SEPARATE
 } CollisionMoment;
 
+
+//The SpaceManager
 @interface SpaceManager : NSObject
 {
 	
@@ -184,12 +186,34 @@ typedef enum {
 
 /*! Return an array of NSValues with a pointer to a cpShape */
 -(NSArray*) getShapesAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group;
-
 /*! @see getShapesAt:layers:group: */
 -(NSArray*) getShapesAt:(cpVect)pos;
 
+/*! Return first shape hit by the given raycast */
+-(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
+/*! see getShapeFromRayCastSegment:end:layers:group: */
+-(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end;
+
+/*! Return the info on the first shape hit by the given raycast */
+-(cpSegmentQueryInfo) getInfoFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
+/*! see getInfoFromRayCastSegment:end:layers:group: */
+-(cpSegmentQueryInfo) getInfoFromRayCastSegment:(cpVect)start end:(cpVect)end;
+
+/*! Return an array of NSValues with a pointer to a cpShape that intersects the raycast */
+-(NSArray*) getShapesFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
+/*! see getShapesFromRayCastSegment:end:layers:group: */
+-(NSArray*) getShapesFromRayCastSegment:(cpVect)start end:(cpVect)end;
+
+/*! Return an array of NSValues with a pointer to a cpSegmentQueryInfo, this array will clean up the infos when released */
+-(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
+/*! see getInfosFromRayCastSegment:end:layers:group: */
+-(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end;
+
 /*! Queries the space as to whether these two shapes are in persistent contact */
 -(BOOL) isPersistentContactOnShape:(cpShape*)shape contactShape:(cpShape*)shape2;
+
+/*! Queries the space as to whether these two shapes are in persistent contact, returns the arbiter info */
+-(cpArbiter*) persistentContactInfoOnShape:(cpShape*)shape;
 
 /*! Queries the space as to whether this shape has ANY persistent contact, It will return
  the first shape it finds or NULL if nothing is found*/
@@ -265,36 +289,46 @@ typedef enum {
 
 /*! Add a spring to two bodies at the body anchor points */
 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2 restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp;
+/*! Add a spring to two bodies at the body anchor points */
 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp;
+/*! Add a spring to two bodies at the body anchor points */
 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody stiffness:(cpFloat)stiff;
 
 /*! Add a groove (aka sliding pin) between two bodies */
 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveAnchor1:(cpVect)groove1 grooveAnchor2:(cpVect)groove2 fromBodyAnchor:(cpVect)anchor2;
+/*! Add a groove (aka sliding pin) between two bodies */
 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveLength:(cpFloat)length isHorizontal:(bool)horiz fromBodyAnchor:(cpVect)anchor2;
+/*! Add a groove (aka sliding pin) between two bodies */
 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveLength:(cpFloat)length isHorizontal:(bool)horiz;
 
 /*! Add a sliding joint between two bodies */
 -(cpConstraint*) addSlideToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2 minLength:(cpFloat)min maxLength:(cpFloat)max;
+/*! Add a sliding joint between two bodies */
 -(cpConstraint*) addSlideToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody minLength:(cpFloat)min maxLength:(cpFloat)max;
 
 /*! Create a pin (rod) between two bodies */
 -(cpConstraint*) addPinToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2;
+/*! Create a pin (rod) between two bodies */
 -(cpConstraint*) addPinToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody;
 
 /*! Add a shared point between two bodies that they may rotate around */
 -(cpConstraint*) addPivotToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2;
+/*! Add a shared point between two bodies that they may rotate around */
 -(cpConstraint*) addPivotToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody worldAnchor:(cpVect)anchr;
+/*! Add a shared point between two bodies that they may rotate around */
 -(cpConstraint*) addPivotToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody;
 
 /*! Add a motor that applys torque to a specified body(s) */
 -(cpConstraint*) addMotorToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody rate:(cpFloat)rate;
+/*! Add a motor that applys torque to a specified body(s) */
 -(cpConstraint*) addMotorToBody:(cpBody*)toBody rate:(cpFloat)rate;
 
 /*! Add gears between two bodies */
 -(cpConstraint*) addGearToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody phase:(cpFloat)phase ratio:(cpFloat)ratio;
+/*! Add gears between two bodies */
 -(cpConstraint*) addGearToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody ratio:(cpFloat)ratio;
 
-/*! */
+/*! This does not work yet */
 -(cpConstraint*) addBreakableToConstraint:(cpConstraint*)breakConstraint maxForce:(cpFloat)max;
 
 /*! */
