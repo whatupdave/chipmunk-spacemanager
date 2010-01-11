@@ -62,6 +62,9 @@ typedef enum {
 	/* The dt used last within step */
 	cpFloat	_lastDt;
 	
+	/* If constant dt used, then this accumulates left over */
+	cpFloat _timeAccumulator;
+	
 	/* hack to fix rehashing one static */
 	BOOL _rehashNextStep;
 	

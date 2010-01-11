@@ -185,7 +185,8 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	_rehashStaticEveryStep = NO;
 	_rehashNextStep = NO;
 	_cleanupBodyDependencies = YES;
-	_constantDt = 0.0;
+	_constantDt = 0.0f;
+	_timeAccumulator = 0.0f;
 	
 	_iterateFunc = &defaultEachShape;
 	_invocations = [[NSMutableArray alloc] init];
@@ -365,12 +366,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 #endif
 
 -(void) step: (cpFloat) delta
-{
-	if (_constantDt)
-		_lastDt = _constantDt/_steps;
-	else
-		_lastDt = delta/(cpFloat)_steps;
-	
+{		
 	//re-calculate static shape positions if this is set
 	if (_rehashStaticEveryStep || _rehashNextStep)
 	{
@@ -378,9 +374,28 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 		_rehashNextStep = NO;
 	}
 	
-	//for the iterations given
-	for(int i=0; i<_steps; i++)
-		cpSpaceStep(_space, _lastDt);
+	if (!_constantDt)
+	{	
+		_lastDt = delta/_steps;
+		for(int i=0; i<_steps; i++)
+			cpSpaceStep(_space, _lastDt);
+	}
+	else 
+	{
+		_lastDt = _constantDt/(cpFloat)_steps;
+
+		for(int i=0; i<_steps; i++)
+			cpSpaceStep(_space, _lastDt);
+		
+		//This will work at some point
+/*		delta += _timeAccumulator;
+		while(delta >= _lastDt) 
+		{
+			cpSpaceStep(_space, _lastDt);
+			delta -= _lastDt;
+		}
+		_timeAccumulator = delta;*/
+	}
 	
 	cpSpaceHashEach(_space->activeShapes, _iterateFunc, self);
 

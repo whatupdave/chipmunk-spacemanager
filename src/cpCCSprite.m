@@ -23,6 +23,26 @@
 	return [[[self alloc] initWithShape:shape file:filename] autorelease];
 }
 
++ (id) spriteWithShape:(cpShape*)shape spriteSheet:(CCSpriteSheet*)spriteSheet rect:(CGRect)rect
+{
+	return [[[self alloc] initWithShape:shape spriteSheet:spriteSheet rect:rect] autorelease];
+}
+
++ (id) spriteWithShape:(cpShape *)shape texture:(CCTexture2D*)texture
+{
+	return [[[self alloc] initWithShape:shape texture:texture] autorelease];
+}
+
++ (id) spriteWithShape:(cpShape *)shape texture:(CCTexture2D*)texture rect:(CGRect)rect
+{
+	return [[[self alloc] initWithShape:shape texture:texture rect:rect] autorelease];
+}
+
++ (id) spriteWithShape:(cpShape *)shape texture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint) offset
+{	
+	return [[[self alloc] initWithShape:shape texture:texture rect:rect offset:offset] autorelease];
+}
+
 - (id) initWithShape:(cpShape*)shape file:(NSString*) filename
 {
 	[super initWithFile:filename];
@@ -37,7 +57,30 @@
 	[self initWithTexture:[spriteSheet.textureAtlas texture] rect:rect];
 	[self setParentIsSpriteSheet:YES];
 	[self setTextureAtlas:textureAtlas_];
+	
+	CPCCNODE_MEM_VARS_INIT(shape)
 
+	return self;
+}
+
+- (id) initWithShape:(cpShape *)shape texture:(CCTexture2D*)texture
+{
+	CGRect rect = CGRectZero;
+	rect.size = texture.contentSize;
+	return [self initWithShape:shape texture:texture rect:rect];
+}
+
+- (id) initWithShape:(cpShape *)shape texture:(CCTexture2D*)texture rect:(CGRect)rect
+{
+	return [self initWithTexture:texture rect:rect offset:CGPointZero];
+}
+
+- (id) initWithShape:(cpShape *)shape texture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset
+{
+	[super initWithTexture:texture rect:rect offset:offset];
+	
+	CPCCNODE_MEM_VARS_INIT(shape)
+	
 	return self;
 }
 
