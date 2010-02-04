@@ -175,7 +175,9 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 @implementation SpaceManager
 
 @synthesize space = _space;
+#ifdef _SPACE_MANAGER_FOR_COCOS2D
 @synthesize topWall,bottomWall,rightWall,leftWall;
+#endif
 @synthesize steps = _steps;
 @synthesize lastDt = _lastDt;
 @synthesize iterateStatic = _iterateStatic;
@@ -184,6 +186,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 @synthesize staticBody = _staticBody;
 @synthesize constantDt = _constantDt;
 @synthesize cleanupBodyDependencies = _cleanupBodyDependencies;
+@synthesize constraintCleanupDelegate = _constraintCleanupDelegate;
 //gravity and damping are written out manually
 
 -(id) init
@@ -925,9 +928,10 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 			
 		if (body == constraint->a || body == constraint->b)
 		{
-			//Need a callback prob for about to delete constraint
+			//Callback for about to free constraint
 			//reason: it's the only thing that may be deleted arbitrarily
 			//because of the cleanupBodyDependencies
+			[_constraintCleanupDelegate aboutToFreeConstraint:constraint];
 			
 			//more efficient to use this method of deletion
 			cpArrayDeleteIndex(array, i);

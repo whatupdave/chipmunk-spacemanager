@@ -31,7 +31,7 @@
 
 void defaultEachShape(void *ptr, void* data);
 
-//Collision Moments
+/*! Collision Moments */
 typedef enum { 
 	COLLISION_BEGIN, 
 	COLLISION_PRESOLVE, 
@@ -39,8 +39,13 @@ typedef enum {
 	COLLISION_SEPARATE
 } CollisionMoment;
 
+/*! Delegate for handling constraints that will be free'd by
+	the method: removeAndFreeConstraintsOnBody */
+@protocol cpConstraintCleanupDelegate<NSObject>
+-(void) aboutToFreeConstraint:(cpConstraint*)constraint;
+@end
 
-//The SpaceManager
+/*! The SpaceManager */
 @interface SpaceManager : NSObject
 {
 	
@@ -52,10 +57,10 @@ typedef enum {
 	NSMutableArray	*_invocations;
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
 	CCTimer			*_timer;
-#endif
 	
 	/* Helpful Shapes/Bodies */
 	cpShape			*topWall,*bottomWall,*rightWall,*leftWall;
+#endif
 	cpBody			*_staticBody;
 	
 	/* Number of steps (across dt) perform on each step call */
@@ -71,24 +76,29 @@ typedef enum {
 	BOOL _rehashNextStep;
 	
 	/* Options:
-		-cleanupBodyDepenencies will also free contraints connected to a free'd shape
+		-cleanupBodyDependencies will also free contraints connected to a free'd shape
+		-constraintCleanupDelegate is the delegate that will be called when the above variable is true
 		-iterateStatic will call _iterateFunc on static shapes
 		-rehashStaticEveryStep will rehash static shapes at the end of every step
 		-iterateFunc; default will update cocosnodes for pos and rotation
 		-constantDt; set this to a non-zero number to always step the simulation with that dt
 	*/
-	BOOL				_cleanupBodyDependencies;
-	BOOL				_iterateStatic;
-	BOOL				_rehashStaticEveryStep;
-	cpSpaceHashIterator	_iterateFunc;
-	cpFloat				_constantDt;
+	BOOL							_cleanupBodyDependencies;
+	id<cpConstraintCleanupDelegate>	_constraintCleanupDelegate;
+	BOOL							_iterateStatic;
+	BOOL							_rehashStaticEveryStep;
+	cpSpaceHashIterator				_iterateFunc;
+	cpFloat							_constantDt;
 }
 
 /*! The actual chipmunk space */
 @property (readonly) cpSpace* space;
 
+#ifdef _SPACE_MANAGER_FOR_COCOS2D
+/*! The segment shapes that form the bounds of the window*/
 @property (readwrite, assign) cpShape *topWall,*bottomWall,*rightWall,*leftWall;
-
+#endif
+ 
 /*! Number of steps (across dt) perform on each step call */
 @property (readwrite, assign) int steps;
 
@@ -119,6 +129,9 @@ typedef enum {
 
 /*! Setting this to YES/TRUE will also free contraints connected to a free'd shape */
 @property (readwrite, assign) BOOL cleanupBodyDependencies;
+
+/*! This will be called from all methods that auto-free constraints dependent on bodies being freed */
+@property (readwrite, retain) id<cpConstraintCleanupDelegate> constraintCleanupDelegate;
 
 /*! initialization method
 	@param size The average size of shapes in space
