@@ -89,6 +89,12 @@ cpContactsEstimateCrushingImpulse(cpContact *contacts, int numContacts)
 	return (1.0f - vmag/fsum);
 }
 
+void
+cpArbiterIgnore(cpArbiter *arb)
+{
+	arb->state = cpArbiterStateIgnore;
+}
+
 cpArbiter*
 cpArbiterAlloc(void)
 {
@@ -101,11 +107,11 @@ cpArbiterInit(cpArbiter *arb, cpShape *a, cpShape *b)
 	arb->numContacts = 0;
 	arb->contacts = NULL;
 	
-	arb->a = a;
-	arb->b = b;
+	arb->private_a = a;
+	arb->private_b = b;
 	
 	arb->stamp = -1;
-	arb->firstColl = 1;
+	arb->state = cpArbiterStateFirstColl;
 	
 	return arb;
 }
@@ -119,7 +125,7 @@ cpArbiterNew(cpShape *a, cpShape *b)
 void
 cpArbiterDestroy(cpArbiter *arb)
 {
-	if(arb->contacts) cpfree(arb->contacts);
+//	if(arb->contacts) cpfree(arb->contacts);
 }
 
 void
@@ -152,7 +158,7 @@ cpArbiterUpdate(cpArbiter *arb, cpContact *contacts, int numContacts, cpCollisio
 			}
 		}
 
-		cpfree(arb->contacts);
+//		cpfree(arb->contacts);
 	}
 	
 	arb->contacts = contacts;
@@ -166,14 +172,14 @@ cpArbiterUpdate(cpArbiter *arb, cpContact *contacts, int numContacts, cpCollisio
 	arb->surface_vr = cpvsub(a->surface_v, b->surface_v);
 	
 	// For collisions between two similar primitive types, the order could have been swapped.
-	arb->a = a; arb->b = b;
+	arb->private_a = a; arb->private_b = b;
 }
 
 void
 cpArbiterPreStep(cpArbiter *arb, cpFloat dt_inv)
 {
-	cpShape *shapea = arb->a;
-	cpShape *shapeb = arb->b;
+	cpShape *shapea = arb->private_a;
+	cpShape *shapeb = arb->private_b;
 
 	cpBody *a = shapea->body;
 	cpBody *b = shapeb->body;
@@ -201,8 +207,8 @@ cpArbiterPreStep(cpArbiter *arb, cpFloat dt_inv)
 void
 cpArbiterApplyCachedImpulse(cpArbiter *arb)
 {
-	cpShape *shapea = arb->a;
-	cpShape *shapeb = arb->b;
+	cpShape *shapea = arb->private_a;
+	cpShape *shapeb = arb->private_b;
 		
 	arb->u = shapea->u * shapeb->u;
 	arb->surface_vr = cpvsub(shapeb->surface_v, shapea->surface_v);
@@ -219,8 +225,8 @@ cpArbiterApplyCachedImpulse(cpArbiter *arb)
 void
 cpArbiterApplyImpulse(cpArbiter *arb, cpFloat eCoef)
 {
-	cpBody *a = arb->a->body;
-	cpBody *b = arb->b->body;
+	cpBody *a = arb->private_a->body;
+	cpBody *b = arb->private_b->body;
 
 	for(int i=0; i<arb->numContacts; i++){
 		cpContact *con = &arb->contacts[i];

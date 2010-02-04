@@ -42,6 +42,13 @@ typedef struct cpCollisionHandler {
 	void *data;
 } cpCollisionHandler;
 
+#define CP_MAX_CONTACTS_PER_ARBITER 6
+typedef struct cpContactBufferHeader {
+	int stamp;
+	struct cpContactBufferHeader *next;
+	unsigned int numContacts;
+} cpContactBufferHeader;
+
 typedef struct cpSpace{
 	// *** User definable fields
 	
@@ -59,6 +66,9 @@ typedef struct cpSpace{
 	
 	// *** Internally Used Fields
 	
+	// When the space is locked, you should not add or remove objects;
+	int locked;
+	
 	// Time stamp. Is incremented on every call to cpSpaceStep().
 	int stamp;
 
@@ -68,8 +78,18 @@ typedef struct cpSpace{
 	
 	// List of bodies in the system.
 	cpArray *bodies;
+	
 	// List of active arbiters for the impulse solver.
-	cpArray *arbiters;
+	cpArray *arbiters, *pooledArbiters;
+	
+	// Linked list ring of contact buffers.
+	// Head is the current buffer. Tail is the oldest buffer.
+	// The list points in the direction of tail->head.
+	cpContactBufferHeader *contactBuffersHead, *contactBuffersTail;
+	
+	// List of buffers to be free()ed when destroying the space.
+	cpArray *allocatedBuffers;
+	
 	// Persistant contact set.
 	cpHashSet *contactSet;
 	
@@ -98,7 +118,6 @@ void cpSpaceFreeChildren(cpSpace *space);
 // Collision handler management functions.
 void cpSpaceSetDefaultCollisionHandler(
 	cpSpace *space,
-	cpCollisionType a, cpCollisionType b,
 	cpCollisionBeginFunc begin,
 	cpCollisionPreSolveFunc preSolve,
 	cpCollisionPostSolveFunc postSolve,
@@ -142,6 +161,10 @@ cpShape *cpSpacePointQueryFirst(cpSpace *space, cpVect point, cpLayers layers, c
 typedef void (*cpSpaceSegmentQueryFunc)(cpShape *shape, cpFloat t, cpVect n, void *data);
 int cpSpaceSegmentQuery(cpSpace *space, cpVect start, cpVect end, cpLayers layers, cpGroup group, cpSpaceSegmentQueryFunc func, void *data);
 cpShape *cpSpaceSegmentQueryFirst(cpSpace *space, cpVect start, cpVect end, cpLayers layers, cpGroup group, cpSegmentQueryInfo *out);
+
+// BB query callback function
+typedef void (*cpSpaceBBQueryFunc)(cpShape *shape, void *data);
+void cpSpaceBBQuery(cpSpace *space, cpBB bb, cpLayers layers, cpGroup group, cpSpaceBBQueryFunc func, void *data);
 
 
 // Iterator function for iterating the bodies in a space.
