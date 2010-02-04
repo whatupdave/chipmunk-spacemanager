@@ -26,6 +26,13 @@
 extern "C" {
 #endif
 
+void cpAbort(char *message, char *condition, char *file, int line);
+#ifdef NDEBUG
+	#define	cpAssert(condition, message)	((void)0)
+#else
+	#define cpAssert(condition, message) if(!(condition)) cpAbort(message, #condition, __FILE__, __LINE__)
+#endif
+
 #include "chipmunk_types.h"
 	
 static inline cpFloat
@@ -83,6 +90,9 @@ cpflerpconst(cpFloat f1, cpFloat f2, cpFloat d)
 		#define INFINITY (1e1000)
 	#endif
 #endif
+
+// Maximum allocated size for various Chipmunk buffer sizes
+#define CP_BUFFER_BYTES (32*1024)
 
 #define cpmalloc malloc
 #define cpcalloc calloc
