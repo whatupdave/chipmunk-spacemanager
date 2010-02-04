@@ -685,8 +685,10 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	cpArbiter *arb = [self persistentContactInfoOnShape:shape];
 	
 	if (arb)
-		contactShape = (arb->a == shape) ? arb->b : arb->a;
-	
+	{
+		CP_ARBITER_GET_SHAPES(arb, a, b)
+		contactShape = (a == shape) ? b : a;
+	}
 	return contactShape;
 }
 
@@ -703,10 +705,15 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 			cpHashSetBin *next = bin->next;
 			cpArbiter *arb = (cpArbiter *)bin->elt;
 			
-			if (arb && (arb->a == shape || arb->b == shape))
+			if (arb)
 			{	
-				if(_space->stamp - arb->stamp < max_contact_staleness)
+				CP_ARBITER_GET_SHAPES(arb, a, b)
+				
+				if ((a == shape || b == shape) && 
+					(_space->stamp - arb->stamp < max_contact_staleness))
+				{
 					retArb = arb;
+				}
 			}
 			
 			bin = next;
