@@ -214,11 +214,11 @@
 	CGPoint pt = [self convertTouchToNodeSpace:[touches anyObject]];
 	CGPoint forceVect = ccpSub(pt, ballSprite.position);
 	
-	cpFloat len = cpvlength(forceVect);
-	cpVect normalized = cpvnormalize(forceVect);
+	//cpFloat len = cpvlength(forceVect);
+	//cpVect normalized = cpvnormalize(forceVect);
 	
 	//This applys a one-time force, pretty much like firing a bullet
-	[ballSprite applyImpulse:ccpMult(normalized, 1.0f/len * 1000)];
+	[ballSprite applyImpulse:ccpMult(forceVect, 1)];
 
 	return kEventHandled;
 }
