@@ -682,7 +682,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	return (arb && _space->stamp - arb->stamp < max_contact_staleness);
 }
 
--(cpShape*) persistentContactOnShape:(cpShape*)shape;
+-(cpShape*) persistentContactOnShape:(cpShape*)shape
 {
 	cpShape *contactShape = NULL;
 	cpArbiter *arb = [self persistentContactInfoOnShape:shape];
@@ -695,7 +695,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	return contactShape;
 }
 
--(cpArbiter*) persistentContactInfoOnShape:(cpShape*)shape;
+-(cpArbiter*) persistentContactInfoOnShape:(cpShape*)shape
 {
 	cpArbiter *retArb = NULL;
 	int max_contact_staleness = cp_contact_persistence;
