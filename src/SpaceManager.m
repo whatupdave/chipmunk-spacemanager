@@ -774,6 +774,29 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 {
 	[self removeShape:shape];
 	cpBodySetMass(shape->body, mass);
+	
+	if (mass == STATIC_MASS)
+		cpBodySetMoment(shape->body, mass);
+	else
+	{
+		switch(shape->klass->type)
+		{
+			case CP_CIRCLE_SHAPE:
+				cpBodySetMoment(shape->body, 
+								cpMomentForCircle(mass, cpCircleShapeGetRadius(shape), cpCircleShapeGetRadius(shape), cpvzero));
+				break;
+			case CP_SEGMENT_SHAPE:
+				cpBodySetMoment(shape->body, 
+								cpMomentForSegment(mass, cpSegmentShapeGetA(shape), cpSegmentShapeGetB(shape)));
+				break;
+			case CP_POLY_SHAPE:
+				
+				cpBodySetMoment(shape->body,
+								cpMomentForPoly(mass, cpPolyShapeGetNumVerts(shape), ((cpPolyShape*)shape)->verts, cpvzero));
+				break;
+		}
+	}
+	
 	[self addShape:shape];
 	
 	return shape;
