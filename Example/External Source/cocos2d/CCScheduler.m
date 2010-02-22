@@ -2,7 +2,7 @@
  *
  * http://www.cocos2d-iphone.org
  *
- * Copyright (C) 2008,2009 Ricardo Quesada
+ * Copyright (C) 2008,2009,2010 Ricardo Quesada
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the 'cocos2d for iPhone' license.
@@ -50,7 +50,7 @@
 -(id) initWithTarget:(id) t selector:(SEL)s interval:(ccTime) seconds
 {
 	if( (self=[super init]) ) {
-#ifdef DEBUG
+#if COCOS2D_DEBUG
 		NSMethodSignature *sig = [t methodSignatureForSelector:s];
 		NSAssert(sig !=0 , @"Signature not found for selector - does it have the following form? -(void) name: (ccTime) dt");
 #endif
@@ -101,32 +101,21 @@ static CCScheduler *sharedScheduler;
 
 + (CCScheduler *)sharedScheduler
 {
-	@synchronized([CCScheduler class])
-	{
-		if (!sharedScheduler)
-			sharedScheduler = [[CCScheduler alloc] init];
-		
-	}
-	// to avoid compiler warning
+	if (!sharedScheduler)
+		sharedScheduler = [[CCScheduler alloc] init];
+
 	return sharedScheduler;
 }
 
 +(id)alloc
 {
-	@synchronized([CCScheduler class])
-	{
-		NSAssert(sharedScheduler == nil, @"Attempted to allocate a second instance of a singleton.");
-		return [super alloc];
-	}
-	// to avoid compiler warning
-	return nil;
+	NSAssert(sharedScheduler == nil, @"Attempted to allocate a second instance of a singleton.");
+	return [super alloc];
 }
 
 +(void)purgeSharedScheduler
 {
-	@synchronized( self ) {
-		[sharedScheduler release];
-	}
+	[sharedScheduler release];
 }
 
 - (id) init
@@ -137,6 +126,9 @@ static CCScheduler *sharedScheduler;
 		methodsToAdd = [[NSMutableArray arrayWithCapacity:20] retain];
 		
 		timeScale_ = 1.0f;
+
+		fireSelector = @selector(fire:);
+		impMethod = (TICK_IMP) [CCTimer instanceMethodForSelector:fireSelector];
 	}
 
 	return self;
@@ -217,6 +209,6 @@ static CCScheduler *sharedScheduler;
 	[methodsToAdd removeAllObjects];
 	
 	for( CCTimer *t in scheduledMethods )
-		[t fire: dt];
+		impMethod(t, fireSelector, dt);
 }
 @end

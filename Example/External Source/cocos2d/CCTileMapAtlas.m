@@ -14,7 +14,7 @@
 
 #import "CCTileMapAtlas.h"
 #import "ccMacros.h"
-#import "Support/FileUtils.h"
+#import "Support/CCFileUtils.h"
 
 @interface CCTileMapAtlas (Private)
 -(void) loadTGAfile:(NSString*)file;
@@ -90,10 +90,10 @@
 {
 	NSAssert( file != nil, @"file must be non-nil");
 
-	NSString *path = [FileUtils fullPathFromRelativePath:file ];
+	NSString *path = [CCFileUtils fullPathFromRelativePath:file ];
 
 //	//Find the path of the file
-//	NSBundle *mainBndl = [NSBundle mainBundle];
+//	NSBundle *mainBndl = [CCDirector sharedDirector].loadingBundle;
 //	NSString *resourcePath = [mainBndl resourcePath];
 //	NSString * path = [resourcePath stringByAppendingPathComponent:file];
 	

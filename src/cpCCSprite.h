@@ -60,9 +60,6 @@
 /*! Return an autoreleased cpSprite who is an "AtlasSprite" */
 + (id) spriteWithShape:(cpShape *)shape texture:(CCTexture2D*)texture rect:(CGRect)rect;
 
-/*! Return an autoreleased cpSprite who is an "AtlasSprite" */
-+ (id) spriteWithShape:(cpShape *)shape texture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset;
-
 
 /*! Initialization method for basic cpSprite */
 - (id) initWithShape:(cpShape*)shape file:(NSString*) filename;
@@ -75,9 +72,6 @@
 
 /*! Initialization method for "AtlasSprite" cpSprite */
 - (id) initWithShape:(cpShape *)shape texture:(CCTexture2D*)texture rect:(CGRect)rect;
-
-/*! Initialization method for "AtlasSprite" cpSprite */
-- (id) initWithShape:(cpShape *)shape texture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset;
 
 @end
 

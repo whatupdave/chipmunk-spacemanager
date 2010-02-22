@@ -52,7 +52,10 @@
 {
 	[super draw];
 	
-	glColor4ub(_color.r, _color.g, _color.b, _opacity);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisable(GL_TEXTURE_2D);
+	
 	glPointSize(_pointSize);
 	glLineWidth(_lineWidth);
 	if (_smoothDraw && _lineWidth <= 1) //OpelGL ES doesn't support smooth lineWidths > 1
@@ -68,8 +71,8 @@
 	
 	if( _opacity != 255 )
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
-	glEnableClientState(GL_VERTEX_ARRAY);
+		
+	glColor4ub(_color.r, _color.g, _color.b, _opacity);
 	
 	switch(_implementation.shape->klass->type)
 	{
@@ -84,7 +87,9 @@
 			break;
 	}
 	
-	glDisableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnable(GL_TEXTURE_2D);
 	
 	if( _opacity != 255 )
 		glBlendFunc(CC_BLEND_SRC, CC_BLEND_DST);

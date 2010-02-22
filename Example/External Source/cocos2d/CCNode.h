@@ -2,7 +2,7 @@
  *
  * http://www.cocos2d-iphone.org
  *
- * Copyright (C) 2008,2009 Ricardo Quesada
+ * Copyright (C) 2008,2009,2010 Ricardo Quesada
  * Copyright (C) 2009 Valentin Milea
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,6 +18,8 @@
 #import "CCAction.h"
 #import "ccTypes.h"
 #import "CCTexture2D.h"
+#import "CCProtocols.h"
+
 
 enum {
 	kCCNodeTagInvalid = -1,
@@ -53,8 +55,32 @@ enum {
  - z-order
  - openGL z position
  
+ Default values:
+  - rotation: 0
+  - position: (x=0,y=0)
+  - scale: (x=1,y=1)
+  - contentSize: (x=0,y=0)
+  - anchorPoint: (x=0,y=0)
+ 
  Limitations:
  - A CCNode is a "void" object. It doesn't have a texture
+ 
+ Order in transformations with grid disabled
+ - 1) The node will be translated (position)
+ - 2) The node will be rotated (rotation)
+ - 3) The node will be scaled (scale)
+ - 4) The node will be moved according to the camera values (camera)
+ 
+ Order in transformations with grid enabled
+ - 1) The node will be translated (position)
+ - 2) The node will be rotated (rotation)
+ - 3) The node will be scaled (scale)
+ - 4) The grid will capture the screen
+ - 5) The node will be moved according to the camera values (camera)
+ - 6) The grid will render the captured screen
+ 
+ Camera:
+ - Each node has a camera. By default it points to the center of the CCNode.
  */ 
 @interface CCNode : NSObject {
 	
@@ -66,55 +92,58 @@ enum {
 	
 	// position of the node
 	CGPoint position_;
+
+	// is visible
+	BOOL visible_;
 	
+	// anchor point in pixels
+	CGPoint anchorPointInPixels_;	
+	// anchor point normalized
+	CGPoint anchorPoint_;	
 	// If YES the transformtions will be relative to (-transform.x, -transform.y).
 	// Sprites, Labels and any other "small" object uses it.
 	// Scenes, Layers and other "whole screen" object don't use it.
-	BOOL relativeAnchorPoint_;
+	BOOL isRelativeAnchorPoint_;
 	
-	// transformation anchor point
-	CGPoint transformAnchor_;
-	
-	// anchor point
-	CGPoint anchorPoint_;
 	// untransformed size of the node
 	CGSize	contentSize_;
 	
+	// transform
 	CGAffineTransform transform_, inverse_;
-	BOOL isTransformDirty_, isInverseDirty_;
-	
+
 	// openGL real Z vertex
 	float vertexZ_;
 	
-	// is visible
-	BOOL visible;
-	
 	// a Camera
-	CCCamera *camera;
+	CCCamera *camera_;
 	
 	// a Grid
-	CCGridBase *grid;
+	CCGridBase *grid_;
 	
 	// z-order value
-	int zOrder;
+	int zOrder_;
 	
 	// array of children
-	NSMutableArray *children;
-	
-	// is running
-	BOOL isRunning;
+	NSMutableArray *children_;
 	
 	// weakref to parent
-	CCNode *parent;
+	CCNode *parent_;
 	
 	// a tag. any number you want to assign to the node
-	int tag;
-
-	// scheduled selectors
-	NSMutableDictionary *scheduledSelectors;
+	int tag_;
     
 	// user data field
 	void *userData;
+	
+	// scheduled selectors
+	NSMutableDictionary *scheduledSelectors_;
+
+	// Is running
+	BOOL isRunning_;
+
+	// To reduce memory, place BOOLs that are not properties here:
+	BOOL isTransformDirty_:1;
+	BOOL isInverseDirty_:1;
 }
 
 /** The z order of the node relative to it's "brothers": children of the same parent */
@@ -128,15 +157,15 @@ enum {
  @since v0.8
  */
 @property (nonatomic,readwrite) float vertexZ;
-/** The rotation (angle) of the node in degrees. 0 is the default rotation angle */
+/** The rotation (angle) of the node in degrees. 0 is the default rotation angle. Positive values rotate node CW. */
 @property(nonatomic,readwrite,assign) float rotation;
-/** The scale factor of the node. 1.0 is the default scale factor. It modifies the X and Y scale at the same time */
+/** The scale factor of the node. 1.0 is the default scale factor. It modifies the X and Y scale at the same time. */
 @property(nonatomic,readwrite,assign) float scale;
 /** The scale factor of the node. 1.0 is the default scale factor. It only modifies the X scale factor. */
 @property(nonatomic,readwrite,assign) float scaleX;
 /** The scale factor of the node. 1.0 is the default scale factor. It only modifies the Y scale factor. */
 @property(nonatomic,readwrite,assign) float scaleY;
-/** Position (x,y) of the node in OpenGL coordinates. (0,0) is the left-bottom corner */
+/** Position (x,y) of the node in OpenGL coordinates. (0,0) is the left-bottom corner. */
 @property(nonatomic,readwrite,assign) CGPoint position;
 /** A Camera object that lets you move the node using camera coordinates.
  * If you use the Camera then position, scale & rotation won't be used */
@@ -145,30 +174,34 @@ enum {
 @property(nonatomic,readwrite,retain) CCGridBase* grid;
 /** Whether of not the node is visible. Default is YES */
 @property(nonatomic,readwrite,assign) BOOL visible;
-/** The transformation anchor point in absolute pixels.
- since v0.8 you can only read it. If you wish to modify it, use anchorPoint instead
- */
-@property(nonatomic,readonly) CGPoint transformAnchor;
-/** The normalized coordinates of the anchor point.
- A (0,0) value means bottom-left corner. (1,1) means top-right corner, (0.5, 0.5) means the center.
- Sprites and other "textured" Nodes have a default anchorPoint of (0.5f, 0.5f).
- IMPORTANT: The anchorPoint can have values lower than 0 and higher than 1.
+/** anchorPoint is the point around which all transformations and positioning manipulations take place.
+ It's like a pin in the node where it is "attached" to its parent.
+ The anchorPoint is normalized, like a percentage. (0,0) means the bottom-left corner and (1,1) means the top-right corner.
+ But you can use values higher than (1,1) and lower than (0,0) too.
+ The default anchorPoint is (0.5,0.5), so it starts in the center of the node.
  @since v0.8
  */
 @property(nonatomic,readwrite) CGPoint anchorPoint;
+/** The anchorPoint in absolute pixels.
+ Since v0.8 you can only read it. If you wish to modify it, use anchorPoint instead
+ */
+@property(nonatomic,readonly) CGPoint anchorPointInPixels;
+
 /** The untransformed size of the node.
  The contentSize remains the same no matter the node is scaled or rotated.
  All nodes has a size. Layer and Scene has the same size of the screen.
  @since v0.8
  */
 @property (nonatomic,readwrite) CGSize contentSize;
+/** whether or not the node is running */
+@property(nonatomic,readonly) BOOL isRunning;
 /** A weak reference to the parent */
 @property(nonatomic,readwrite,assign) CCNode* parent;
 /** If YES the transformtions will be relative to it's anchor point.
  * Sprites, Labels and any other sizeble object use it have it enabled by default.
  * Scenes, Layers and other "whole screen" object don't use it, have it disabled by default.
  */
-@property(nonatomic,readwrite,assign) BOOL relativeAnchorPoint;
+@property(nonatomic,readwrite,assign) BOOL isRelativeAnchorPoint;
 /** A tag used to identify the node easily */
 @property(nonatomic,readwrite,assign) int tag;
 /** A custom user data pointer */
@@ -265,7 +298,6 @@ enum {
 -(void) draw;
 /** recursive method that visit its children and draw them */
 -(void) visit;
-
 
 // transformations
 

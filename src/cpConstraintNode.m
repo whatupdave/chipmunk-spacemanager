@@ -176,8 +176,10 @@
 }
 
 -(void)draw
-{
-	[super draw];
+{	
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisable(GL_TEXTURE_2D);
 
 	glColor4ub(_color.r, _color.g, _color.b, _opacity);
 	glPointSize(_pointSize);
@@ -195,7 +197,7 @@
 	
 	if( _opacity != 255 )
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
+			
 	cpBody *body_a = _constraint->a;
 	cpBody *body_b = _constraint->b;
 	
@@ -221,6 +223,10 @@
 	
 	if( _opacity != 255 )
 		glBlendFunc(CC_BLEND_SRC, CC_BLEND_DST);
+	
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnable(GL_TEXTURE_2D);
 }
 
 - (void) drawPinJoint:(cpPinJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
@@ -235,12 +241,12 @@
 	array[3] = b.y;
 	
 	glVertexPointer(2, GL_FLOAT, 0, array);
-	glEnableClientState(GL_VERTEX_ARRAY);
+	//glEnableClientState(GL_VERTEX_ARRAY);
 	
 	glDrawArrays(GL_POINTS, 0, 2);
 	glDrawArrays(GL_LINES, 0, 2);
 	
-	glDisableClientState(GL_VERTEX_ARRAY);	
+	//glDisableClientState(GL_VERTEX_ARRAY);	
 	free(array);
 }
 
@@ -256,12 +262,12 @@
 	array[3] = b.y;
 	
 	glVertexPointer(2, GL_FLOAT, 0, array);
-	glEnableClientState(GL_VERTEX_ARRAY);
+	//glEnableClientState(GL_VERTEX_ARRAY);
 	
 	glDrawArrays(GL_POINTS, 0, 2);
 	glDrawArrays(GL_LINES, 0, 2);
 	
-	glDisableClientState(GL_VERTEX_ARRAY);	
+	//glDisableClientState(GL_VERTEX_ARRAY);	
 	
 	free(array);
 }
@@ -279,10 +285,10 @@
 	
 	glVertexPointer(2, GL_FLOAT, 0, array);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
+	//glEnableClientState(GL_VERTEX_ARRAY);
 	glDrawArrays(GL_POINTS, 0, 2);	
 	glDrawArrays(GL_LINES, 0, 2);
-	glDisableClientState(GL_VERTEX_ARRAY);	
+	//glDisableClientState(GL_VERTEX_ARRAY);	
 	
 	free(array);
 }
@@ -302,13 +308,13 @@
 	groove[4] = grv.x;
 	groove[5] = grv.y;
 
-	glEnableClientState(GL_VERTEX_ARRAY);
+	//glEnableClientState(GL_VERTEX_ARRAY);
 		
 	glVertexPointer(2, GL_FLOAT, 0, groove);
 	glDrawArrays(GL_POINTS, 0, 3);
 	glDrawArrays(GL_LINES, 0, 2);
 		
-	glDisableClientState(GL_VERTEX_ARRAY);	
+	//glDisableClientState(GL_VERTEX_ARRAY);	
 	
 	free(groove);
 }
@@ -345,7 +351,7 @@
 	
 	glVertexPointer(2, GL_FLOAT, 0, array);
 	
-	glEnableClientState(GL_VERTEX_ARRAY);
+	//glEnableClientState(GL_VERTEX_ARRAY);
 	glDrawArrays(GL_POINTS, 0, 2);	
 	
 	cpVect delta = cpvsub(b, a);
@@ -369,7 +375,7 @@
 		glDrawArrays(GL_LINE_STRIP, 0, springVAR_count);
 	} glPopMatrix();
 	
-	glDisableClientState(GL_VERTEX_ARRAY);	
+	//glDisableClientState(GL_VERTEX_ARRAY);	
 	
 	free(array);
 }
@@ -432,10 +438,10 @@
 
 	glVertexPointer(2, GL_FLOAT, 0, array);
 	
-	glEnableClientState(GL_VERTEX_ARRAY);
+	//glEnableClientState(GL_VERTEX_ARRAY);
 	//glDrawArrays(GL_POINTS, 0, 4);	
 	glDrawArrays(GL_LINES, 0, 4);
-	glDisableClientState(GL_VERTEX_ARRAY);	
+	//glDisableClientState(GL_VERTEX_ARRAY);	
 }
 
 @end

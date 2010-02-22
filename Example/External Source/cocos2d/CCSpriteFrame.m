@@ -2,7 +2,7 @@
  *
  * http://www.cocos2d-iphone.org
  *
- * Copyright (C) 2009 Ricardo Quesada
+ * Copyright (C) 2009,2010 Ricardo Quesada
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the 'cocos2d for iPhone' license.
@@ -89,31 +89,30 @@
 #pragma mark CCSpriteFrame
 @implementation CCSpriteFrame
 @synthesize rect = rect_, offset = offset_, texture = texture_;
-@synthesize flipX=flipX_, flipY=flipY_;
+@synthesize originalSize=originalSize_;
 
 +(id) frameWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset
 {
-	return [[[self alloc] initWithTexture:texture rect:rect offset:offset flipX:NO flipY:NO] autorelease];
+	return [[[self alloc] initWithTexture:texture rect:rect offset:offset originalSize:rect.size] autorelease];
 }
 
-+(id) frameWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset flipX:(BOOL)flipX flipY:(BOOL)flipY
++(id) frameWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset originalSize:(CGSize)originalSize
 {
-	return [[[self alloc] initWithTexture:texture rect:rect offset:offset flipX:flipX flipY:flipY] autorelease];
+	return [[[self alloc] initWithTexture:texture rect:rect offset:offset originalSize:originalSize] autorelease];
 }
 
 -(id) initWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset
 {
-	return [self initWithTexture:texture rect:rect offset:offset flipX:NO flipY:NO];
+	return [self initWithTexture:texture rect:rect offset:offset originalSize:rect.size];
 }
 
--(id) initWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset flipX:(BOOL)flipX flipY:(BOOL)flipY
+-(id) initWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset originalSize:(CGSize)originalSize
 {
 	if( (self=[super init]) ) {
 		self.texture = texture;
 		offset_ = offset;
 		rect_ = rect;
-		flipX_ = flipX;
-		flipY_ = flipY;
+		originalSize_ = originalSize;
 	}
 	return self;
 }
@@ -137,7 +136,7 @@
 
 -(id) copyWithZone: (NSZone*) zone
 {
-	CCSpriteFrame *copy = [[[self class] allocWithZone: zone] initWithTexture:texture_ rect:rect_ offset:offset_ flipX:flipX_ flipY:flipY_];
+	CCSpriteFrame *copy = [[[self class] allocWithZone: zone] initWithTexture:texture_ rect:rect_ offset:offset_ originalSize:originalSize_];
 	return copy;
 }
 @end

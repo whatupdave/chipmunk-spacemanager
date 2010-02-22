@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 #include "chipmunk.h"
-#include "constraints/util.h"
+#include "util.h"
 
 cpFloat cp_bias_coef = 0.1f;
 cpFloat cp_collision_slop = 0.1f;

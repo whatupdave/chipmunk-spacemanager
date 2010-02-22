@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 #include "chipmunk.h"
-#include "constraints/util.h"
+#include "util.h"
 
 static void
 preStep(cpSlideJoint *joint, cpFloat dt, cpFloat dt_inv)

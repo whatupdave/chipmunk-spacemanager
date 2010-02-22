@@ -35,7 +35,7 @@
 		CGSize s = [[CCDirector sharedDirector] winSize];
 		anchorPoint_ = ccp(0.5f, 0.5f);
 		[self setContentSize:s];
-		self.relativeAnchorPoint = NO;
+		self.isRelativeAnchorPoint = NO;
 
 		isTouchEnabled = NO;
 		isAccelerometerEnabled = NO;
@@ -60,7 +60,7 @@
 {
 	if( enabled != isAccelerometerEnabled ) {
 		isAccelerometerEnabled = enabled;
-		if( isRunning ) {
+		if( isRunning_ ) {
 			if( enabled )
 				[[UIAccelerometer sharedAccelerometer] setDelegate:self];
 			else
@@ -78,7 +78,7 @@
 {
 	if( isTouchEnabled != enabled ) {
 		isTouchEnabled = enabled;
-		if( isRunning ) {
+		if( isRunning_ ) {
 			if( enabled )
 				[self registerWithTouchDispatcher];
 			else
@@ -130,16 +130,8 @@
 
 // Opacity and RGB color protocol
 @synthesize opacity=opacity_, color=color_;
+@synthesize blendFunc=blendFunc_;
 
-
-- (id) init
-{
-	NSException* myException = [NSException
-								exceptionWithName:@"ColorLayerInit"
-								reason:@"Use ColorLayer initWithColor instead"
-								userInfo:nil];
-	@throw myException;	
-}
 
 + (id) layerWithColor:(ccColor4B)color width:(GLfloat)w  height:(GLfloat) h
 {
@@ -154,6 +146,10 @@
 - (id) initWithColor:(ccColor4B)color width:(GLfloat)w  height:(GLfloat) h
 {
 	if( (self=[super init]) ) {
+		
+		// default blend function
+		blendFunc_ = (ccBlendFunc) { CC_BLEND_SRC, CC_BLEND_DST };
+
 		color_.r = color.r;
 		color_.g = color.g;
 		color_.b = color.b;
@@ -192,14 +188,12 @@
 
 -(void) changeWidth: (GLfloat) w
 {
-	CGSize s = self.contentSize;
-	[self setContentSize:CGSizeMake(w,s.height)];
+	[self setContentSize:CGSizeMake(w,contentSize_.height)];
 }
 
 -(void) changeHeight: (GLfloat) h
 {
-	CGSize s = self.contentSize;
-	[self setContentSize:CGSizeMake(s.width,h)];
+	[self setContentSize:CGSizeMake(contentSize_.width,h)];
 }
 
 - (void) updateColor
@@ -219,21 +213,33 @@
 
 - (void)draw
 {		
+	// Default GL states: GL_TEXTURE_2D, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TEXTURE_COORD_ARRAY
+	// Needed states: GL_VERTEX_ARRAY, GL_COLOR_ARRAY
+	// Unneeded states: GL_TEXTURE_2D, GL_TEXTURE_COORD_ARRAY
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisable(GL_TEXTURE_2D);
+
 	glVertexPointer(2, GL_FLOAT, 0, squareVertices);
-	glEnableClientState(GL_VERTEX_ARRAY);
 	glColorPointer(4, GL_UNSIGNED_BYTE, 0, squareColors);
-	glEnableClientState(GL_COLOR_ARRAY);
 	
-	if( opacity_ != 255 )
+	BOOL newBlend = NO;
+	if( blendFunc_.src != CC_BLEND_SRC || blendFunc_.dst != CC_BLEND_DST ) {
+		newBlend = YES;
+		glBlendFunc(blendFunc_.src, blendFunc_.dst);
+	}
+	else if( opacity_ != 255 ) {
+		newBlend = YES;
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
 	
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	
-	if( opacity_ != 255 )
+	if( newBlend )
 		glBlendFunc(CC_BLEND_SRC, CC_BLEND_DST);
 	
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
+	// restore default GL state
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnable(GL_TEXTURE_2D);
 }
 
 #pragma mark Protocols

@@ -20,10 +20,8 @@
 #import "Support/ccArray.h"
 
 
-@class CCTMXMapInfo;
 @class CCTMXLayer;
-@class CCTMXLayerInfo;
-@class CCTMXTilesetInfo;
+@class CCTMXObjectGroup;
 
 /** Possible oritentations of the TMX map */
 enum
@@ -42,7 +40,8 @@ enum
  
  It adds support for the TMX tiled map format used by http://www.mapeditor.org
  It supports isometric, hexagonal and orthogonal tiles.
- 
+ It also supports object groups, objects, and properties.
+
  Features:
  - Each tile will be treated as an CCSprite
  - Each tile can be rotated / moved / scaled / tinted / "opacitied"
@@ -55,9 +54,12 @@ enum
  - The tileset image will be loaded using the TextureMgr
  - Each tile will have a unique tag
  - Each tile will have a unique z value. top-left: z=1, bottom-right: z=max z
+ - Each object group will be treated as an NSMutableArray
+ - Objects can be created using your own classes or a generic object class which will contain all the properties in a dictionary
+ - Properties can be assigned to the Map, Layer, Object Group, and Object
  
  Limitations:
- - It only supports one tileset.
+ - It only supports one tileset per layer.
  - Embeded images are not supported
  - It only supports the XML format (the JSON format is not supported)
  
@@ -68,13 +70,28 @@ enum
   - [map getChildByTag: tag_number];  // 0=1st layer, 1=2nd layer, 2=3rd layer, etc...
   - [map layerNamed: name_of_the_layer];
 
+   Each object group is created using a TMXObjectGroup which is a subclass of NSMutableArray.
+   You can obtain the object groups at runtime by:
+   - [map objectGroupNamed: name_of_the_object_group];
+  
+   Each object is a TMXObject.
+
+   Each property is stored as a key-value pair in an NSMutableDictionary.
+   You can obtain the properties at runtime by:
+   - [map propertyNamed: name_of_the_property];
+   - [layer propertyNamed: name_of_the_property];
+   - [objectGroup propertyNamed: name_of_the_property];
+   - [object propertyNamed: name_of_the_property];
+
  @since v0.8.1
  */
 @interface CCTMXTiledMap : CCNode
 {
-	CGSize		mapSize_;
-	CGSize		tileSize_;
-	int			mapOrientation_;	
+	CGSize				mapSize_;
+	CGSize				tileSize_;
+	int					mapOrientation_;
+	NSMutableArray		*objectGroups_;
+	NSMutableDictionary	*properties_;
 }
 
 /** the map's size property measured in tiles */
@@ -83,6 +100,10 @@ enum
 @property (nonatomic,readonly) CGSize tileSize;
 /** map orientation */
 @property (nonatomic,readonly) int mapOrientation;
+/** object groups */
+@property (nonatomic,readwrite,retain) NSMutableArray *objectGroups;
+/** properties */
+@property (nonatomic,readwrite,retain) NSMutableDictionary *properties;
 
 /** creates a TMX Tiled Map with a TMX file.*/
 +(id) tiledMapWithTMXFile:(NSString*)tmxFile;
@@ -92,75 +113,16 @@ enum
 
 /** return the TMXLayer for the specific layer */
 -(CCTMXLayer*) layerNamed:(NSString *)layerName;
+
+/** return the TMXObjectGroup for the secific group */
+-(CCTMXObjectGroup*) objectGroupNamed:(NSString *)groupName;
+
+/** return the TMXObjectGroup for the secific group
+ @deprecated Use map#objectGroupNamed instead
+ */
+-(CCTMXObjectGroup*) groupNamed:(NSString *)groupName __attribute__((deprecated));
+
+/** return the value for the specific property name */
+-(id) propertyNamed:(NSString *)propertyName;
 @end
-
-
-/** CCTMXLayer represents the TMX layer.
- 
- It is a subclass of CCSpriteSheet, so each "tile" is represented by an CCSprite.
- The benefits of using CCSprite objects as tiles are:
- - tiles (CCSprite) can be rotated/scaled/moved with a nice API
- 
- @since v0.8.1
- */
-@interface CCTMXLayer : CCSpriteSheet
-{
-	CCTMXTilesetInfo	*tileset_;
-	NSString			*layerName_;
-	CGSize				layerSize_;
-	CGSize				mapTileSize_;
-	unsigned int		*tiles_;
-	int					layerOrientation_;
-	
-	// used for optimization
-	CCSprite		*reusedTile;
-	ccCArray		*atlasIndexArray;
-}
-/** name of the layer */
-@property (nonatomic,readwrite,retain) NSString *layerName;
-/** size of the layer in tiles */
-@property (nonatomic,readwrite) CGSize layerSize;
-/** size of the map's tile (could be differnt from the tile's size) */
-@property (nonatomic,readwrite) CGSize mapTileSize;
-/** pointer to the map of tiles */
-@property (nonatomic,readwrite) unsigned int *tiles;
-/** Tilset information for the layer */
-@property (nonatomic,readwrite,retain) CCTMXTilesetInfo *tileset;
-/** Layer orientation, which is the same as the map orientation */
-@property (nonatomic,readwrite) int layerOrientation;
-
-
-/** creates a CCTMXLayer with an tileset info, a layer info and a map info */
-+(id) layerWithTilesetInfo:(CCTMXTilesetInfo*)tilesetInfo layerInfo:(CCTMXLayerInfo*)layerInfo mapInfo:(CCTMXMapInfo*)mapInfo;
-/** initializes a CCTMXLayer with a tileset info, a layer info and a map info */
--(id) initWithTilesetInfo:(CCTMXTilesetInfo*)tilesetInfo layerInfo:(CCTMXLayerInfo*)layerInfo mapInfo:(CCTMXMapInfo*)mapInfo;
-
-/** dealloc the map that contains the tile position from memory.
- Unless you want to know at runtime the tiles positions, you can safely call this method.
- If you are going to call [layer tileGIDAt:] then, don't release the map
- */
--(void) releaseMap;
-
-/** returns the tile (CCSprite) at a given a tile coordinate */
--(CCSprite*) tileAt:(CGPoint)tileCoordinate;
-
-/** returns the tile gid at a given tile coordinate.
- if it returns 0, it means that the tile is empty.
- This method requires the the tile map has not been previously released (eg. don't call [layer releaseMap])
- */
--(unsigned int) tileGIDAt:(CGPoint)tileCoordinate;
-
-/** sets the tile gid (gid = tile global id) at a given tile coordinate.
- The Tile GID can be obtained by using the method "tileGIDAt" or by using the TMX editor -> Tileset Mgr +1.
- If a tile is already placed at that position, then it will be removed.
- */
--(void) setTileGID:(unsigned int)gid at:(CGPoint)tileCoordinate;
-
-/** removes a tile at given tile coordinate */
--(void) removeTileAt:(CGPoint)tileCoordinate;
-
-/** returns the position in pixels of a given tile coordinate */
--(CGPoint) positionAt:(CGPoint)tileCoordinate;
-@end
-
 

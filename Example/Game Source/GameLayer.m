@@ -220,7 +220,7 @@
 	//This applys a one-time force, pretty much like firing a bullet
 	[ballSprite applyImpulse:ccpMult(forceVect, 1)];
 
-	return kEventHandled;
+	return YES;
 }
 
 - (BOOL) handleCollisionWithRect:(CollisionMoment)moment arbiter:(cpArbiter*)arb space:(cpSpace*)space

@@ -16,7 +16,7 @@
 #import "ccMacros.h"
 #import "CCDirector.h"
 #import "CCTexture2D.h"
-#import "Support/FileUtils.h"
+#import "Support/CCFileUtils.h"
 
 static EAGLContext *auxEAGLcontext = nil;
 
@@ -42,7 +42,6 @@ static EAGLContext *auxEAGLcontext = nil;
 	[data_ release];
 	[super dealloc];
 }
-
 @end
 
 
@@ -54,32 +53,21 @@ static CCTextureCache *sharedTextureCache;
 
 + (CCTextureCache *)sharedTextureCache
 {
-	@synchronized([CCTextureCache class])
-	{
-		if (!sharedTextureCache)
-			sharedTextureCache = [[CCTextureCache alloc] init];
+	if (!sharedTextureCache)
+		sharedTextureCache = [[CCTextureCache alloc] init];
 		
-	}
-	// to avoid compiler warning
 	return sharedTextureCache;
 }
 
 +(id)alloc
 {
-	@synchronized([CCTextureCache class])
-	{
-		NSAssert(sharedTextureCache == nil, @"Attempted to allocate a second instance of a singleton.");
-		return [super alloc];
-	}
-	// to avoid compiler warning
-	return nil;
+	NSAssert(sharedTextureCache == nil, @"Attempted to allocate a second instance of a singleton.");
+	return [super alloc];
 }
 
 +(void)purgeSharedTextureCache
 {
-	@synchronized( self ) {
-		[sharedTextureCache release];
-	}
+	[sharedTextureCache release];
 }
 
 -(id) init
@@ -186,16 +174,24 @@ static CCTextureCache *sharedTextureCache;
 	if( ! tex ) {
 		
 		// Split up directory and filename
-		NSString *fullpath = [FileUtils fullPathFromRelativePath: path ];
+		NSString *fullpath = [CCFileUtils fullPathFromRelativePath: path ];
 
 		// all images are handled by UIImage except PVR extension that is handled by our own handler
 		if ( [[path lowercaseString] hasSuffix:@".pvr"] )
 			tex = [self addPVRTCImage:fullpath];
 		else {
-		
-			tex = [ [CCTexture2D alloc] initWithImage: [UIImage imageWithContentsOfFile: fullpath ] ];
 
-			[textures setObject: tex forKey:path];
+			// prevents overloading the autorelease pool
+			UIImage *image = [ [UIImage alloc] initWithContentsOfFile: fullpath ];
+			tex = [ [CCTexture2D alloc] initWithImage: image ];
+			[image release];
+			
+
+			if( tex )
+				[textures setObject: tex forKey:path];
+			else
+				CCLOG(@"cocos2d: Couldn't add image:%@ in CCTextureCache", path);
+
 			
 			[tex release];
 		}
@@ -218,11 +214,15 @@ static CCTextureCache *sharedTextureCache;
 	}
 	
 	// Split up directory and filename
-	NSString *fullpath = [FileUtils fullPathFromRelativePath:path];
+	NSString *fullpath = [CCFileUtils fullPathFromRelativePath:path];
 	
 	NSData *nsdata = [[NSData alloc] initWithContentsOfFile:fullpath];
 	tex = [[CCTexture2D alloc] initWithPVRTCData:[nsdata bytes] level:0 bpp:bpp hasAlpha:alpha length:w];
-	[textures setObject: tex forKey:path];
+	if( tex )
+		[textures setObject: tex forKey:path];
+	else
+		CCLOG(@"cocos2d: Couldn't add PVRTCImage:%@ in CCTextureCache",path);
+
 	[nsdata release];
 
 	return [tex autorelease];
@@ -241,27 +241,37 @@ static CCTextureCache *sharedTextureCache;
 	tex = [[CCTexture2D alloc] initWithPVRTCFile: fileimage];
 	if( tex )
 		[textures setObject: tex forKey:fileimage];
+	else
+		CCLOG(@"cocos2d: Couldn't add PVRTCImage:%@ in CCTextureCache",fileimage);	
 	
 	return [tex autorelease];
 }
 
--(CCTexture2D*) addCGImage: (CGImageRef) image forKey: (NSString *)key
+-(CCTexture2D*) addCGImage: (CGImageRef) imageref forKey: (NSString *)key
 {
-	NSAssert(image != nil, @"TextureCache: image MUST not be nill");
+	NSAssert(imageref != nil, @"TextureCache: image MUST not be nill");
 	
-	CCTexture2D * tex;
+	CCTexture2D * tex = nil;
 	
-	if( (tex=[textures objectForKey: key] ) ) {
+	// If key is nil, then create a new texture each time
+	if( key && (tex=[textures objectForKey: key] ) ) {
 		return tex;
 	}
 	
-	tex = [[CCTexture2D alloc] initWithImage: [UIImage imageWithCGImage:image]];
-	[textures setObject: tex forKey:key];
+	// prevents overloading the autorelease pool
+	UIImage *image = [[UIImage alloc] initWithCGImage:imageref];
+	tex = [[CCTexture2D alloc] initWithImage: image];
+	[image release];
+	
+	if(tex && key)
+		[textures setObject: tex forKey:key];
+	else
+		CCLOG(@"cocos2d: Couldn't add CGImage in CCTextureCache");
 	
 	return [tex autorelease];
 }
 
-#pragma mark TextureCache - Cache
+#pragma mark TextureCache - Remove
 
 -(void) removeAllTextures
 {

@@ -2,7 +2,7 @@
  *
  * http://www.cocos2d-iphone.org
  *
- * Copyright (C) 2008,2009 Ricardo Quesada
+ * Copyright (C) 2008,2009,2010 Ricardo Quesada
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the 'cocos2d for iPhone' license.
@@ -114,10 +114,9 @@
 
 -(id) initWithAction: (CCIntervalAction*) action
 {
-	if( !(self=[super init]) )
-		return nil;
-	
-	other = [action retain];
+	if( (self=[super init]) )	
+		other = [action retain];
+
 	return self;
 }
 
@@ -143,7 +142,11 @@
 {
 	[other step: dt];
 	if( [other isDone] ) {
+		ccTime diff = dt + other.duration - other.elapsed;
 		[other startWithTarget:target];
+		
+		// to prevent jerk. issue #390
+		[other step: diff];
 	}
 }
 

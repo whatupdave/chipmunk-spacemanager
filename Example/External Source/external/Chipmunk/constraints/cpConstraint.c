@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 #include "chipmunk.h"
-#include "constraints/util.h"
+#include "util.h"
 
 // TODO: Comment me!
 

@@ -25,7 +25,6 @@
 @end
 
 //According to some tests GL_TRIANGLE_STRIP is slower, MUCH slower. Probably I'm doing something very wrong
-//#define USE_TRIANGLE_STRIP 1
 
 @implementation CCTextureAtlas
 
@@ -58,21 +57,27 @@
 	if( (self=[super init]) ) {
 	
 		capacity_ = n;
+		totalQuads_ = 0;
 		
 		// retained in property
 		self.texture = tex;
 
 		quads_ = calloc( sizeof(quads_[0]) * capacity_, 1 );
-		indices = calloc( sizeof(indices[0]) * capacity_ * 6, 1 );
+		indices_ = calloc( sizeof(indices_[0]) * capacity_ * 6, 1 );
 		
-		if( ! ( quads_ && indices) ) {
+		if( ! ( quads_ && indices_) ) {
 			CCLOG(@"cocos2d: TextureAtlas: not enough memory");
 			if( quads_ )
 				free(quads_);
-			if( indices )
-				free(indices);
+			if( indices_ )
+				free(indices_);
 			return nil;
 		}
+		
+#if CC_TEXTURE_ATLAS_USES_VBO
+		// initial binding
+		glGenBuffers(2, &buffersVBO_[0]);		
+#endif // CC_TEXTURE_ATLAS_USES_VBO
 
 		[self initIndices];
 	}
@@ -90,7 +95,12 @@
 	CCLOG(@"cocos2d: deallocing %@",self);
 
 	free(quads_);
-	free(indices);
+	free(indices_);
+	
+#if CC_TEXTURE_ATLAS_USES_VBO
+	glDeleteBuffers(2, buffersVBO_);
+#endif // CC_TEXTURE_ATLAS_USES_VBO
+	
 	
 	[texture_ release];
 
@@ -100,27 +110,36 @@
 -(void) initIndices
 {
 	for( NSUInteger i=0;i< capacity_;i++) {
-#if USE_TRIANGLE_STRIP
-		indices[i*6+0] = i*4+0;
-		indices[i*6+1] = i*4+0;
-		indices[i*6+2] = i*4+2;		
-		indices[i*6+3] = i*4+1;
-		indices[i*6+4] = i*4+3;
-		indices[i*6+5] = i*4+3;
+#if CC_TEXTURE_ATLAS_USE_TRIANGLE_STRIP
+		indices_[i*6+0] = i*4+0;
+		indices_[i*6+1] = i*4+0;
+		indices_[i*6+2] = i*4+2;		
+		indices_[i*6+3] = i*4+1;
+		indices_[i*6+4] = i*4+3;
+		indices_[i*6+5] = i*4+3;
 #else
-		indices[i*6+0] = i*4+0;
-		indices[i*6+1] = i*4+1;
-		indices[i*6+2] = i*4+2;
+		indices_[i*6+0] = i*4+0;
+		indices_[i*6+1] = i*4+1;
+		indices_[i*6+2] = i*4+2;
 		
 		// inverted index. issue #179
-		indices[i*6+3] = i*4+3;
-		indices[i*6+4] = i*4+2;
-		indices[i*6+5] = i*4+1;		
-//		indices[i*6+3] = i*4+2;
-//		indices[i*6+4] = i*4+3;
-//		indices[i*6+5] = i*4+1;	
+		indices_[i*6+3] = i*4+3;
+		indices_[i*6+4] = i*4+2;
+		indices_[i*6+5] = i*4+1;		
+//		indices_[i*6+3] = i*4+2;
+//		indices_[i*6+4] = i*4+3;
+//		indices_[i*6+5] = i*4+1;	
 #endif	
 	}
+	
+#if CC_TEXTURE_ATLAS_USES_VBO
+	glBindBuffer(GL_ARRAY_BUFFER, buffersVBO_[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quads_[0]) * capacity_, quads_, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffersVBO_[1]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_[0]) * capacity_ * 6, indices_, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+#endif // CC_TEXTURE_ATLAS_USES_VBO
 }
 
 #pragma mark TextureAtlas - Update, Insert, Move & Remove
@@ -130,16 +149,17 @@
 	NSAssert( n >= 0 && n < capacity_, @"updateQuadWithTexture: Invalid index");
 	
 	totalQuads_ =  MAX( n+1, totalQuads_);
-
-	quads_[n] = *quad;
+	
+	quads_[n] = *quad;	
 }
 
 
 -(void) insertQuad:(ccV3F_C4B_T2F_Quad*)quad atIndex:(NSUInteger)index
 {
 	NSAssert( index >= 0 && index < capacity_, @"insertQuadWithTexture: Invalid index");
-
+	
 	totalQuads_++;
+	NSAssert( totalQuads_ <= capacity_, @"invalid totalQuads");
 	
 	// issue #575. index can be > totalQuads
 	int remaining = (totalQuads_-1) - index;
@@ -147,7 +167,7 @@
 	// last object doesn't need to be moved
 	if( remaining > 0) {
 		// tex coordinates
-		memmove( &quads_[index+1],&quads_[index], sizeof(quads_[0]) * remaining );
+		memmove( &quads_[index+1],&quads_[index], sizeof(quads_[0]) * remaining );		
 	}
 	
 	quads_[index] = *quad;
@@ -182,6 +202,7 @@
 	
 	NSUInteger remaining = (totalQuads_-1) - index;
 	
+	
 	// last object doesn't need to be moved
 	if( remaining ) {
 		// tex coordinates
@@ -189,6 +210,8 @@
 	}
 	
 	totalQuads_--;
+	
+	NSAssert( totalQuads_ >= 0, @"invalid totalQuads");
 }
 
 -(void) removeAllQuads
@@ -208,7 +231,7 @@
 	capacity_ = newCapacity;
 
 	void * tmpQuads = realloc( quads_, sizeof(quads_[0]) * capacity_ );
-	void * tmpIndices = realloc( indices, sizeof(indices[0]) * capacity_ * 6 );
+	void * tmpIndices = realloc( indices_, sizeof(indices_[0]) * capacity_ * 6 );
 	
 	if( ! ( tmpQuads && tmpIndices) ) {
 		CCLOG(@"cocos2d: TextureAtlas: not enough memory");
@@ -220,16 +243,16 @@
 		if( tmpIndices )
 			free(tmpIndices);
 		else
-			free(indices);
+			free(indices_);
 		
-		indices = nil;
+		indices_ = nil;
 		quads_ = nil;
 		capacity_ = totalQuads_ = 0;
 		return NO;
 	}
 		
 	quads_ = tmpQuads;
-	indices = tmpIndices;
+	indices_ = tmpIndices;
 
 	[self initIndices];	
 
@@ -245,28 +268,59 @@
 
 -(void) drawNumberOfQuads: (NSUInteger) n
 {	
-#define kPointSize sizeof(quads_[0].bl)
+	
 	glBindTexture(GL_TEXTURE_2D, [texture_ name]);
+#define kQuadSize sizeof(quads_[0].bl)
+
+
+#if CC_TEXTURE_ATLAS_USES_VBO
+	glBindBuffer(GL_ARRAY_BUFFER, buffersVBO_[0]);
+	
+	// XXX: update is done in draw... perhaps it should be done in a timer
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(quads_[0]) * n, quads_);
+	
+	// vertices
+	glVertexPointer(3, GL_FLOAT, kQuadSize, (void*) offsetof( ccV3F_C4B_T2F, vertices));
+	
+	// colors
+	glColorPointer(4, GL_UNSIGNED_BYTE, kQuadSize, (void*) offsetof( ccV3F_C4B_T2F, colors));
+	
+	// tex coords
+	glTexCoordPointer(2, GL_FLOAT, kQuadSize, (void*) offsetof( ccV3F_C4B_T2F, texCoords));
+	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffersVBO_[1]);
+#if CC_TEXTURE_ATLAS_USE_TRIANGLE_STRIP
+	glDrawElements(GL_TRIANGLE_STRIP, n*6, GL_UNSIGNED_SHORT, (void*)0);    
+#else
+	glDrawElements(GL_TRIANGLES, n*6, GL_UNSIGNED_SHORT, (void*)0); 
+#endif // CC_TEXTURE_ATLAS_USE_TRIANGLE_STRIP
+	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	
+#else // ! CC_TEXTURE_ATLAS_USES_VBO
 	
 	int offset = (int)quads_;
 
 	// vertex
 	int diff = offsetof( ccV3F_C4B_T2F, vertices);
-	glVertexPointer(3, GL_FLOAT, kPointSize, (void*) (offset + diff) );
+	glVertexPointer(3, GL_FLOAT, kQuadSize, (void*) (offset + diff) );
 
 	// color
 	diff = offsetof( ccV3F_C4B_T2F, colors);
-	glColorPointer(4, GL_UNSIGNED_BYTE, kPointSize, (void*)(offset + diff));
+	glColorPointer(4, GL_UNSIGNED_BYTE, kQuadSize, (void*)(offset + diff));
 	
 	// tex coords
 	diff = offsetof( ccV3F_C4B_T2F, texCoords);
-	glTexCoordPointer(2, GL_FLOAT, kPointSize, (void*)(offset + diff));
+	glTexCoordPointer(2, GL_FLOAT, kQuadSize, (void*)(offset + diff));
 	
-#if USE_TRIANGLE_STRIP
-	glDrawElements(GL_TRIANGLE_STRIP, n*6, GL_UNSIGNED_SHORT, indices);	
+#if CC_TEXTURE_ATLAS_USE_TRIANGLE_STRIP
+	glDrawElements(GL_TRIANGLE_STRIP, n*6, GL_UNSIGNED_SHORT, indices_);	
 #else
-	glDrawElements(GL_TRIANGLES, n*6, GL_UNSIGNED_SHORT, indices);	
+	glDrawElements(GL_TRIANGLES, n*6, GL_UNSIGNED_SHORT, indices_);	
 #endif
+	
+#endif // CC_TEXTURE_ATLAS_USES_VBO
 }
 
 @end

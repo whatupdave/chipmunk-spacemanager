@@ -24,6 +24,7 @@
 #import "CCTiledGridAction.h"
 #import "CCEaseAction.h"
 #import "CCTouchDispatcher.h"
+#import "CCRenderTexture.h"
 #import "Support/CGPointExtension.h"
 
 enum {
@@ -54,13 +55,7 @@ enum {
 		outScene = [[CCDirector sharedDirector] runningScene];
 		[outScene retain];
 		
-		if( inScene == outScene ) {
-			NSException* myException = [NSException
-										exceptionWithName:@"TransitionWithInvalidScene"
-										reason:@"Incoming scene must be different from the outgoing scene"
-										userInfo:nil];
-			@throw myException;		
-		}
+		NSAssert( inScene != outScene, @"Incoming scene must be different from the outgoing scene" );
 		
 		// disable events while transitions
 		[[CCTouchDispatcher sharedDispatcher] setDispatchEvents: NO];
@@ -107,7 +102,12 @@ enum {
 {	
 	[self unschedule:_cmd];
 	
-	[[CCDirector sharedDirector] replaceScene: inScene];
+	CCDirector *director = [CCDirector sharedDirector];
+	
+	// Before replacing, save the "send cleanup to scene"
+	sendCleanupToScene = [director sendCleanupToScene];
+	
+	[director replaceScene: inScene];
 	
 	// enable events while transitions
 	[[CCTouchDispatcher sharedDispatcher] setDispatchEvents: YES];
@@ -134,16 +134,20 @@ enum {
 -(void) onExit
 {
 	[super onExit];
-	[outScene onExit];	
+	[outScene onExit];
 
 	// inScene should not receive the onExit callback
 	// only the onEnterTransitionDidFinish
 	[inScene onEnterTransitionDidFinish];
 }
 
--(void) onEnterTransitionDidFinish
+// custom cleanup
+-(void) cleanup
 {
-	[super onEnterTransitionDidFinish];
+	[super cleanup];
+	
+	if( sendCleanupToScene )
+	   [outScene cleanup];
 }
 
 -(void) dealloc
@@ -476,6 +480,7 @@ enum {
 		outDeltaZ = -90;
 		outAngleZ = 0;
 	}
+		
 	inA = [CCSequence actions:
 		   [CCDelayTime actionWithDuration:duration/2],
 		   [CCShow action],
@@ -766,13 +771,13 @@ enum {
 	
 	
 	CCNode *f = [self getChildByTag:kSceneFade];
-
+	
 	CCIntervalAction *a = [CCSequence actions:
-							[CCFadeIn actionWithDuration:duration/2],
-							[CCCallFunc actionWithTarget:self selector:@selector(hideOutShowIn)],
-							[CCFadeOut actionWithDuration:duration/2],
-							[CCCallFunc actionWithTarget:self selector:@selector(finish)],
-						 nil ];
+						   [CCFadeIn actionWithDuration:duration/2],
+						   [CCCallFunc actionWithTarget:self selector:@selector(hideOutShowIn)],
+						   [CCFadeOut actionWithDuration:duration/2],
+						   [CCCallFunc actionWithTarget:self selector:@selector(finish)],
+						   nil ];
 	[f runAction: a];
 }
 
@@ -780,6 +785,91 @@ enum {
 {
 	[super onExit];
 	[self removeChildByTag:kSceneFade cleanup:NO];
+}
+@end
+
+
+//
+// Cross Fade Transition
+//
+@implementation CCCrossFadeTransition
+
+-(void) draw
+{
+	// override draw since both scenes (textures) are rendered in 1 scene
+}
+
+-(void) onEnter
+{
+	[super onEnter];
+	
+	// create a transparent color layer
+	// in which we are going to add our rendertextures
+	ccColor4B  color = {0,0,0,0};
+	CGSize size = [[CCDirector sharedDirector] winSize];
+	CCColorLayer * layer = [CCColorLayer layerWithColor:color];
+	
+	// create the first render texture for inScene
+	CCRenderTexture *inTexture = [CCRenderTexture renderTextureWithWidth:size.width height:size.height];
+	inTexture.sprite.anchorPoint= ccp(0.5f,0.5f);
+	inTexture.position = ccp(size.width/2, size.height/2);
+	inTexture.anchorPoint = ccp(0.5f,0.5f);
+	
+	// render inScene to its texturebuffer
+	[inTexture begin];
+	[inScene visit];
+	[inTexture end];
+	
+	// create the second render texture for outScene
+	CCRenderTexture *outTexture = [CCRenderTexture renderTextureWithWidth:size.width height:size.height];
+	outTexture.sprite.anchorPoint= ccp(0.5f,0.5f);
+	outTexture.position = ccp(size.width/2, size.height/2);
+	outTexture.anchorPoint = ccp(0.5f,0.5f);
+	
+	// render outScene to its texturebuffer
+	[outTexture begin];
+	[outScene visit];
+	[outTexture end];
+	
+	// create blend functions
+	
+	ccBlendFunc blend1 = {GL_ONE, GL_ONE}; // inScene will lay on background and will not be used with alpha
+	ccBlendFunc blend2 = {GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA}; // we are going to blend outScene via alpha 
+	
+	// set blendfunctions
+	[inTexture.sprite setBlendFunc:blend1];
+	[outTexture.sprite setBlendFunc:blend2];	
+	
+	// add render textures to the layer
+	[layer addChild:inTexture];
+	[layer addChild:outTexture];
+	
+	// initial opacity:
+	[inTexture.sprite setOpacity:255];
+	[outTexture.sprite setOpacity:255];
+	
+	// create the blend action
+	CCIntervalAction * layerAction = [CCSequence actions:
+									  [CCFadeTo actionWithDuration:duration opacity:0],
+									  [CCCallFunc actionWithTarget:self selector:@selector(hideOutShowIn)],
+									  [CCCallFunc actionWithTarget:self selector:@selector(finish)],
+									  nil ];
+	
+	
+	// run the blend action
+	[outTexture.sprite runAction: layerAction];
+	
+	// add the layer (which contains our two rendertextures) to the scene
+	[self addChild: layer z:2 tag:kSceneFade];
+}
+
+// clean up on exit
+-(void) onExit
+{
+	// remove our layer and release all containing objects 
+	[self removeChildByTag:kSceneFade cleanup:NO];
+	
+	[super onExit];	
 }
 @end
 

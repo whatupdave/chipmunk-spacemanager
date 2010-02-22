@@ -14,6 +14,7 @@
 
 #import "CCTexture2D.h"
 #import "ccTypes.h"
+#import "ccConfig.h"
 
 /** A class that implements a Texture Atlas.
  Supported features:
@@ -24,14 +25,18 @@
    * Quads can be re-ordered in runtime
    * The TextureAtlas capacity can be increased or decreased in runtime
    * OpenGL component: V3F, C4B, T2F.
- The quads are rendered using an OpenGL ES an interleaved vertex array list
+ The quads are rendered using an OpenGL ES VBO.
+ To render the quads using an interleaved vertex array list, you should modify the ccConfig.h file 
  */
 @interface CCTextureAtlas : NSObject {
 	NSUInteger			totalQuads_;
 	NSUInteger			capacity_;
 	ccV3F_C4B_T2F_Quad	*quads_;	// quads to be rendered
-	GLushort			*indices;
-	CCTexture2D			*texture_;	
+	GLushort			*indices_;
+	CCTexture2D			*texture_;
+#if CC_TEXTURE_ATLAS_USES_VBO
+	GLuint				buffersVBO_[2]; //0: vertex  1: indices
+#endif // CC_TEXTURE_ATLAS_USES_VBO
 }
 
 /** quantity of quads that are going to be drawn */
@@ -50,6 +55,8 @@
 
 /** initializes a TextureAtlas with a filename and with a certain capacity for Quads.
  * The TextureAtlas capacity can be increased in runtime.
+ *
+ * WARNING: Do not reinitialize the TextureAtlas because it will leak memory (issue #706)
  */
 -(id) initWithFile: (NSString*) file capacity:(NSUInteger)capacity;
 
@@ -62,6 +69,8 @@
 /** initializes a TextureAtlas with a previously initialized Texture2D object, and
  * with an initial capacity for Quads. 
  * The TextureAtlas capacity can be increased in runtime.
+ *
+ * WARNING: Do not reinitialize the TextureAtlas because it will leak memory (issue #706)
  */
 -(id) initWithTexture:(CCTexture2D *)tex capacity:(NSUInteger)capacity;
 
@@ -78,7 +87,7 @@
 -(void) insertQuad:(ccV3F_C4B_T2F_Quad*)quad atIndex:(NSUInteger)index;
 
 /** Removes the quad that is located at a certain index and inserts it at a new index
- This operation is faster than remove and insert in 2 different steps.
+ This operation is faster than removing and inserting in a quad in 2 different steps
  @since v0.7.2
 */
 -(void) insertQuadFromIndex:(NSUInteger)fromIndex atIndex:(NSUInteger)newIndex;

@@ -112,7 +112,7 @@ cpflerpconst(cpFloat f1, cpFloat f2, cpFloat d)
 #include "cpArbiter.h"
 #include "cpCollision.h"
 	
-#include "constraints/cpConstraint.h"
+#include "cpConstraint.h"
 
 #include "cpSpace.h"
 

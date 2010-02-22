@@ -2,7 +2,7 @@
  *
  * http://www.cocos2d-iphone.org
  *
- * Copyright (C) 2009 Ricardo Quesada
+ * Copyright (C) 2009,2010 Ricardo Quesada
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the 'cocos2d for iPhone' license.
@@ -26,9 +26,8 @@
 {
 	CGRect			rect_;
 	CGPoint			offset_;
+	CGSize			originalSize_;
 	CCTexture2D		*texture_;
-	BOOL			flipX_;
-	BOOL			flipY_;
 }
 /** rect of the frame */
 @property (nonatomic,readwrite) CGRect rect;
@@ -36,32 +35,31 @@
 /** offset of the frame */
 @property (nonatomic,readwrite) CGPoint offset;
 
+/** original size of the trimmed image */
+@property (nonatomic,readwrite) CGSize originalSize;
+
 /** texture of the frame */
 @property (nonatomic, retain, readwrite) CCTexture2D *texture;
 
-/** whether or not the frame is flipped horizontally */
-@property (nonatomic,readwrite)	BOOL flipX;
-
-/** whether or not the frame is flipped vertically */
-@property (nonatomic,readwrite)	BOOL flipY;
-
 /** Create a CCSpriteFrame with a texture, rect and offset.
- The frame won't be flipped by default.
+ It is assumed that the frame was not trimmed.
  */
 +(id) frameWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset;
 
-/** Create a CCSpriteFrame with a texture, rect and offset, flipX and flipY.
+/** Create a CCSpriteFrame with a texture, rect, offset and originalSize.
+ The originalSize is the size in pixels of the frame before being trimmed.
  */
-+(id) frameWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset flipX:(BOOL)flipX flipY:(BOOL)flipY;
++(id) frameWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset originalSize:(CGSize)originalSize;
 
 /** Initializes a CCSpriteFrame with a texture, rect and offset.
- The frame won't be flipped by default
+ It is assumed that the frame was not trimmed.
  */
 -(id) initWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset;
 
-/** Initializes a CCSpriteFrame with a texture, rect and offset, flipX and flipY. */
--(id) initWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset flipX:(BOOL)flipX flipY:(BOOL)flipY;
-
+/** Initializes a CCSpriteFrame with a texture, rect, offset and originalSize.
+ The originalSize is the size in pixels of the frame before being trimmed.
+ */
+-(id) initWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset originalSize:(CGSize)originalSize;
 @end
 
 #pragma mark -

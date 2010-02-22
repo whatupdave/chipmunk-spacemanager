@@ -46,6 +46,7 @@ typedef enum {
 	CCScene	*outScene;
 	ccTime	duration;
 	BOOL	inSceneOnTop;
+	BOOL	sendCleanupToScene;
 }
 /** creates a base transition with duration and incoming scene */
 +(id) transitionWithDuration:(ccTime) t scene:(CCScene*)s;
@@ -218,6 +219,16 @@ typedef enum {
 +(id) transitionWithDuration:(ccTime)duration scene:(CCScene*)scene withColor:(ccColor3B)color;
 /** initializes the transition with a duration and with an RGB color */
 -(id) initWithDuration:(ccTime)duration scene:(CCScene*)scene withColor:(ccColor3B)color;
+@end
+
+/**
+ CCCrossFadeTransition:
+ Cross fades two scenes using the CCRenderTexture object.
+ */
+@class CCRenderTexture;
+@interface CCCrossFadeTransition : CCTransitionScene
+{
+}
 @end
 
 /** CCTurnOffTilesTransition:

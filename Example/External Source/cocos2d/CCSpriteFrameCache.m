@@ -24,7 +24,7 @@
 #import "CCSpriteFrameCache.h"
 #import "CCSpriteFrame.h"
 #import "CCSprite.h"
-#import "Support/FileUtils.h"
+#import "Support/CCFileUtils.h"
 
 
 @implementation CCSpriteFrameCache
@@ -35,31 +35,21 @@ static CCSpriteFrameCache *sharedSpriteFrameCache_=nil;
 
 + (CCSpriteFrameCache *)sharedSpriteFrameCache
 {
-	@synchronized([CCSpriteFrameCache class])
-	{
-		if (!sharedSpriteFrameCache_)
-			sharedSpriteFrameCache_ = [[CCSpriteFrameCache alloc] init];
+	if (!sharedSpriteFrameCache_)
+		sharedSpriteFrameCache_ = [[CCSpriteFrameCache alloc] init];
 		
-	}
 	return sharedSpriteFrameCache_;
 }
 
 +(id)alloc
 {
-	@synchronized([CCSpriteFrameCache class])
-	{
-		NSAssert(sharedSpriteFrameCache_ == nil, @"Attempted to allocate a second instance of a singleton.");
-		return [super alloc];
-	}
-	// to avoid compiler warning
-	return nil;
+	NSAssert(sharedSpriteFrameCache_ == nil, @"Attempted to allocate a second instance of a singleton.");
+	return [super alloc];
 }
 
 +(void)purgeSharedSpriteFrameCache
 {
-	@synchronized( self ) {
-		[sharedSpriteFrameCache_ release];
-	}
+	[sharedSpriteFrameCache_ release];
 }
 
 -(id) init
@@ -97,10 +87,18 @@ static CCSpriteFrameCache *sharedSpriteFrameCache_=nil;
 		float h = [[frameDict objectForKey:@"height"] floatValue];
 		float ox = [[frameDict objectForKey:@"offsetX"] floatValue];
 		float oy = [[frameDict objectForKey:@"offsetY"] floatValue];
-		BOOL fx = [[frameDict objectForKey:@"flipX"] boolValue];
-		BOOL fy = [[frameDict objectForKey:@"flipX"] boolValue];
+		int ow = [[frameDict objectForKey:@"originalWidth"] intValue];
+		int oh = [[frameDict objectForKey:@"originalHeight"] intValue];
+
+		if( !ow || !oh ) {
+			CCLOG(@"cocos2d: WARNING: originalWidth/Height not found on the CCSpriteFrame. AnchorPoint won't work as expected. Regenrate the .plist");
+		}
 		
-		CCSpriteFrame *frame = [CCSpriteFrame frameWithTexture:texture rect:CGRectMake(x,y,w,h) offset:CGPointMake(ox,oy) flipX:fx flipY:fy];
+		// zwoptex fix
+		ow = abs(ow);
+		oh = abs(oh);
+
+		CCSpriteFrame *frame = [CCSpriteFrame frameWithTexture:texture rect:CGRectMake(x,y,w,h) offset:CGPointMake(ox,oy) originalSize:CGSizeMake(ow,oh)];
 		
 		[spriteFrames setObject:frame forKey:frameDictKey];
 	}
@@ -109,7 +107,7 @@ static CCSpriteFrameCache *sharedSpriteFrameCache_=nil;
 
 -(void) addSpriteFramesWithFile:(NSString*)plist texture:(CCTexture2D*)texture
 {
-	NSString *path = [FileUtils fullPathFromRelativePath:plist];
+	NSString *path = [CCFileUtils fullPathFromRelativePath:plist];
 	NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:path];
 
 	return [self addSpriteFramesWithDictionary:dict texture:texture];
@@ -117,7 +115,7 @@ static CCSpriteFrameCache *sharedSpriteFrameCache_=nil;
 
 -(void) addSpriteFramesWithFile:(NSString*)plist
 {
-	NSString *path = [FileUtils fullPathFromRelativePath:plist];
+	NSString *path = [CCFileUtils fullPathFromRelativePath:plist];
 	NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:path];
 	
 	NSString *texturePath = [NSString stringWithString:plist];

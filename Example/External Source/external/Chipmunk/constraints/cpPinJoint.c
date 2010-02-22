@@ -23,7 +23,7 @@
 //#include <math.h>
 
 #include "chipmunk.h"
-#include "constraints/util.h"
+#include "util.h"
 
 static void
 preStep(cpPinJoint *joint, cpFloat dt, cpFloat dt_inv)
