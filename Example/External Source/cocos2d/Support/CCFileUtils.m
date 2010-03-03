@@ -12,9 +12,10 @@
  *
  */
 
-#import "FileUtils.h"
+#import "CCFileUtils.h"
+#import "CCConfiguration.h"
 
-@implementation FileUtils
+@implementation CCFileUtils
 +(NSString*) fullPathFromRelativePath:(NSString*) relPath
 {
 	// do not convert an absolute path (starting with '/')
@@ -29,7 +30,7 @@
 	[imagePathComponents removeLastObject];
 	NSString *imageDirectory = [NSString pathWithComponents:imagePathComponents];
 	
-	NSString *fullpath = [[NSBundle mainBundle] pathForResource:file
+	NSString *fullpath = [[CCConfiguration sharedConfiguration].loadingBundle pathForResource:file
 														 ofType:nil
 													inDirectory:imageDirectory];
 	if (fullpath == nil)
