@@ -145,7 +145,7 @@
 	cpConstraint *joint = [smgr addSpringToBody:weight->body fromBody:ballSprite.shape->body toBodyAnchor:cpv(0,-30) fromBodyAnchor:cpv(0,0) restLength:0.0f stiffness:1.0f damping:0.0f];
 	cpConstraintNode *jointNode = [cpConstraintNode nodeWithConstraint:joint];
 	
-	cpConstraint *grooveJoint = [smgr addGrooveToBody:smgr.topWall->body fromBody:weight->body grooveAnchor1:cpv(80,250) grooveAnchor2:cpv(400, 250) fromBodyAnchor:cpv(0,50)];	
+	cpConstraint *grooveJoint = [smgr addGrooveToBody:smgr.staticBody fromBody:weight->body grooveAnchor1:cpv(80,250) grooveAnchor2:cpv(400, 250) fromBodyAnchor:cpv(0,50)];	
 	cpConstraintNode *grooveJointNode = [cpConstraintNode nodeWithConstraint:grooveJoint];
 	
 	jointNode.color = ccWHITE;

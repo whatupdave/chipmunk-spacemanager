@@ -160,7 +160,8 @@ typedef enum {
 -(void) stop;
 
 /*! Convenience method for adding a containment rect around the view */
--(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat) elasticity inset:(cpVect)inset;
+-(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset;
+-(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset radius:(cpFloat)radius;
 
 #endif
 

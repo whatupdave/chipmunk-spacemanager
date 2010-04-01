@@ -63,7 +63,7 @@
 	if (_shape != nil)
 	{
 		//If we're out of sync with chipmunk
-		if (cpvlength(cpvsub(_shape->body->p,pos)) != 0)
+		if (_shape->body->p.x != pos.x || _shape->body->p.y != pos.y)
 		{
 			//(Basic Euler integration)
 			if (_integrationDt)

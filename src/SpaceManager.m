@@ -372,31 +372,35 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 
 -(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset
 {
+	[self addWindowContainmentWithFriction:friction elasticity:elasticity inset:inset radius:1.0f];
+}
+
+-(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset radius:(cpFloat)radius
+{
 	CGSize  wins = [[CCDirector sharedDirector] winSize];
 	
-	// bottom
-	bottomWall = cpSegmentShapeNew(_staticBody, cpv(inset.x,inset.y), cpv(wins.width-inset.x,inset.y), 1.0f);
-	bottomWall->e = elasticity; 
-	bottomWall->u = friction;
-	cpSpaceAddStaticShape(_space, bottomWall);
+	bottomWall = [self addSegmentAtWorldAnchor:cpv(inset.x,inset.y) 
+								 toWorldAnchor:cpv(wins.width-inset.x,inset.y) 
+										  mass:STATIC_MASS 
+										radius:radius];
 	
-	// top
-	topWall = cpSegmentShapeNew(_staticBody, cpv(inset.x,wins.height-inset.y), cpv(wins.width-inset.x,wins.height-inset.y), 1.0f);
-	topWall->e = elasticity; 
-	topWall->u = friction;
-	cpSpaceAddStaticShape(_space, topWall);
+	topWall = [self addSegmentAtWorldAnchor:cpv(inset.x,wins.height-inset.y) 
+							  toWorldAnchor:cpv(wins.width-inset.x,wins.height-inset.y)
+									   mass:STATIC_MASS 
+									 radius:radius];
 	
-	// left
-	leftWall = cpSegmentShapeNew(_staticBody, cpv(inset.x,inset.y), cpv(inset.x,wins.height-inset.y), 1.0f);
-	leftWall->e = elasticity; 
-	leftWall->u = friction;
-	cpSpaceAddStaticShape(_space, leftWall);
+	leftWall = [self addSegmentAtWorldAnchor:cpv(inset.x,inset.y)
+							   toWorldAnchor:cpv(inset.x,wins.height-inset.y)
+										mass:STATIC_MASS
+									  radius:radius];
 	
-	// right
-	rightWall = cpSegmentShapeNew(_staticBody, cpv(wins.width-inset.x,inset.y), cpv(wins.width-inset.x,wins.height-inset.y), 1.0f);
-	rightWall->e = elasticity; 
-	rightWall->u = friction;
-	cpSpaceAddStaticShape(_space, rightWall);
+	rightWall = [self addSegmentAtWorldAnchor:cpv(wins.width-inset.x,inset.y)
+								toWorldAnchor:cpv(wins.width-inset.x,wins.height-inset.y)
+										 mass:STATIC_MASS 
+									   radius:radius];
+	
+	bottomWall->e = topWall->e = leftWall->e = rightWall->e = elasticity;
+	bottomWall->u = topWall->u = leftWall->u = rightWall->u = friction;
 }
 
 #endif
