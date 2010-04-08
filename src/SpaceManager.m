@@ -980,11 +980,8 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 }
 
 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody stiffness:(cpFloat)stiff
-{
-	cpFloat m1 = toBody->m;
-	cpFloat m2 = fromBody->m;
-	
-	return [self addSpringToBody:toBody fromBody:fromBody restLength:0.0 stiffness:((m1 < m2) ? m1 : m2) damping:0.0];
+{	
+	return [self addSpringToBody:toBody fromBody:fromBody restLength:0.0 stiffness:stiff damping:0.0];
 }
 
 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveAnchor1:(cpVect)groove1 grooveAnchor2:(cpVect)groove2 fromBodyAnchor:(cpVect)anchor2
@@ -1104,7 +1101,6 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 -(void) ignoreCollionBetweenType:(unsigned int)type1 otherType:(unsigned int)type2
 {
 	cpSpaceAddCollisionHandler(_space, type1, type2, NULL, collIgnore, NULL, NULL, NULL);
-	//cpSpaceAddCollisionPairFunc(_space, type1, type2, &collIgnore, NULL);
 }
 
 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp
@@ -1129,6 +1125,60 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	
 	//add the callback to chipmunk
 	cpSpaceAddCollisionHandler(_space, type1, type2, collBegin, collPreSolve, collPostSolve, collSeparate, invocation);
+	
+	//we'll keep a ref so it won't disappear, prob could just retain and clear hash later
+	[_invocations addObject:invocation];
+}
+
+-(void) addCollisionCallbackBetweenType:(unsigned int)type1 
+							  otherType:(unsigned int)type2 
+								 target:(id)target 
+							   selector:(SEL)selector
+								moments:(CollisionMoment)moments, ...
+{
+	//set up the invocation
+	NSMethodSignature * sig = [[target class] instanceMethodSignatureForSelector:selector];
+	NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
+	
+	[invocation setTarget:target];
+	[invocation setSelector:selector];
+	
+	cpCollisionBeginFunc begin = NULL;
+	cpCollisionPreSolveFunc preSolve = NULL;
+	cpCollisionPostSolveFunc postSolve = NULL;
+	cpCollisionSeparateFunc separate = NULL;
+	CollisionMoment moment;
+	
+	va_list args;
+	va_start(args, moments);
+	
+	do
+	{
+		moment = va_arg(args, CollisionMoment);
+		switch (moment) 
+		{
+			case COLLISION_BEGIN:
+				begin = collBegin;
+				break;
+			case COLLISION_PRESOLVE:
+				preSolve = collPreSolve;
+				break;
+			case COLLISION_POSTSOLVE:
+				postSolve = collPostSolve;
+				break;
+			case COLLISION_SEPARATE:
+				separate = collSeparate;
+				break;
+			default:
+				break;
+		}
+		
+	} while (moment != 0);
+
+	va_end(args);
+		
+	//add the callback to chipmunk
+	cpSpaceAddCollisionHandler(_space, type1, type2, begin, preSolve, postSolve, separate, invocation);
 	
 	//we'll keep a ref so it won't disappear, prob could just retain and clear hash later
 	[_invocations addObject:invocation];

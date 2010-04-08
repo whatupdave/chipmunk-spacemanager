@@ -33,7 +33,7 @@ void defaultEachShape(void *ptr, void* data);
 
 /*! Collision Moments */
 typedef enum { 
-	COLLISION_BEGIN, 
+	COLLISION_BEGIN = 1, 
 	COLLISION_PRESOLVE, 
 	COLLISION_POSTSOLVE, 
 	COLLISION_SEPARATE
@@ -288,6 +288,13 @@ typedef enum {
 
 /*! Register a collision callback between types */
 -(void) addCollisionCallbackBetweenType:(unsigned int)type1 otherType:(unsigned int)type2 target:(id)target selector:(SEL)selector;
+
+/*! Register a collision callback between types for the given collision moments */
+-(void) addCollisionCallbackBetweenType:(unsigned int)type1 
+							  otherType:(unsigned int)type2 
+								 target:(id)target 
+							   selector:(SEL)selector
+								moments:(CollisionMoment)moments, ... NS_REQUIRES_NIL_TERMINATION;
 
 /*! Unregister a collision callback between types */
 -(void) removeCollisionCallbackBetweenType:(unsigned int)type1 otherType:(unsigned int)type2;
