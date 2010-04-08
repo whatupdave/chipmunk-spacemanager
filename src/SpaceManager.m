@@ -981,7 +981,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 
 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody stiffness:(cpFloat)stiff
 {	
-	return [self addSpringToBody:toBody fromBody:fromBody restLength:0.0 stiffness:stiff damping:0.0];
+	return [self addSpringToBody:toBody fromBody:fromBody restLength:0.0 stiffness:stiff damping:1.0f];
 }
 
 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveAnchor1:(cpVect)groove1 grooveAnchor2:(cpVect)groove2 fromBodyAnchor:(cpVect)anchor2
