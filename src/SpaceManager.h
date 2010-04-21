@@ -260,6 +260,9 @@ typedef enum {
 /*! This will force a shape active and give it the given mass */
 -(cpShape*) morphShapeToActive:(cpShape*)shape mass:(cpFloat)mass;
 
+/*! This will force a shape to be kinematic (body will not simulate) */
+-(cpShape*) morphShapeToKinematic:(cpShape*)shape;
+
 /*! This will take a shape (any) and split it into the number of pieces you specify,
 	@return An NSArray* of NSValues* with cpShape* as the value (the fragments) or nil if failed
  */
@@ -280,8 +283,11 @@ typedef enum {
  */
 -(NSArray*) fragmentSegment:(cpSegmentShape*)segment piecesNum:(int)pieces eachMass:(float)mass;
 
-/*! */
-//-(void) mergeShape:(cpShape*)shape withShape:(cpShape*)shape2;
+/*! Combine two shapes together by combining their bodies into one */
+-(void) combineShapes:(cpShape*)shape, ... NS_REQUIRES_NIL_TERMINATION;
+
+/*! Offset shape from body using (circle:center, segment:endpoints, poly:vertices) */
+-(void) offsetShape:(cpShape*)shape offset:(cpVect)offset;
 
 /*! Unique Collision: will ignore the effects a collsion between types */
 -(void) ignoreCollionBetweenType:(unsigned int)type1 otherType:(unsigned int)type2;

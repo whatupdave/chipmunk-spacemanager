@@ -79,16 +79,23 @@
 	}
 }
 
--(void) applyImpulse:(cpVect)impulse
+-(void) addToAnchorWithOffset:(cpVect)offset node:(CCNode*)node
 {
-	if (_shape != nil)
-		cpBodyApplyImpulse(_shape->body, impulse, cpvzero);
+	CGSize size = node.contentSize;
+	node.anchorPoint = cpvadd(node.anchorPoint, 
+							  cpv(-offset.x/size.width, -offset.y/size.height));
 }
 
--(void) applyForce:(cpVect)force
+-(void) applyImpulse:(cpVect)impulse offset:(cpVect)offset
 {
 	if (_shape != nil)
-		cpBodyApplyForce(_shape->body, force, cpvzero);	
+		cpBodyApplyImpulse(_shape->body, impulse, offset);
+}
+
+-(void) applyForce:(cpVect)force offset:(cpVect)offset
+{
+	if (_shape != nil)
+		cpBodyApplyForce(_shape->body, force, offset);	
 }
 
 -(void) resetForces

@@ -45,6 +45,10 @@
 	_fillShape = YES;
 	_drawDecoration = YES;
 	
+	//Set internals
+	self.contentSize = CGSizeMake(shape->bb.r - shape->bb.l, shape->bb.b - shape->bb.t);
+	self.anchorPoint = ccp(0.0f, 0.0f);
+	
 	return self;
 }
 
@@ -134,10 +138,12 @@
 	
 	glVertexPointer(2, GL_FLOAT, 0, circleVAR);
 	
+	//ccDrawCircle(cpvzero, circle->r, 0, 30, _drawDecoration);
+	
 	glPushMatrix(); {
-		//cpVect center = cpvadd(body->p, cpvrotate(circle->c, body->rot));
-		//glTranslatef(center.x, center.y, 0.0f);
-		//glRotatef(body->a*180.0/M_PI, 0.0f, 0.0f, 1.0f);
+		//cpVect center = cpvsub(anchorPoint_, cpv(0.5f, 0.5f));
+		//glTranslatef(-center.x*contentSize_.width, -center.y*contentSize_.height, 0.0f);
+
 		glScalef(circle->r, circle->r, 1.0f);
 		
 		if (_fillShape)

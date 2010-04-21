@@ -15,6 +15,7 @@
 
 @interface GameLayer (PrivateMethods)
 - (void) setupExample;
+- (void) setupMergedShapes;
 - (void) setupStaticShapes;
 - (void) setupBallSlider;
 - (void) setupSawHorse;
@@ -81,9 +82,34 @@
 	[self setupBallSlider];
 	[self setupSawHorse];
 	[self setupFragmentShape];
+	[self setupMergedShapes];
 	
 	//start the manager!
 	[smgr start]; 	
+}
+
+- (void) setupMergedShapes
+{
+	cpShape *sh1 = [smgr addCircleAt:cpv(300,190) mass:0.25 radius:10];
+	cpCCSprite *s1 = [cpCCSprite spriteWithShape:sh1 file:@"ball.png"];
+	[self addChild:s1];
+	
+	cpShape *sh2 = [smgr addCircleAt:cpv(340,160) mass:3.0 radius:10];
+	cpShapeNode *s2 = [cpShapeNode nodeWithShape:sh2];
+	s2.color = ccWHITE;
+	[self addChild:s2];
+	
+	
+	cpShape *sh3 = [smgr addCircleAt:cpv(310,100) mass:1.0 radius:10];
+	cpShapeNode *s3 = [cpShapeNode nodeWithShape:sh3];
+	s3.color = ccYELLOW;
+	[self addChild:s3];
+	
+	[smgr combineShapes:sh1,sh2,sh3,nil];
+	[s1 addToAnchorWithOffset:cpCircleShapeGetOffset(sh1)];
+	[s2 addToAnchorWithOffset:cpCircleShapeGetOffset(sh2)];
+	[s3 addToAnchorWithOffset:cpCircleShapeGetOffset(sh3)];
+	
 }
 
 - (void) setupStaticShapes

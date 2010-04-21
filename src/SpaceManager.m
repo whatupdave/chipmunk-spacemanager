@@ -24,7 +24,7 @@ void defaultEachShape(void *ptr, void* data)
 	if(node) 
 	{
 		cpBody *body = shape->body;
-		[node setPosition: cpv( body->p.x, body->p.y)];
+		[node setPosition:body->p];
 		[node setRotation: CC_RADIANS_TO_DEGREES( -body->a )];
 	}
 #endif
@@ -806,6 +806,12 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	return shape;
 }
 
+-(cpShape*) morphShapeToKinematic:(cpShape*)shape
+{
+	cpSpaceRemoveBody(_space, shape->body);
+	return shape;
+}
+
 -(NSArray*) fragmentShape:(cpShape*)shape piecesNum:(int)pieces eachMass:(float)mass;
 {
 	cpShapeType type = shape->klass->type;
@@ -930,6 +936,133 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	[self removeAndFreeShape:(cpShape*)segment];
 	
 	return fragments;	
+}
+
+-(void) combineShapes:(cpShape*)shapes, ...
+{
+	cpArray *ss = cpArrayNew(2);
+	va_list args;
+	va_start(args, shapes);
+	
+	cpShape *shape = shapes;
+	cpBody *body = shape->body; 
+	
+	//Setup initial data
+	cpVect mr = cpvmult(body->p, body->m);
+	cpFloat total_mass = body->m;
+	cpArrayPush(ss, shape);
+	
+	while ((shape = va_arg(args, cpShape*)))
+	{
+		body = shape->body;
+		
+		//Calculate the sum of the "first mass moments"
+		//Treating each shape/body as a particle
+		mr = cpvadd(mr, cpvmult(body->p, body->m));
+		total_mass += body->m;
+		
+		cpArrayPush(ss, shape);
+	}
+	va_end(args);
+	
+	//Make sure no funny business
+	if (ss->num > 1)
+	{
+	
+		//Calculate the center of mass
+		cpVect cm = cpvmult(mr, 1.0f/(total_mass));
+		cpFloat moi = 0;
+		
+		//Grab first shape
+		cpShape *first_shape = ss->arr[0];
+		
+		//Calculate the new moment of inertia
+		for(int i=0; i < ss->num; i++)
+		{
+			shape = ss->arr[i];
+			body = shape->body;
+			
+			cpVect offset = cpvsub(body->p, cm);
+			
+			//apply the offset (based off type)
+			[self offsetShape:shape  offset:offset];
+			
+			//summation of inertia
+			moi += (body->i + body->m*cpvdot(offset, offset));
+			
+			//Remove all but first body (for reuse)
+			if (i)
+			{
+				cpSpaceRemoveBody(_space, body);
+				cpBodyFree(body);
+				
+				//New body for this shape
+				shape->body = first_shape->body;
+			}
+			
+		}
+		
+		//New mass and moment of inertia
+		cpBodySetMass(first_shape->body, total_mass);
+		cpBodySetMoment(first_shape->body, moi);
+		
+		//New pos
+		cpBodySetPos(first_shape->body, cm);
+	}
+	
+	//free the array
+	cpArrayFree(ss);
+	
+	/*
+	cpBody *b1 = shape->body;
+	cpBody *b2 = shape2->body;
+	
+	//Calculate the sum of the "first mass moments"
+	//Treating each shape/body as a particle
+	cpVect mr = cpvadd(cpvmult(b1->p, b1->m), cpvmult(b2->p, b2->m));
+	
+	//Calculate the center of mass
+	cpVect cm = cpvmult(mr, 1.0f/(b1->m+b2->m));
+	
+	cpVect offset1 = cpvsub(b1->p, cm);
+	cpVect offset2 = cpvsub(b2->p, cm);
+	
+	//apply the offset (based off type)
+	[self offsetShape:shape  offset:offset1];
+	[self offsetShape:shape2 offset:offset2];
+	
+	cpFloat moi = ((b1->i + b1->m*cpvdot(offset1, offset1)) +
+				   (b2->i + b2->m*cpvdot(offset2, offset2)));
+	
+	cpBodySetMass(shape->body, b1->m + b2->m);
+	cpBodySetMoment(shape->body, moi);
+	
+	
+	//New pos
+	cpBodySetPos(shape->body, cm);
+	
+	//Remove 2nd body
+	cpSpaceRemoveBody(_space, b2);
+	cpBodyFree(b2);
+	
+	//Set second shape's body to new body
+	shape2->body = shape->body;*/
+}
+
+-(void) offsetShape:(cpShape*)shape offset:(cpVect)offset;
+{
+	switch(shape->klass->type)
+	{
+		case CP_CIRCLE_SHAPE:
+			((cpCircleShape*)shape)->c = offset;
+			break;
+		case CP_SEGMENT_SHAPE:
+			
+			break;
+		case CP_POLY_SHAPE:
+			
+			break;
+	}	
 }
 
 -(cpConstraint*) removeConstraint:(cpConstraint*)constraint

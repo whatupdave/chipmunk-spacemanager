@@ -43,8 +43,12 @@
 -(void) setAutoFreeShape:(BOOL)autofree;
 -(BOOL) autoFreeShape;
 
+-(void) addToAnchorWithOffset:(cpVect)offset;
+
 -(void) applyImpulse:(cpVect)impulse;
+-(void) applyImpulse:(cpVect)impulse offset:(cpVect)offset;
 -(void) applyForce:(cpVect)force;
+-(void) applyForce:(cpVect)force offset:(cpVect)offset;
 -(void) resetForces;
 @end
 
@@ -75,8 +79,10 @@
 -(BOOL)setRotation:(float)rot;
 -(void)setPosition:(cpVect)pos;
 
--(void) applyImpulse:(cpVect)impulse;
--(void) applyForce:(cpVect)force;
+-(void) conformNodeToOffset:(cpVect)offset node:(CCNode*)node;
+
+-(void) applyImpulse:(cpVect)impulse offset:(cpVect)offset;
+-(void) applyForce:(cpVect)force offset:(cpVect)offset;
 -(void) resetForces;
 
 @end
@@ -122,13 +128,20 @@ if (shape)\
 }\
 -(void) applyImpulse:(cpVect)impulse\
 {\
-	[_implementation applyImpulse:impulse];\
+	[_implementation applyImpulse:impulse offset:cpvzero];\
 }\
 -(void) applyForce:(cpVect)force\
 {\
-	[_implementation applyForce:force];\
+	[_implementation applyForce:force offset:cpvzero];\
 }\
-\
+-(void) applyImpulse:(cpVect)impulse offset:(cpVect)offset\
+{\
+	[_implementation applyImpulse:impulse offset:offset];\
+}\
+-(void) applyForce:(cpVect)force offset:(cpVect)offset\
+{\
+	[_implementation applyForce:force offset:offset];\
+}\
 -(void) resetForces\
 {\
 	[_implementation resetForces];\
@@ -159,17 +172,21 @@ if (shape)\
 }\
 -(void) setSpaceManager:(SpaceManager*)spaceManager\
 {\
-_implementation.spaceManager = spaceManager;\
+	_implementation.spaceManager = spaceManager;\
 }\
 -(SpaceManager*) spaceManager\
 {\
-return _implementation.spaceManager;\
+	return _implementation.spaceManager;\
 }\
 -(void) setAutoFreeShape:(BOOL)autoFree\
 {\
-_implementation.autoFreeShape = autoFree;\
+	_implementation.autoFreeShape = autoFree;\
 }\
 -(BOOL) autoFreeShape\
 {\
-return _implementation.autoFreeShape;\
+	return _implementation.autoFreeShape;\
+}\
+-(void) addToAnchorWithOffset:(cpVect)offset\
+{\
+	[_implementation addToAnchorWithOffset:offset node:self];\
 }
