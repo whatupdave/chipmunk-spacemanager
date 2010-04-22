@@ -1267,7 +1267,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 							  otherType:(unsigned int)type2 
 								 target:(id)target 
 							   selector:(SEL)selector
-								moments:(CollisionMoment)moments, ...
+								moments:(CollisionMoment)moment, ...
 {
 	//set up the invocation
 	NSMethodSignature * sig = [[target class] instanceMethodSignatureForSelector:selector];
@@ -1280,14 +1280,12 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	cpCollisionPreSolveFunc preSolve = NULL;
 	cpCollisionPostSolveFunc postSolve = NULL;
 	cpCollisionSeparateFunc separate = NULL;
-	CollisionMoment moment;
 	
 	va_list args;
-	va_start(args, moments);
+	va_start(args, moment);
 	
-	do
+	while (moment != 0)
 	{
-		moment = va_arg(args, CollisionMoment);
 		switch (moment) 
 		{
 			case COLLISION_BEGIN:
@@ -1305,8 +1303,8 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 			default:
 				break;
 		}
-		
-	} while (moment != 0);
+		moment = (CollisionMoment)va_arg(args, int);
+	}
 
 	va_end(args);
 		

@@ -300,7 +300,7 @@ typedef enum {
 							  otherType:(unsigned int)type2 
 								 target:(id)target 
 							   selector:(SEL)selector
-								moments:(CollisionMoment)moments, ... NS_REQUIRES_NIL_TERMINATION;
+								moments:(CollisionMoment)moment, ... NS_REQUIRES_NIL_TERMINATION;
 
 /*! Unregister a collision callback between types */
 -(void) removeCollisionCallbackBetweenType:(unsigned int)type1 otherType:(unsigned int)type2;
