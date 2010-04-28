@@ -73,6 +73,7 @@ static int handleInvocations(CollisionMoment moment, cpArbiter *arb, struct cpSp
 		//No biggie, continue!
 	}
 	
+	[invocation retain];
 	[invocation invoke];
 	
 	//default is yes, thats what it is in chipmunk
@@ -81,6 +82,9 @@ static int handleInvocations(CollisionMoment moment, cpArbiter *arb, struct cpSp
 	//not sure how heavy these methods are...
 	if ([[invocation methodSignature]  methodReturnLength] > 0)
 		[invocation getReturnValue:&retVal];
+	
+	[invocation release];
+
 	
 	return retVal;
 }

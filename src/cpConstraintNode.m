@@ -65,7 +65,7 @@
 - (void) dealloc
 {
 	if (_autoFreeConstraint)
-		[_spaceManager removeConstraint:_constraint];
+		[_spaceManager removeAndFreeConstraint:_constraint];
 	[super dealloc];
 }
 

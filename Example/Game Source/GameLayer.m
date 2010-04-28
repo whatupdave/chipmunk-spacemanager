@@ -264,7 +264,7 @@
 }
 
 - (void) handleCollisionWithFragmentingRect:(CollisionMoment)moment arbiter:(cpArbiter*)arb space:(cpSpace*)space
-{
+{	
 	if (moment == COLLISION_POSTSOLVE)
 	{
 		[label setString:@"You hit the Fragmenting Shape!"];

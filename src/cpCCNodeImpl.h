@@ -79,7 +79,7 @@
 -(BOOL)setRotation:(float)rot;
 -(void)setPosition:(cpVect)pos;
 
--(void) conformNodeToOffset:(cpVect)offset node:(CCNode*)node;
+-(void) addToAnchorWithOffset:(cpVect)offset node:(CCNode*)node;
 
 -(void) applyImpulse:(cpVect)impulse offset:(cpVect)offset;
 -(void) applyForce:(cpVect)force offset:(cpVect)offset;
