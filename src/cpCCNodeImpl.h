@@ -43,8 +43,6 @@
 -(void) setAutoFreeShape:(BOOL)autofree;
 -(BOOL) autoFreeShape;
 
--(void) addToAnchorWithOffset:(cpVect)offset;
-
 -(void) applyImpulse:(cpVect)impulse;
 -(void) applyImpulse:(cpVect)impulse offset:(cpVect)offset;
 -(void) applyForce:(cpVect)force;
@@ -78,8 +76,6 @@
 
 -(BOOL)setRotation:(float)rot;
 -(void)setPosition:(cpVect)pos;
-
--(void) addToAnchorWithOffset:(cpVect)offset node:(CCNode*)node;
 
 -(void) applyImpulse:(cpVect)impulse offset:(cpVect)offset;
 -(void) applyForce:(cpVect)force offset:(cpVect)offset;
@@ -185,8 +181,4 @@ if (shape)\
 -(BOOL) autoFreeShape\
 {\
 	return _implementation.autoFreeShape;\
-}\
--(void) addToAnchorWithOffset:(cpVect)offset\
-{\
-	[_implementation addToAnchorWithOffset:offset node:self];\
 }

@@ -1058,13 +1058,29 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	switch(shape->klass->type)
 	{
 		case CP_CIRCLE_SHAPE:
-			((cpCircleShape*)shape)->c = offset;
+			cpCircleShapeSetOffset(shape, offset);
 			break;
 		case CP_SEGMENT_SHAPE:
+		{
+			cpVect a = cpSegmentShapeGetA(shape);
+			cpVect b = cpSegmentShapeGetA(shape);
 			
+			cpSegmentShapeSetEndpoints(shape, cpvadd(a, offset), cpvadd(b, offset));
 			break;
+		}
 		case CP_POLY_SHAPE:
+		{
+			int numVerts = cpPolyShapeGetNumVerts(shape);
+			cpVect *verts = malloc(sizeof(cpVect)*numVerts);
 			
+			//have to copy... oh well
+			for (int i = 0; i < numVerts; i++)
+				verts[i] = cpPolyShapeGetVert(shape, i);
+			
+			cpPolyShapeSetVerts(shape, numVerts, verts, offset);
+			
+			free(verts);
+		}
 			break;
 	}	
 }

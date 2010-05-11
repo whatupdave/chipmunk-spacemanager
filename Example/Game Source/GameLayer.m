@@ -99,17 +99,12 @@
 	s2.color = ccWHITE;
 	[self addChild:s2];
 	
-	
-	cpShape *sh3 = [smgr addCircleAt:cpv(310,100) mass:1.0 radius:10];
+	cpShape *sh3 = [smgr addRectAt:cpv(310,100) mass:1.0 width:20 height:20 rotation:1];
 	cpShapeNode *s3 = [cpShapeNode nodeWithShape:sh3];
 	s3.color = ccYELLOW;
 	[self addChild:s3];
 	
 	[smgr combineShapes:sh1,sh2,sh3,nil];
-	[s1 addToAnchorWithOffset:cpCircleShapeGetOffset(sh1)];
-	[s2 addToAnchorWithOffset:cpCircleShapeGetOffset(sh2)];
-	[s3 addToAnchorWithOffset:cpCircleShapeGetOffset(sh3)];
-	
 }
 
 - (void) setupStaticShapes

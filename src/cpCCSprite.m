@@ -74,6 +74,29 @@
 	return self;
 }
 
+#define RENDER_IN_SUBPIXEL
+
+-(void) draw
+{
+	cpShape *shape = _implementation.shape;
+	if (shape->klass->type == CP_CIRCLE_SHAPE)
+	{
+		cpVect offset = cpCircleShapeGetOffset(shape);
+		
+		if (offset.x != 0 && offset.y != 0)
+		{
+			glPushMatrix();
+			glTranslatef(RENDER_IN_SUBPIXEL(offset.x), RENDER_IN_SUBPIXEL(offset.y), 0);
+			[super draw];
+			glPopMatrix();
+		}
+		else
+			[super draw];
+	}
+	else
+		[super draw];
+}
+
 CPCCNODE_FUNC_SRC
 
 @end

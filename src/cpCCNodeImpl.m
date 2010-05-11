@@ -79,13 +79,6 @@
 	}
 }
 
--(void) addToAnchorWithOffset:(cpVect)offset node:(CCNode*)node
-{
-	CGSize size = node.contentSize;
-	node.anchorPoint = cpvadd(node.anchorPoint, 
-							  cpv(-offset.x/size.width, -offset.y/size.height));
-}
-
 -(void) applyImpulse:(cpVect)impulse offset:(cpVect)offset
 {
 	if (_shape != nil)

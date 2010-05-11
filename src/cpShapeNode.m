@@ -52,9 +52,12 @@
 	return self;
 }
 
+#define RENDER_IN_SUBPIXEL
+
 - (void) draw
 {
-	[super draw];
+	//[super draw];
+	cpShape *shape = _implementation.shape;
 	
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -78,11 +81,26 @@
 		
 	glColor4ub(_color.r, _color.g, _color.b, _opacity);
 	
-	switch(_implementation.shape->klass->type)
+	switch(shape->klass->type)
 	{
 		case CP_CIRCLE_SHAPE:
+		{
+			//Circle's are somewhat unique with this offset variable
+			cpVect offset = cpCircleShapeGetOffset(shape);
+			BOOL pushpop =  (offset.x != 0 && offset.y != 0);
+			
+			if (pushpop)
+			{
+				glPushMatrix();
+				glTranslatef(RENDER_IN_SUBPIXEL(offset.x), RENDER_IN_SUBPIXEL(offset.y), 0);
+			}
+			
 			[self drawCircleShape];
+
+			if (pushpop)
+				glPopMatrix();
 			break;
+		}
 		case CP_SEGMENT_SHAPE:
 			[self drawSegmentShape];
 			break;
