@@ -234,11 +234,7 @@
 	cpVect a = cpvadd(body_a->p, cpvrotate(joint->anchr1, body_a->rot));
 	cpVect b = cpvadd(body_b->p, cpvrotate(joint->anchr2, body_b->rot));
 	
-	float *array = malloc( sizeof(float)*4);
-	array[0] = a.x;
-	array[1] = a.y;
-	array[2] = b.x;
-	array[3] = b.y;
+	const float array[] = { a.x, a.y, b.x, b.y };
 	
 	glVertexPointer(2, GL_FLOAT, 0, array);
 	//glEnableClientState(GL_VERTEX_ARRAY);
@@ -247,7 +243,6 @@
 	glDrawArrays(GL_LINES, 0, 2);
 	
 	//glDisableClientState(GL_VERTEX_ARRAY);	
-	free(array);
 }
 
 - (void) drawSlideJoint:(cpSlideJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
@@ -255,11 +250,7 @@
 	cpVect a = cpvadd(body_a->p, cpvrotate(joint->anchr1, body_a->rot));
 	cpVect b = cpvadd(body_b->p, cpvrotate(joint->anchr2, body_b->rot));
 	
-	float *array = malloc( sizeof(float)*4);
-	array[0] = a.x;
-	array[1] = a.y;
-	array[2] = b.x;
-	array[3] = b.y;
+	const float array[] = { a.x, a.y, b.x, b.y };
 	
 	glVertexPointer(2, GL_FLOAT, 0, array);
 	//glEnableClientState(GL_VERTEX_ARRAY);
@@ -268,8 +259,6 @@
 	glDrawArrays(GL_LINES, 0, 2);
 	
 	//glDisableClientState(GL_VERTEX_ARRAY);	
-	
-	free(array);
 }
 
 - (void) drawPivotJoint:(cpPivotJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
@@ -277,11 +266,7 @@
 	cpVect a = cpvadd(body_a->p, cpvrotate(joint->anchr1, body_a->rot));
 	cpVect b = cpvadd(body_b->p, cpvrotate(joint->anchr2, body_b->rot));
 	
-	float *array = malloc( sizeof(float)*4);
-	array[0] = a.x;
-	array[1] = a.y;
-	array[2] = b.x;
-	array[3] = b.y;
+	const float array[] = { a.x, a.y, b.x, b.y };
 	
 	glVertexPointer(2, GL_FLOAT, 0, array);
 
@@ -289,8 +274,6 @@
 	glDrawArrays(GL_POINTS, 0, 2);	
 	glDrawArrays(GL_LINES, 0, 2);
 	//glDisableClientState(GL_VERTEX_ARRAY);	
-	
-	free(array);
 }
 
 - (void) drawGrooveJoint:(cpGrooveJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
@@ -343,11 +326,7 @@
 	cpVect a = cpvadd(body_a->p, cpvrotate(joint->anchr1, body_a->rot));
 	cpVect b = cpvadd(body_b->p, cpvrotate(joint->anchr2, body_b->rot));
 	
-	float *array = malloc( sizeof(float)*4);
-	array[0] = a.x;
-	array[1] = a.y;
-	array[2] = b.x;
-	array[3] = b.y;
+	const float array[] = { a.x, a.y, b.x, b.y };
 	
 	glVertexPointer(2, GL_FLOAT, 0, array);
 	
@@ -376,8 +355,6 @@
 	} glPopMatrix();
 	
 	//glDisableClientState(GL_VERTEX_ARRAY);	
-	
-	free(array);
 }
 
 /*- (void) drawBreakableJoint:(cpBreakableJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
@@ -415,7 +392,7 @@
 	c = cpvadd(body_a->p, cpvrotate(c,rotation));
 	d = cpvadd(body_b->p, cpvrotate(d,rotation));
 	
-	float *array = malloc(sizeof(float)*8);
+	float array[8];
 	array[0] = a.x;
 	array[1] = a.y;
 	array[4] = c.x;

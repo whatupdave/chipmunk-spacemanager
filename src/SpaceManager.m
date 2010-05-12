@@ -14,6 +14,7 @@
  **********************************************************************/
 
 #import "SpaceManager.h"
+#import "chipmunk_unsafe.h"
 
 void defaultEachShape(void *ptr, void* data)
 {
@@ -280,50 +281,6 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	{
 		//ERROR
 	}
-	
-	NSMutableString *fileContents = [NSMutableString stringWithString:@"<?xml version=""1.0"" encoding=""UTF-8""?>"];
-	[fileContents appendString:@"\n<space>"];
-	
-	//Write out active shapes
-	cpHashSet *activeSet = _space->activeShapes->handleSet;
-	for(int i=0; i<activeSet->size; i++)
-	{
-		cpHashSetBin *bin = activeSet->table[i];
-		while(bin)
-		{
-			cpHashSetBin *next = bin->next;
-			cpShape *shape = (cpShape*)bin->elt;
-			[fileContents appendString:[self writeShape:shape]];
-			bin = next;
-		}
-	}
-	
-	//Write out static shapes
-	cpHashSet *staticSet = _space->staticShapes->handleSet;
-	for(int i=0; i<staticSet->size; i++)
-	{
-		cpHashSetBin *bin = staticSet->table[i];
-		while(bin)
-		{
-			cpHashSetBin *next = bin->next;
-			cpShape *shape = (cpShape*)bin->elt;
-			[fileContents appendString:[self writeShape:shape]];
-			bin = next;
-		}
-	}
-	
-	//Write out constraints
-	for(int i=0; i<_space->constraints->num; i++)
-	{
-		cpConstraint *constraint = (cpConstraint *)_space->constraints->arr[i];
-		[fileContents appendString:[self writeConstraint:constraint]];
-	}
-	
-	[fileContents appendString:@"\n</space>"];
-	
-	[[NSFileManager defaultManager] createFileAtPath:path 
-											contents:[fileContents dataUsingEncoding:NSUTF8StringEncoding]
-										  attributes:nil];
 }
 
 -(NSString*) writeShape:(cpShape*)shape
@@ -517,11 +474,13 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 
 -(cpShape*) addRectAt:(cpVect)pos mass:(cpFloat)mass width:(cpFloat)width height:(cpFloat)height rotation:(cpFloat)r 
 {	
+	const cpFloat halfHeight = height/2.0f;
+	const cpFloat halfWidth = width/2.0f;
 	return [self addPolyAt:pos mass:mass rotation:r numPoints:4 points:		
-																	cpv(-width/2.0f, height/2.0f),	/* top-left */ 
-																	cpv( width/2.0f, height/2.0f),	/* top-right */
-																	cpv( width/2.0f,-height/2.0f),	/* bottom-right */
-																	cpv(-width/2.0f,-height/2.0f)];	/* bottom-left */
+																	cpv(-halfWidth, halfHeight),	/* top-left */ 
+																	cpv( halfWidth, halfHeight),	/* top-right */
+																	cpv( halfWidth,-halfHeight),	/* bottom-right */
+																	cpv(-halfWidth,-halfHeight)];	/* bottom-left */
 }
 
 -(cpShape*) addPolyAt:(cpVect)pos mass:(cpFloat)mass rotation:(cpFloat)r numPoints:(int)numPoints points:(cpVect)pt, ...
@@ -534,7 +493,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 		va_start(args,pt);
 
 		//Setup our vertices
-		cpVect *verts = malloc(sizeof(cpVect)*numPoints);
+		cpVect verts[numPoints];
 		verts[0] = pt;
 		for (int i = 1; i < numPoints; i++)
 			verts[i] = va_arg(args, cpVect);
@@ -551,7 +510,6 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 		cpBodySetAngle(shape->body, r);	
 		[self addShape:shape];
 			
-		free(verts);
 		va_end(args);
 	}
 	
@@ -708,7 +666,8 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	cpArbiter *retArb = NULL;
 	int max_contact_staleness = cp_contact_persistence;
 	cpHashSet *contactSet = _space->contactSet;
-	for(int i=0; i<contactSet->size && !retArb; i++)
+	const int size = contactSet->size;
+	for(int i=0; i < size && !retArb; i++)
 	{
 		cpHashSetBin *bin = contactSet->table[i];
 		while(bin && !retArb)
@@ -737,10 +696,11 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 -(NSArray*) getConstraints
 {
 	NSMutableArray *constraints = [[[NSMutableArray alloc] init] autorelease];
-	int num = _space->constraints->num;
+	const int num = _space->constraints->num;
+	void** constraintArr = _space->constraints->arr;
 	
 	for (int i = 0; i < num; i++)
-		[constraints addObject:[NSValue valueWithPointer:_space->constraints->arr[i]]];
+		[constraints addObject:[NSValue valueWithPointer:constraintArr]];
 	
 	return constraints;
 }
@@ -749,11 +709,12 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 {
 	NSMutableArray *constraints = [[[NSMutableArray alloc] init] autorelease];
 	cpConstraint* constraint;
-	int num = _space->constraints->num;
-	
+	const int num = _space->constraints->num;
+	void** constraintArr = _space->constraints->arr;
+
 	for (int i = 0; i < num; i++)
 	{
-		constraint = _space->constraints->arr[i];
+		constraint = constraintArr[i];
 		
 		if (body == constraint->a || body == constraint->b)
 			[constraints addObject:[NSValue valueWithPointer:constraint]];
@@ -1101,8 +1062,9 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 {
 	cpConstraint *constraint;
 	cpArray *array = _space->constraints;
+	const int num = array->num;
 
-	for (int i = 0; i < array->num; i++)
+	for (int i = 0; i < num; i++)
 	{
 		constraint = array->arr[i];
 			

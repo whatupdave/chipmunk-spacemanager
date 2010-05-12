@@ -242,17 +242,10 @@
 		} glPopMatrix();
 	} else 
 	{
-		float *array = malloc( sizeof(float)*4);
-		array[0] = a.x;
-		array[1] = a.y;
-		array[2] = b.x;
-		array[3] = b.y;
+		const float array[] = { a.x, a.y, b.x, b.y };
 		
-		glVertexPointer(2, GL_FLOAT, 0, array);
-		
+		glVertexPointer(2, GL_FLOAT, 0, array);		
 		glDrawArrays(GL_LINES, 0, 2);	
-		
-		free(array);
 	}
 }
 
