@@ -1,14 +1,25 @@
-/* cocos2d for iPhone
+/*
+ * cocos2d for iPhone: http://www.cocos2d-iphone.org
  *
- * http://www.cocos2d-iphone.org
- *
- * Copyright (C) 2008,2009 Ricardo Quesada
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the 'cocos2d for iPhone' license.
- *
- * You will find a copy of this license within the cocos2d for iPhone
- * distribution inside the "LICENSE" file.
+ * Copyright (c) 2008-2010 Ricardo Quesada
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  *
  */
 
@@ -37,7 +48,7 @@ static EAGLContext *auxEAGLcontext = nil;
 @synthesize data = data_;
 - (void) dealloc
 {
-	CCLOG(@"cocos2d: deallocing %@", self);
+	CCLOGINFO(@"cocos2d: deallocing %@", self);
 	[target_ release];
 	[data_ release];
 	[super dealloc];
@@ -284,7 +295,7 @@ static CCTextureCache *sharedTextureCache;
 	for( id key in keys ) {
 		id value = [textures objectForKey:key];		
 		if( [value retainCount] == 1 ) {
-			CCLOG(@"cocos2d: removing texture: %@", key);
+			CCLOG(@"cocos2d: CCTextureCache: removing unused texture: %@", key);
 			[textures removeObjectForKey:key];
 		}
 	}

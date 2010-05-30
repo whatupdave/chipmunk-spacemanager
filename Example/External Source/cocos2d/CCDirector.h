@@ -1,16 +1,27 @@
-/* cocos2d for iPhone
+/*
+ * cocos2d for iPhone: http://www.cocos2d-iphone.org
  *
- * http://www.cocos2d-iphone.org
- *
- * Copyright (C) 2008,2009,2010 Ricardo Quesada
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the 'cocos2d for iPhone' license.
- *
- * You will find a copy of this license within the cocos2d for iPhone
- * distribution inside the "LICENSE" file.
- *
+ * Copyright (c) 2008-2010 Ricardo Quesada
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
+
 
 
 //
@@ -20,48 +31,66 @@
 // OpenGL related
 #import "Support/EAGLView.h"
 
-/** Possible Pixel Formats for the EAGLView */
+/** @typedef tPixelFormat
+ Possible Pixel Formats for the EAGLView
+ */
 typedef enum {
 	/** RGB565 pixel format. No alpha. 16-bit. (Default) */
-	kPixelFormatRGB565,
+	kCCPixelFormatRGB565,
 	/** RGBA format. 32-bit. Needed for some 3D effects. It is not as fast as the RGB565 format. */
-	kPixelFormatRGBA8888,
+	kCCPixelFormatRGBA8888,
 	/** default pixel format */
-	kPixelFormatDefault = kPixelFormatRGB565,
+	kCCPixelFormatDefault = kCCPixelFormatRGB565,
 
-	kRGB565 = kPixelFormatRGB565,
-	kRGBA8 = kPixelFormatRGBA8888,
+	// backward compatibility stuff
+	kPixelFormatRGB565 = kCCPixelFormatRGB565,
+	kRGB565 = kCCPixelFormatRGB565,
+	kPixelFormatRGBA8888 = kCCPixelFormatRGBA8888,
+	kRGBA8 = kCCPixelFormatRGBA8888,
 } tPixelFormat;
 
-/** Possible DepthBuffer Formats for the EAGLView.
+/** @typedef tDepthBufferFormat
+ Possible DepthBuffer Formats for the EAGLView.
  Use 16 or 24 bit depth buffers if you are going to use real 3D objects.
  */
 typedef enum {
 	/// A Depth Buffer of 0 bits will be used (default)
-	kDepthBufferNone,
+	kCCDepthBufferNone,
 	/// A depth buffer of 16 bits will be used
-	kDepthBuffer16,
+	kCCDepthBuffer16,
 	/// A depth buffer of 24 bits will be used
-	kDepthBuffer24,
+	kCCDepthBuffer24,
+	
+	// backward compatibility stuff
+	kDepthBuffer16 = kCCDepthBuffer16,
+	kDepthBuffer24 = kCCDepthBuffer24,
 } tDepthBufferFormat;
 
-/** Possible OpenGL projections used by director */
+/** @typedef ccDirectorProjection
+ Possible OpenGL projections used by director
+ */
 typedef enum {
 	/// sets a 2D projection (orthogonal projection)
-	CCDirectorProjection2D,
+	kCCDirectorProjection2D,
 	
 	/// sets a 3D projection with a fovy=60, znear=0.5f and zfar=1500.
-	CCDirectorProjection3D,
+	kCCDirectorProjection3D,
 	
 	/// it does nothing. But if you are using a custom projection set it this value.
-	CCDirectorProjectionCustom,
+	kCCDirectorProjectionCustom,
 	
 	/// Detault projection is 3D projection
-	CCDirectorProjectionDefault = CCDirectorProjection3D,
+	kCCDirectorProjectionDefault = kCCDirectorProjection3D,
+	
+	// backward compatibility stuff
+	CCDirectorProjection2D = kCCDirectorProjection2D,
+	CCDirectorProjection3D = kCCDirectorProjection3D,
+	CCDirectorProjectionCustom = kCCDirectorProjectionCustom,
 
 } ccDirectorProjection;
 
-/** Possible Director Types.
+/** @typedef ccDirectorType
+ Possible Director Types.
  @since v0.8.2
  */
 typedef enum {
@@ -72,7 +101,7 @@ typedef enum {
 	 * - It the slowest director
 	 * - The invertal update is customizable from 1 to 60
 	 */
-	CCDirectorTypeNSTimer,
+	kCCDirectorTypeNSTimer,
 	
 	/** will use a Director that triggers the main loop from a custom main loop.
 	 *
@@ -81,7 +110,7 @@ typedef enum {
 	 * - It doesn't integrate well with UIKit objecgts
 	 * - The interval update can't be customizable
 	 */
-	CCDirectorTypeMainLoop,
+	kCCDirectorTypeMainLoop,
 	
 	/** Will use a Director that triggers the main loop from a thread, but the main loop will be executed on the main thread.
 	 *
@@ -90,7 +119,7 @@ typedef enum {
 	 * - It doesn't integrate well with UIKit objecgts
 	 * - The interval update can't be customizable
 	 */
-	CCDirectorTypeThreadMainLoop,
+	kCCDirectorTypeThreadMainLoop,
 	
 	/** Will use a Director that synchronizes timers with the refresh rate of the display.
 	 *
@@ -101,23 +130,39 @@ typedef enum {
 	 * - Integrates OK with UIKit objects
 	 * - The interval update can be 1/60, 1/30, 1/15
 	 */	
-	CCDirectorTypeDisplayLink,
+	kCCDirectorTypeDisplayLink,
 	
 	/** Default director is the NSTimer directory */
-	CCDirectorTypeDefault = CCDirectorTypeNSTimer,
+	kCCDirectorTypeDefault = kCCDirectorTypeNSTimer,
+	
+	// backward compatibility stuff
+	CCDirectorTypeNSTimer = kCCDirectorTypeNSTimer,
+	CCDirectorTypeMainLoop = kCCDirectorTypeMainLoop,
+	CCDirectorTypeThreadMainLoop = kCCDirectorTypeThreadMainLoop,
+	CCDirectorTypeDisplayLink = kCCDirectorTypeDisplayLink,
+	CCDirectorTypeDefault =kCCDirectorTypeDefault,
+
 
 } ccDirectorType;
 
-/** Possible device orientations */
+/** @typedef ccDeviceOrientation
+ Possible device orientations
+ */
 typedef enum {
 	/// Device oriented vertically, home button on the bottom
-	CCDeviceOrientationPortrait = UIDeviceOrientationPortrait,	
+	kCCDeviceOrientationPortrait = UIDeviceOrientationPortrait,	
 	/// Device oriented vertically, home button on the top
-    CCDeviceOrientationPortraitUpsideDown = UIDeviceOrientationPortraitUpsideDown,
+    kCCDeviceOrientationPortraitUpsideDown = UIDeviceOrientationPortraitUpsideDown,
 	/// Device oriented horizontally, home button on the right
-    CCDeviceOrientationLandscapeLeft = UIDeviceOrientationLandscapeLeft,
+    kCCDeviceOrientationLandscapeLeft = UIDeviceOrientationLandscapeLeft,
 	/// Device oriented horizontally, home button on the left
-    CCDeviceOrientationLandscapeRight = UIDeviceOrientationLandscapeRight,
+    kCCDeviceOrientationLandscapeRight = UIDeviceOrientationLandscapeRight,
+	
+	// Backward compatibility stuff
+	CCDeviceOrientationPortrait = kCCDeviceOrientationPortrait,
+	CCDeviceOrientationPortraitUpsideDown = kCCDeviceOrientationPortraitUpsideDown,
+	CCDeviceOrientationLandscapeLeft = kCCDeviceOrientationLandscapeLeft,
+	CCDeviceOrientationLandscapeRight = kCCDeviceOrientationLandscapeRight,
 } ccDeviceOrientation;
 
 @class CCLabelAtlas;
@@ -194,6 +239,10 @@ and when to execute the Scenes.
 	
 	/* projection used */
 	ccDirectorProjection projection_;
+	
+#if CC_ENABLE_PROFILERS
+	ccTime accumDtForProfiler;
+#endif
 }
 
 /** The current running Scene. Director can only run one Scene at the time */
@@ -347,6 +396,14 @@ and when to execute the Scenes.
  */
 -(void) startAnimation;
 
+// Memory Helper
+
+/** Removes cached all cocos2d cached data.
+ It will purge the CCTextureCache, CCSpriteFrameCache, CCBitmapFont cache
+ @since v0.99.3
+ */
+-(void) purgeCachedData;
+ 
 
 // OpenGL Helper
 

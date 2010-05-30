@@ -78,12 +78,10 @@ typedef enum {
 	
 	/* Internal devices */
 	NSMutableArray	*_invocations;
-#ifdef _SPACE_MANAGER_FOR_COCOS2D
-	CCTimer			*_timer;
-	
+
 	/* Helpful Shapes/Bodies */
 	cpShape			*topWall,*bottomWall,*rightWall,*leftWall;
-#endif
+	
 	cpBody			*_staticBody;
 	
 	/* Number of steps (across dt) perform on each step call */
@@ -117,10 +115,8 @@ typedef enum {
 /*! The actual chipmunk space */
 @property (readonly) cpSpace* space;
 
-#ifdef _SPACE_MANAGER_FOR_COCOS2D
 /*! The segment shapes that form the bounds of the window*/
 @property (readwrite, assign) cpShape *topWall,*bottomWall,*rightWall,*leftWall;
-#endif
  
 /*! Number of steps (across dt) perform on each step call */
 @property (readwrite, assign) int steps;

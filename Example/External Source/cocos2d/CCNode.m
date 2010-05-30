@@ -1,17 +1,28 @@
-/* cocos2d for iPhone
+/*
+ * cocos2d for iPhone: http://www.cocos2d-iphone.org
  *
- * http://www.cocos2d-iphone.org
- *
- * Copyright (C) 2008,2009,2010 Ricardo Quesada
- * Copyright (C) 2009 Valentin Milea
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the 'cocos2d for iPhone' license.
- *
- * You will find a copy of this license within the cocos2d for iPhone
- * distribution inside the "LICENSE" file.
- *
+ * Copyright (c) 2008-2010 Ricardo Quesada
+ * Copyright (c) 2009 Valentin Milea
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
+
 
 
 #import "ccConfig.h"
@@ -64,30 +75,45 @@
 {
 	rotation_ = newRotation;
 	isTransformDirty_ = isInverseDirty_ = YES;
+#if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
+	isTransformGLDirty_ = YES;
+#endif
 }
 
 -(void) setScaleX: (float)newScaleX
 {
 	scaleX_ = newScaleX;
 	isTransformDirty_ = isInverseDirty_ = YES;
+#if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
+	isTransformGLDirty_ = YES;
+#endif	
 }
 
 -(void) setScaleY: (float)newScaleY
 {
 	scaleY_ = newScaleY;
 	isTransformDirty_ = isInverseDirty_ = YES;
+#if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
+	isTransformGLDirty_ = YES;
+#endif	
 }
 
 -(void) setPosition: (CGPoint)newPosition
 {
 	position_ = newPosition;
 	isTransformDirty_ = isInverseDirty_ = YES;
+#if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
+	isTransformGLDirty_ = YES;
+#endif	
 }
 
 -(void) setIsRelativeAnchorPoint: (BOOL)newValue
 {
 	isRelativeAnchorPoint_ = newValue;
 	isTransformDirty_ = isInverseDirty_ = YES;
+#if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
+	isTransformGLDirty_ = YES;
+#endif	
 }
 
 -(void) setAnchorPoint:(CGPoint)point
@@ -96,6 +122,9 @@
 		anchorPoint_ = point;
 		anchorPointInPixels_ = ccp( contentSize_.width * anchorPoint_.x, contentSize_.height * anchorPoint_.y );
 		isTransformDirty_ = isInverseDirty_ = YES;
+#if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
+		isTransformGLDirty_ = YES;
+#endif		
 	}
 }
 -(CGPoint) anchorPoint
@@ -109,6 +138,9 @@
 		contentSize_ = size;
 		anchorPointInPixels_ = ccp( contentSize_.width * anchorPoint_.x, contentSize_.height * anchorPoint_.y );
 		isTransformDirty_ = isInverseDirty_ = YES;
+#if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
+		isTransformGLDirty_ = YES;
+#endif		
 	}
 }
 -(CGSize) contentSize
@@ -132,6 +164,9 @@
 {
 	scaleX_ = scaleY_ = s;
 	isTransformDirty_ = isInverseDirty_ = YES;
+#if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
+	isTransformGLDirty_ = YES;
+#endif	
 }
 
 #pragma mark CCNode - Init & cleanup
@@ -158,7 +193,9 @@
 		isRelativeAnchorPoint_ = YES; 
 		
 		isTransformDirty_ = isInverseDirty_ = YES;
-		
+#if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
+		isTransformGLDirty_ = YES;
+#endif
 		
 		vertexZ_ = 0;
 
@@ -176,9 +213,6 @@
 		// children (lazy allocs)
 		children_ = nil;
 		
-		// scheduled selectors (lazy allocs)
-		scheduledSelectors_ = nil;
-		
 		// userData is always inited as nil
 		userData = nil;
 	}
@@ -190,10 +224,9 @@
 {
 	// actions
 	[self stopAllActions];
+	[self unscheduleAllSelectors];
 	
 	// timers
-	[scheduledSelectors_ release];
-	scheduledSelectors_ = nil;
 	
 	[children_ makeObjectsPerformSelector:@selector(cleanup)];
 }
@@ -205,7 +238,7 @@
 
 - (void) dealloc
 {
-	CCLOG( @"cocos2d: deallocing %@", self);
+	CCLOGINFO( @"cocos2d: deallocing %@", self);
 	
 	// attributes
 	[camera_ release];
@@ -228,7 +261,7 @@
 
 -(void) childrenAlloc
 {
-	children_ = [[NSMutableArray arrayWithCapacity:4] retain];
+	children_ = [[NSMutableArray alloc] initWithCapacity:4];
 }
 
 // camera: lazy alloc
@@ -299,6 +332,11 @@
 {
 	NSAssert( child != nil, @"Argument must be non-nil");
 	return [self addChild:child z:child.zOrder tag:child.tag];
+}
+
+-(void) removeFromParentAndCleanup:(BOOL)cleanup
+{
+	[self.parent removeChild:self cleanup:cleanup];
 }
 
 /* "remove" logic MUST only be on this method
@@ -459,17 +497,19 @@
 }
 
 -(void) transform
-{
-	
+{	
 	// transformations
 	
 #if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
 	// BEGIN alternative -- using cached transform
 	//
-	static GLfloat m[16];
-	CGAffineTransform t = [self nodeToParentTransform];
-	CGAffineToGL(&t, m);
-	glMultMatrixf(m);
+	if( isTransformGLDirty_ ) {
+		CGAffineTransform t = [self nodeToParentTransform];
+		CGAffineToGL(&t, transformGL_);
+		isTransformGLDirty_ = NO;
+	}
+
+	glMultMatrixf(transformGL_);
 	if( vertexZ_ )
 		glTranslatef(0, 0, vertexZ_);
 
@@ -528,7 +568,7 @@
 {
 	[children_ makeObjectsPerformSelector:@selector(onEnter)];
 	
-	[self activateTimers];
+	[self resumeSchedulerAndActions];
 
 	isRunning_ = YES;
 }
@@ -540,7 +580,7 @@
 
 -(void) onExit
 {
-	[self deactivateTimers];
+	[self pauseSchedulerAndActions];
 
 	isRunning_ = NO;	
 	
@@ -586,77 +626,59 @@
 }
 
 
-#pragma mark CCNode Timers 
+#pragma mark CCNode - Callbacks
 
-#pragma mark CCNode Timers 
-
--(void) timerAlloc
+-(void) scheduleUpdate
 {
-	scheduledSelectors_ = [[NSMutableDictionary dictionaryWithCapacity: 2] retain];
+	[self scheduleUpdateWithPriority:0];
 }
 
--(void) schedule: (SEL) selector
+-(void) scheduleUpdateWithPriority:(int)priority
+{
+	[[CCScheduler sharedScheduler] scheduleUpdateForTarget:self priority:priority paused:!isRunning_];
+}
+
+-(void) unscheduleUpdate
+{
+	[[CCScheduler sharedScheduler] unscheduleUpdateForTarget:self];
+}
+
+-(void) schedule:(SEL)selector
 {
 	[self schedule:selector interval:0];
 }
 
--(void) schedule: (SEL) selector interval:(ccTime)interval
+-(void) schedule:(SEL)selector interval:(ccTime)interval
 {
 	NSAssert( selector != nil, @"Argument must be non-nil");
 	NSAssert( interval >=0, @"Arguemnt must be positive");
-	
-	if( !scheduledSelectors_ )
-		[self timerAlloc];
-	
-	NSString *key = NSStringFromSelector(selector);
-	// already scheduled ?
-	if( [scheduledSelectors_ objectForKey:key  ] ) {
-		return;
-	}
-	
-	CCTimer *timer = [CCTimer timerWithTarget:self selector:selector interval:interval];
-	
-	if( isRunning_ )
-		[[CCScheduler sharedScheduler] scheduleTimer:timer];
-	
-	[scheduledSelectors_ setObject:timer forKey:key ];
+
+	[[CCScheduler sharedScheduler] scheduleSelector:selector forTarget:self interval:interval paused:!isRunning_];
 }
 
--(void) unschedule: (SEL) selector
+-(void) unschedule:(SEL)selector
 {
 	// explicit nil handling
 	if (selector == nil)
 		return;
-	
-	CCTimer *timer = nil;
-	NSString *key = NSStringFromSelector(selector);
-	
-	if( ! (timer = [scheduledSelectors_ objectForKey:key] ) )
-	{
-		CCLOG(@"cocos2d: CCNode.unschedule: Selector not scheduled: %@",key );
-		return;
-	}
-	
-	[scheduledSelectors_ removeObjectForKey: key];
-	
-	if( isRunning_ )
-		[[CCScheduler sharedScheduler] unscheduleTimer:timer];
+
+	[[CCScheduler sharedScheduler] unscheduleSelector:selector forTarget:self];
 }
 
-- (void) activateTimers
+-(void) unscheduleAllSelectors
 {
-	for( id key in scheduledSelectors_ )
-		[[CCScheduler sharedScheduler] scheduleTimer: [scheduledSelectors_ objectForKey:key]];
-	
-	[[CCActionManager sharedManager] resumeAllActionsForTarget:self];
+	[[CCScheduler sharedScheduler] unscheduleAllSelectorsForTarget:self];
+}
+- (void) resumeSchedulerAndActions
+{
+	[[CCScheduler sharedScheduler] resumeTarget:self];
+	[[CCActionManager sharedManager] resumeTarget:self];
 }
 
-- (void) deactivateTimers
+- (void) pauseSchedulerAndActions
 {
-	for( id key in scheduledSelectors_ )
-		[[CCScheduler sharedScheduler] unscheduleTimer: [scheduledSelectors_ objectForKey:key]];
-	
-	[[CCActionManager sharedManager] pauseAllActionsForTarget:self];
+	[[CCScheduler sharedScheduler] pauseTarget:self];
+	[[CCActionManager sharedManager] pauseTarget:self];
 }
 
 #pragma mark CCNode Transform
@@ -667,14 +689,18 @@
 		
 		transform_ = CGAffineTransformIdentity;
 		
-		if ( !isRelativeAnchorPoint_ )
+		if ( !isRelativeAnchorPoint_ && !CGPointEqualToPoint(anchorPointInPixels_, CGPointZero) )
 			transform_ = CGAffineTransformTranslate(transform_, anchorPointInPixels_.x, anchorPointInPixels_.y);
 		
-		transform_ = CGAffineTransformTranslate(transform_, position_.x, position_.y);
-		transform_ = CGAffineTransformRotate(transform_, -CC_DEGREES_TO_RADIANS(rotation_));
-		transform_ = CGAffineTransformScale(transform_, scaleX_, scaleY_);
+		if( ! CGPointEqualToPoint(position_, CGPointZero) )
+			transform_ = CGAffineTransformTranslate(transform_, position_.x, position_.y);
+		if( rotation_ != 0 )
+			transform_ = CGAffineTransformRotate(transform_, -CC_DEGREES_TO_RADIANS(rotation_));
+		if( ! (scaleX_ == 1 && scaleY_ == 1) ) 
+			transform_ = CGAffineTransformScale(transform_, scaleX_, scaleY_);
 		
-		transform_ = CGAffineTransformTranslate(transform_, -anchorPointInPixels_.x, -anchorPointInPixels_.y);
+		if( ! CGPointEqualToPoint(anchorPointInPixels_, CGPointZero) )
+			transform_ = CGAffineTransformTranslate(transform_, -anchorPointInPixels_.x, -anchorPointInPixels_.y);
 		
 		isTransformDirty_ = NO;
 	}

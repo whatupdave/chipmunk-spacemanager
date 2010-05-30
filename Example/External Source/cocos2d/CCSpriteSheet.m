@@ -1,17 +1,29 @@
-/* cocos2d for iPhone
+/*
+ * cocos2d for iPhone: http://www.cocos2d-iphone.org
  *
- * http://www.cocos2d-iphone.org
- *
+ * Copyright (c) 2009-2010 Ricardo Quesada
  * Copyright (C) 2009 Matt Oswald
- * Copyright (C) 2009 Ricardo Quesada
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the 'cocos2d for iPhone' license.
- *
- * You will find a copy of this license within the cocos2d for iPhone
- * distribution inside the "LICENSE" file.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  *
  */
+
 
 #import "ccConfig.h"
 #import "CCSprite.h"
@@ -174,36 +186,17 @@ const int defaultCapacity = 29;
 // override reorderChild
 -(void) reorderChild:(CCSprite*)child z:(int)z
 {
-	// reorder child in the children array
-	[super reorderChild:child z:z];
+	NSAssert( child != nil, @"Child must be non-nil");
+	NSAssert( [children_ containsObject:child], @"Child doesn't belong to Sprite" );
 	
+	if( z == child.zOrder )
+		return;
 	
-	// What's the new atlas index ?
-	NSUInteger newAtlasIndex = 0;
-	for( CCSprite *sprite in children_) {
-		if( [sprite isEqual:child] )
-			break;
-		newAtlasIndex++;
-	}
-	
-	if( newAtlasIndex != child.atlasIndex ) {
-		
-		[textureAtlas_ insertQuadFromIndex:child.atlasIndex atIndex:newAtlasIndex];
-		
-		// update descendats (issue #708)
-		[child retain];
-		[descendants_ removeObjectAtIndex: child.atlasIndex];
-		[descendants_ insertObject:child atIndex:newAtlasIndex];
-		[child release];
-		
-		// update atlas index
-		NSUInteger count = MAX( newAtlasIndex, child.atlasIndex);
-		NSUInteger index = MIN( newAtlasIndex, child.atlasIndex);
-		for( ; index < count+1 ; index++ ) {
-			CCSprite *sprite = (CCSprite *)[children_ objectAtIndex:index];
-			[sprite setAtlasIndex: index];
-		}
-	}
+	// XXX: Instead of removing/adding, it is more efficient to reorder manually
+	[child retain];
+	[self removeChild:child cleanup:NO];
+	[self addChild:child z:z];
+	[child release];
 }
 
 // override removeChild:
@@ -301,13 +294,13 @@ const int defaultCapacity = 29;
 	// this is likely computationally expensive
 	NSUInteger quantity = (textureAtlas_.capacity + 1) * 4 / 3;
 
-	CCLOG(@"cocos2d: Resizing TextureAtlas capacity, from [%d] to [%d].", textureAtlas_.capacity, quantity);
+	CCLOG(@"cocos2d: CCSpriteSheet: resizing TextureAtlas capacity from [%d] to [%d].", textureAtlas_.capacity, quantity);
 
 
 	if( ! [textureAtlas_ resizeCapacity:quantity] ) {
 		// serious problems
 		CCLOG(@"cocos2d: WARNING: Not enough memory to resize the atlas");
-		NSAssert(NO,@"XXX: SpriteSheet#increateAtlasCapacity SHALL handle this assert");
+		NSAssert(NO,@"XXX: SpriteSheet#increaseAtlasCapacity SHALL handle this assert");
 	}	
 }
 
@@ -363,9 +356,6 @@ const int defaultCapacity = 29;
 	if( childIndex > 0 )
 		previous = [brothers objectAtIndex:childIndex-1];
 	
-//	if( childIndex < [brothers count] -1 )
-//		next = [brothers objectAtIndex:childIndex+1];
-
 	// first child of the sprite sheet
 	if( ignoreParent ) {
 		if( childIndex == 0 )
@@ -396,7 +386,7 @@ const int defaultCapacity = 29;
 		return p.atlasIndex + 1;
 	}
 	
-	NSAssert( YES, @"Should not happen. Error calculating Z on SpriteSheet");
+	NSAssert( NO, @"Should not happen. Error calculating Z on SpriteSheet");
 	return 0;
 }
 

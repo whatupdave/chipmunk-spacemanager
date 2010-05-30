@@ -291,9 +291,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 @implementation SpaceManager
 
 @synthesize space = _space;
-#ifdef _SPACE_MANAGER_FOR_COCOS2D
 @synthesize topWall,bottomWall,rightWall,leftWall;
-#endif
 @synthesize steps = _steps;
 @synthesize lastDt = _lastDt;
 @synthesize iterateStatic = _iterateStatic;
@@ -348,8 +346,9 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 
 -(void) dealloc
 {	
-	if (_timer != nil)
-		[self stop];
+#ifdef _SPACE_MANAGER_FOR_COCOS2D
+	[self stop];
+#endif
 	
 	if (_space != nil)
 	{
@@ -422,9 +421,8 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
 -(void) start:(ccTime)dt
-{
-	_timer = [CCTimer timerWithTarget:self selector:@selector(step:) interval:dt];
-	[[CCScheduler sharedScheduler] scheduleTimer:_timer];
+{	
+	[[CCScheduler sharedScheduler] scheduleSelector:@selector(step:) forTarget:self interval:dt paused:NO];
 }
 
 -(void) start
@@ -434,8 +432,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 
 -(void) stop
 {
-	[[CCScheduler sharedScheduler] unscheduleTimer:_timer];
-	_timer = nil;
+	[[CCScheduler sharedScheduler] unscheduleSelector:@selector(step:) forTarget:self];
 }
 
 -(CCLayer*) createDebugLayer
@@ -512,7 +509,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 		for(int i=0; i<_steps; i++)
 			cpSpaceStep(_space, _lastDt);
 		
-		//This will work at some point
+		//This will work at some point... but above seems desirable sometimes too -rkb
 /*		delta += _timeAccumulator;
 		while(delta >= _lastDt) 
 		{

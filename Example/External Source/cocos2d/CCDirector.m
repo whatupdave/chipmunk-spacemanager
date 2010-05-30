@@ -1,20 +1,33 @@
-/* cocos2d for iPhone
+/*
+ * cocos2d for iPhone: http://www.cocos2d-iphone.org
  *
- * http://www.cocos2d-iphone.org
- *
- * Copyright (C) 2008,2009,2010 Ricardo Quesada
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the 'cocos2d for iPhone' license.
- *
- * You will find a copy of this license within the cocos2d for iPhone
- * distribution inside the "LICENSE" file.
- *
+ * Copyright (c) 2008-2010 Ricardo Quesada
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
+
 
 /* Idea of decoupling Window from Director taken from OC3D project: http://code.google.com/p/oc3d/
  */
  
+#import <unistd.h>
+
 // cocos2d imports
 #import "CCDirector.h"
 #import "CCTouchDelegateProtocol.h"
@@ -30,6 +43,7 @@
 #import "CCTouchDispatcher.h"
 #import "CCSpriteFrameCache.h"
 #import "CCTexture2D.h"
+#import "CCBitmapFontAtlas.h"
 
 // support imports
 #import "Support/glu.h"
@@ -37,6 +51,10 @@
 #import "Support/CGPointExtension.h"
 
 #import "CCLayer.h"
+
+#if CC_ENABLE_PROFILERS
+#import "Support/CCProfiling.h"
+#endif
 
 #define kDefaultFPS		60.0	// 60 frames per second
 
@@ -57,6 +75,9 @@ extern NSString * cocos2dVersion(void);
 // calculates delta time since last time it was called
 -(void) calculateDeltaTime;
 
+#if CC_ENABLE_PROFILERS
+- (void) showProfilers;
+#endif
 
 @end
 
@@ -138,7 +159,7 @@ static CCDirector *_sharedDirector = nil;
 		CCLOG(@"cocos2d: Using Director Type:%@", [self class]);
 		
 		// default values
-		pixelFormat_ = kPixelFormatDefault;
+		pixelFormat_ = kCCPixelFormatDefault;
 		depthBufferFormat_ = 0;
 
 		// scenes
@@ -146,7 +167,7 @@ static CCDirector *_sharedDirector = nil;
 		nextScene_ = nil;
 		
 		oldAnimationInterval = animationInterval = 1.0 / kDefaultFPS;
-		scenesStack_ = [[NSMutableArray arrayWithCapacity:10] retain];
+		scenesStack_ = [[NSMutableArray alloc] initWithCapacity:10];
 		
 		// landscape
 		deviceOrientation_ = CCDeviceOrientationPortrait;
@@ -164,7 +185,7 @@ static CCDirector *_sharedDirector = nil;
 
 - (void) dealloc
 {
-	CCLOG( @"cocos2d: deallocing %@", self);
+	CCLOGINFO(@"cocos2d: deallocing %@", self);
 
 #if CC_DIRECTOR_FAST_FPS
 	[FPSLabel release];
@@ -184,15 +205,19 @@ static CCDirector *_sharedDirector = nil;
 
 	[self setAlphaBlending: YES];
 	[self setDepthTest: YES];
-	[self setProjection: CCDirectorProjectionDefault];
+	[self setProjection: kCCDirectorProjectionDefault];
 	
 	// set other opengl default values
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	
 #if CC_DIRECTOR_FAST_FPS
-    if (!FPSLabel)
-        FPSLabel = [[CCLabelAtlas labelAtlasWithString:@"00.0" charMapFile:@"fps_images.png" itemWidth:16 itemHeight:24 startCharMap:'.'] retain];
-#endif	
+    if (!FPSLabel) {
+		CCTexture2DPixelFormat currentFormat = [CCTexture2D defaultAlphaPixelFormat];
+		[CCTexture2D setDefaultAlphaPixelFormat:kCCTexture2DPixelFormat_RGBA4444];
+		FPSLabel = [[CCLabelAtlas labelAtlasWithString:@"00.0" charMapFile:@"fps_images.png" itemWidth:16 itemHeight:24 startCharMap:'.'] retain];
+		[CCTexture2D setDefaultAlphaPixelFormat:currentFormat];		
+	}
+#endif	// CC_DIRECTOR_FAST_FPS
 }
 
 //
@@ -227,10 +252,14 @@ static CCDirector *_sharedDirector = nil;
 	if( displayFPS )
 		[self showFPS];
 	
+#if CC_ENABLE_PROFILERS
+	[self showProfilers];
+#endif
+	
 	CC_DISABLE_DEFAULT_GL_STATES();
 	
 	glPopMatrix();
-
+	
 	/* swap buffers */
 	[openGLView_ swapBuffers];	
 }
@@ -271,7 +300,16 @@ static CCDirector *_sharedDirector = nil;
    depthBufferFormat_ = format;
 }
 
-#pragma mark Director Scene OpenGL Helper
+#pragma mark Director - Memory Helper
+
+-(void) purgeCachedData
+{
+	[CCBitmapFontAtlas purgeCachedData];	
+	[CCSpriteFrameCache purgeSharedSpriteFrameCache];
+	[CCTextureCache purgeSharedTextureCache];	
+}
+
+#pragma mark Director - Scene OpenGL Helper
 
 -(ccDirectorProjection) projection
 {
@@ -287,15 +325,15 @@ static CCDirector *_sharedDirector = nil;
 {
 	CGSize size = openGLView_.frame.size;
 	switch (projection) {
-		case CCDirectorProjection2D:
+		case kCCDirectorProjection2D:
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
-			glOrthof(0, size.width, 0, size.height, -1, 1);
+			glOrthof(0, size.width, 0, size.height, -1000, 1000);
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();			
 			break;
 
-		case CCDirectorProjection3D:
+		case kCCDirectorProjection3D:
 			glViewport(0, 0, size.width, size.height);
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
@@ -308,7 +346,7 @@ static CCDirector *_sharedDirector = nil;
 					  0.0f, 1.0f, 0.0f);			
 			break;
 			
-		case CCDirectorProjectionCustom:
+		case kCCDirectorProjectionCustom:
 			// if custom, ignore it. The user is resposible for setting the correct projection
 			break;
 			
@@ -325,6 +363,7 @@ static CCDirector *_sharedDirector = nil;
 	if (on) {
 		glEnable(GL_BLEND);
 		glBlendFunc(CC_BLEND_SRC, CC_BLEND_DST);
+		
 	} else
 		glDisable(GL_BLEND);
 }
@@ -411,11 +450,11 @@ static CCDirector *_sharedDirector = nil;
 			CCLOG(@"cocos2d: Director: Unknown pixel format.");
 		}
 		
-		if(depthBufferFormat_ == kDepthBuffer16)
+		if(depthBufferFormat_ == kCCDepthBuffer16)
 			depthFormat = GL_DEPTH_COMPONENT16_OES;
-		else if(depthBufferFormat_ == kDepthBuffer24)
+		else if(depthBufferFormat_ == kCCDepthBuffer24)
 			depthFormat = GL_DEPTH_COMPONENT24_OES;
-		else if(depthBufferFormat_ == kDepthBufferNone)
+		else if(depthBufferFormat_ == kCCDepthBufferNone)
 			depthFormat = 0;
 		else {
 			CCLOG(@"cocos2d: Director: Unknown buffer depth.");
@@ -423,9 +462,12 @@ static CCDirector *_sharedDirector = nil;
 		
 		// alloc and init the opengl view
 		openGLView_ = [[EAGLView alloc] initWithFrame:rect pixelFormat:pFormat depthFormat:depthFormat preserveBackbuffer:NO];
-
+		
 		// check if the view was alloced and initialized
 		NSAssert( openGLView_, @"FATAL: Could not alloc and init the OpenGL view. ");
+
+		// opaque by default (faster)
+		openGLView_.opaque = YES;		
 		
 		// set autoresizing enabled when attaching the glview to another view
 		[openGLView_ setAutoresizesEAGLSurface:YES];		
@@ -465,10 +507,7 @@ static CCDirector *_sharedDirector = nil;
 	// add the glview to his (new) superview
 	[view addSubview:openGLView_];
 	
-	// set the background color of the glview
-	//	[backgroundColor setOpenGLClearColor];
-	
-	
+		
 	NSAssert( [self isOpenGLAttached], @"FATAL: Director: Could not attach OpenGL view");
 
 	[self initGLDefaultValues];
@@ -609,6 +648,9 @@ static CCDirector *_sharedDirector = nil;
 	
 	[self pushScene:scene];
 	[self startAnimation];
+	
+	// render the 1st frame to avoid flicker (issue #350)
+	[self mainLoop];
 }
 
 -(void) replaceScene: (CCScene*) scene
@@ -670,6 +712,9 @@ static CCDirector *_sharedDirector = nil;
 	[FPSLabel release];
 	FPSLabel = nil;
 #endif	
+
+	// Purge bitmap cache
+	[CCBitmapFontAtlas purgeCachedData];
 
 	// Purge all managers
 	[CCSpriteFrameCache purgeSharedSpriteFrameCache];
@@ -810,6 +855,17 @@ static CCDirector *_sharedDirector = nil;
 	glEnableClientState(GL_COLOR_ARRAY);
 }
 #endif
+
+#if CC_ENABLE_PROFILERS
+- (void) showProfilers {
+	accumDtForProfiler += dt;
+	if (accumDtForProfiler > 1.0f) {
+		accumDtForProfiler = 0;
+		[[CCProfiler sharedProfiler] displayTimers];
+	}
+}
+#endif
+
 
 @end
 
