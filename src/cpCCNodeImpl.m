@@ -28,7 +28,7 @@
 - (id) initWithShape:(cpShape*)s
 {	
 	_shape = s;
-	_integrationDt = 1.0/60.0;
+	_integrationDt = 0; //This should be off by default
 	
 	return self;
 }
