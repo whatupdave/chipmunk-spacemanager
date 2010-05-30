@@ -1,6 +1,6 @@
 /*********************************************************************
  *	
- *	Particles
+ *	SpaceManager
  *
  *	GameDelegate.m
  *
@@ -15,7 +15,7 @@
 
 #import "GameDelegate.h"
 #import "GameLayer.h"
-
+#import "Serialize.h"
 
 @interface GameDelegate (PrivateMethods)
 
@@ -42,14 +42,18 @@
 	[window makeKeyAndVisible];
 
 	CCScene *game = [CCScene node];
+#if SERIALIZE_TEST
+	Serialize *layer = [Serialize node];
+#else
 	GameLayer *layer = [GameLayer node];
+#endif
 	[game addChild:layer];
-	
 	[[CCDirector sharedDirector] runWithScene:game];
 }
 
 - (void)applicationWillTerminate:(UIApplication*)application
 {
+	[[CCDirector sharedDirector] end];
 }
 
 -(void)dealloc
@@ -58,23 +62,19 @@
 	[super dealloc];
 }
 
-
 -(void) applicationWillResignActive:(UIApplication *)application
 {
 	[[CCDirector sharedDirector] pause];
 }
-
 
 -(void) applicationDidBecomeActive:(UIApplication *)application
 {
 	[[CCDirector sharedDirector] resume];
 }
 
-
 - (void)applicationDidReceiveMemoryWarning:(UIApplication *)application
 {
 	[[CCTextureCache sharedTextureCache] removeAllTextures];
 }
-
 
 @end

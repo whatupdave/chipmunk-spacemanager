@@ -45,6 +45,29 @@ typedef enum {
 -(void) aboutToFreeConstraint:(cpConstraint*)constraint;
 @end
 
+/*! Delegate for handling I/O
+ 
+	These functions are events that get fired when saving/loading
+	a space, they enable you to use a specific id system (if you choose)
+	as well as record any UI specific data at time of writing; the reading
+	events will let you hook up your UI when an object has just been read,
+	but not added to the space yet.
+ */
+@protocol SpaceManagerSerializeDelegate
+@optional
+-(long) makeShapeId:(cpShape*)shape;
+-(long) makeBodyId:(cpBody*)body;
+-(long) makeConstraintId:(cpConstraint*)constraint;
+
+-(BOOL) aboutToWriteShape:(cpShape*)shape shapeId:(long)id;
+-(BOOL) aboutToWriteBody:(cpBody*)body bodyId:(long)id;
+-(BOOL) aboutToWriteConstraint:(cpConstraint*)constraint constraintId:(long)id;
+
+-(BOOL) aboutToReadShape:(cpShape*)shape shapeId:(long)id;
+-(BOOL) aboutToReadBody:(cpBody*)body bodyId:(long)id;
+-(BOOL) aboutToReadConstraint:(cpConstraint*)constraint constraintId:(long)id;
+@end
+
 /*! The SpaceManager */
 @interface SpaceManager : NSObject
 {
@@ -142,11 +165,17 @@ typedef enum {
 /* initialization method that takes a precreated space */
 -(id) initWithSpace:(cpSpace*)space;
 
-///Incomplete///
--(void) loadSpaceFromFile:(NSString*)file;
--(void) saveSpaceToFile:(NSString*)file;
--(void) loadSpaceFromPath:(NSString*)path;
--(void) saveSpaceToPath:(NSString*)path;
+/*! load a cpSerializer file from a resource file, delegate can be nil */
+- (BOOL) loadSpaceFromUserDocs:(NSString*)file delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
+
+/*! save a cpSerializer file to a resource file, delegate can be nil */
+- (BOOL) saveSpaceToUserDocs:(NSString*)file delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
+
+/*! load a cpSerializer file from a file (path), delegate can be nil */
+- (BOOL) loadSpaceFromPath:(NSString*)path delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
+
+/*! save a cpSerializer file to a resource file (path), delegate can be nil */
+- (BOOL) saveSpaceToPath:(NSString*)path delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
 
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
 
@@ -159,11 +188,14 @@ typedef enum {
 /*! Stop the timed loop */
 -(void) stop;
 
+/*! Attach cpShapeNode's and cpConstraintNode's to shapes/constraints that have NULL data fields */
+-(CCLayer*) createDebugLayer;
+
 /*! Convenience method for adding a containment rect around the view */
 -(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset;
 -(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset radius:(cpFloat)radius;
-
 #endif
+-(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity size:(CGSize)wins inset:(cpVect)inset radius:(cpFloat)radius;
 
 /*! Manually advance time within the space */
 -(void) step: (cpFloat) delta;

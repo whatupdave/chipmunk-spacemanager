@@ -15,13 +15,95 @@
 
 #import "SpaceManager.h"
 #import "chipmunk_unsafe.h"
+#import "cpSpaceSerializer.h"
+
+class cpSSDelegate : public cpSpaceSerializerDelegate 
+{
+public:
+	
+	cpSSDelegate(NSObject<SpaceManagerSerializeDelegate>* delegate) : _delegate(delegate){}
+	
+	long makeId(cpShape* shape) 
+	{
+		if ([_delegate respondsToSelector:@selector(makeShapeId:)])
+			return [_delegate makeShapeId:shape];		
+		else
+			return CPSS_DEFAULT_MAKE_ID(shape);
+	}
+	
+	long makeId(cpBody* body) 
+	{
+		if ([_delegate respondsToSelector:@selector(makeBodyId:)])
+			return [_delegate makeBodyId:body];		
+		else
+			return CPSS_DEFAULT_MAKE_ID(body);
+	}
+	
+	long makeId(cpConstraint* constraint) 
+	{
+		if ([_delegate respondsToSelector:@selector(makeConstraintId:)])
+			return [_delegate makeConstraintId:constraint];		
+		else
+			return CPSS_DEFAULT_MAKE_ID(constraint);
+	}
+	
+	bool writing(cpShape *shape, long shapeId) 
+	{
+		if ([_delegate respondsToSelector:@selector(aboutToWriteShape:shapeId:)])
+			return [_delegate aboutToWriteShape:shape shapeId:shapeId];		
+		else
+			return true;
+	}
+	
+	bool writing(cpBody *body, long bodyId) 
+	{
+		if ([_delegate respondsToSelector:@selector(aboutToWriteBody:bodyId:)])
+			return [_delegate aboutToWriteBody:body bodyId:bodyId];		
+		else
+			return true;
+	}
+	
+	bool writing(cpConstraint *constraint, long constraintId) 
+	{
+		if ([_delegate respondsToSelector:@selector(aboutToWriteConstraint:constraintId:)])
+			return [_delegate aboutToWriteConstraint:constraint constraintId:constraintId];		
+		else
+			return true;
+	}
+	
+	bool reading(cpShape *shape, long shapeId) 
+	{
+		if ([_delegate respondsToSelector:@selector(aboutToReadShape:shapeId:)])
+			return [_delegate aboutToReadShape:shape shapeId:shapeId];		
+		else
+			return true;
+		
+	}
+	bool reading(cpBody *body, long bodyId) 
+	{
+		if ([_delegate respondsToSelector:@selector(aboutToReadBody:bodyId:)])
+			return [_delegate aboutToReadBody:body bodyId:bodyId];		
+		else
+			return true;
+	}
+	bool reading(cpConstraint *constraint, long constraintId) 
+	{
+		if ([_delegate respondsToSelector:@selector(aboutToReadConstraint:constraintId:)])
+			return [_delegate aboutToReadConstraint:constraint constraintId:constraintId];		
+		else
+			return true;
+	}
+	
+private:
+	NSObject<SpaceManagerSerializeDelegate>* _delegate;
+};
 
 void defaultEachShape(void *ptr, void* data)
 {
 	cpShape *shape = (cpShape*) ptr;
 
 #ifdef _SPACE_MANAGER_FOR_COCOS2D	
-	CCNode *node = shape->data;
+	CCNode *node = (CCNode*)shape->data;
 	if(node) 
 	{
 		cpBody *body = shape->body;
@@ -33,11 +115,43 @@ void defaultEachShape(void *ptr, void* data)
 }
 
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
+
+//These are the only functions that use these....
+#import "cpShapeNode.h"
+#import "cpConstraintNode.h"
+static void createShapeNode(void *ptr, void *layer)
+{
+	cpShape *shape = (cpShape*)ptr;
+	
+	if (shape->data == NULL)
+	{
+		ccColor3B color = ccc3(rand()%256, rand()%256, rand()%256);
+		
+		cpShapeNode *node = [cpShapeNode nodeWithShape:shape];
+		node.color = color;
+		[(CCLayer*)layer addChild:node];
+	}
+}
+
+static void createConstraintNode(void *ptr, void *layer)
+{
+	cpConstraint *constraint = (cpConstraint*)ptr;
+	
+	if (constraint->data == NULL)
+	{
+		ccColor3B color = ccc3(rand()%256, rand()%256, rand()%256);
+		
+		cpConstraintNode *node = [cpConstraintNode nodeWithConstraint:constraint];
+		node.color = color;
+		[(CCLayer*)layer addChild:node];
+	}
+}
+
 static void eachShapeAsChildren(void *ptr, void* data)
 {
 	cpShape *shape = (cpShape*) ptr;
 	
-	CCNode *node = shape->data;
+	CCNode *node = (CCNode*)shape->data;
 	if(node) 
 	{
 		cpBody *body = shape->body;
@@ -172,9 +286,6 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 /* Private Method Declarations */
 @interface SpaceManager (PrivateMethods)
 -(void) setupDefaultShape:(cpShape*) s;
-
--(NSString*) writeShape:(cpShape*)shape;
--(NSString*) writeConstraint:(cpConstraint*)shape;
 @end
 
 @implementation SpaceManager
@@ -201,12 +312,12 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 
 -(id) initWithSize:(int)size count:(int)count
 {
-	id this = [self initWithSpace:cpSpaceNew()];
+	id me = [self initWithSpace:cpSpaceNew()];
 	
 	cpSpaceResizeStaticHash(_space, size, count);
 	cpSpaceResizeActiveHash(_space, size, count);
 	
-	return this;
+	return me;
 }
 
 -(id) initWithSpace:(cpSpace*)space
@@ -251,46 +362,42 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	[super dealloc];
 }
 
-- (void) loadSpaceFromFile:(NSString*)file
+- (BOOL) loadSpaceFromUserDocs:(NSString*)file delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate
 {
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *dataPath = [[paths objectAtIndex:0] stringByAppendingPathComponent:file];
+    NSString *path = [[paths objectAtIndex:0] stringByAppendingPathComponent:file];
 	
-	[self loadSpaceFromPath:dataPath];
+	return [self loadSpaceFromPath:path delegate:delegate];
 }
 
-- (void) saveSpaceToFile:(NSString*)file
+- (BOOL) saveSpaceToUserDocs:(NSString*)file delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate
 {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *dataPath = [[paths objectAtIndex:0] stringByAppendingPathComponent:file];	
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *path = [[paths objectAtIndex:0] stringByAppendingPathComponent:file];	
 	
-	[self saveSpaceToPath:dataPath];
+	return [self saveSpaceToPath:path delegate:delegate];
 }
 
-- (void) loadSpaceFromPath:(NSString*)path
+- (BOOL) loadSpaceFromPath:(NSString*)path delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate
 {
 	if ([[NSFileManager defaultManager] fileExistsAtPath:path])
 	{
+		cpSSDelegate cpssdel(delegate);
 		
+		cpSpaceSerializer reader(&cpssdel);
+		reader.load(_space, [path cStringUsingEncoding:NSASCIIStringEncoding]);
+		
+		return YES;
 	}
+	else
+		return NO;
 }
 
-- (void) saveSpaceToPath:(NSString*)path
+- (BOOL) saveSpaceToPath:(NSString*)path delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate
 {
-	if (![[NSFileManager defaultManager] fileExistsAtPath:path])
-	{
-		//ERROR
-	}
-}
-
--(NSString*) writeShape:(cpShape*)shape
-{
-	return [NSString stringWithFormat:@"\n<shape/>"];
-}
-
--(NSString*) writeConstraint:(cpConstraint*)constraint
-{
-	return [NSString stringWithFormat:@"\n<constraint/>"];
+	cpSSDelegate cpssdel(delegate);
+	cpSpaceSerializer writer(&cpssdel);	
+	return writer.save(_space, [path cStringUsingEncoding:NSASCIIStringEncoding]);
 }
 
 -(void) setGravity:(cpVect)gravity
@@ -331,6 +438,18 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	_timer = nil;
 }
 
+-(CCLayer*) createDebugLayer
+{
+	CCLayer *layer = [CCLayer node];
+	
+	cpSpaceHashEach(_space->activeShapes, createShapeNode, layer);
+	cpSpaceHashEach(_space->staticShapes, createShapeNode, layer);
+	
+	cpArrayEach(_space->constraints, createConstraintNode, layer);
+	
+	return layer;
+}
+
 -(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset
 {
 	[self addWindowContainmentWithFriction:friction elasticity:elasticity inset:inset radius:1.0f];
@@ -338,7 +457,14 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 
 -(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset radius:(cpFloat)radius
 {
-	CGSize  wins = [[CCDirector sharedDirector] winSize];
+	CGSize wins = [[CCDirector sharedDirector] winSize];
+	
+	[self addWindowContainmentWithFriction:friction elasticity:elasticity size:wins inset:inset radius:radius];
+}
+#endif
+
+-(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity size:(CGSize)wins inset:(cpVect)inset radius:(cpFloat)radius
+{	
 	
 	bottomWall = [self addSegmentAtWorldAnchor:cpv(inset.x,inset.y) 
 								 toWorldAnchor:cpv(wins.width-inset.x,inset.y) 
@@ -363,8 +489,6 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	bottomWall->e = topWall->e = leftWall->e = rightWall->e = elasticity;
 	bottomWall->u = topWall->u = leftWall->u = rightWall->u = friction;
 }
-
-#endif
 
 -(void) step: (cpFloat) delta
 {		
@@ -714,7 +838,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 
 	for (int i = 0; i < num; i++)
 	{
-		constraint = constraintArr[i];
+		constraint = (cpConstraint*)constraintArr[i];
 		
 		if (body == constraint->a || body == constraint->b)
 			[constraints addObject:[NSValue valueWithPointer:constraint]];
@@ -939,12 +1063,12 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 		cpFloat moi = 0;
 		
 		//Grab first shape
-		cpShape *first_shape = ss->arr[0];
+		cpShape *first_shape = (cpShape*)ss->arr[0];
 		
 		//Calculate the new moment of inertia
 		for(int i=0; i < ss->num; i++)
 		{
-			shape = ss->arr[i];
+			shape = (cpShape*)ss->arr[i];
 			body = shape->body;
 			
 			cpVect offset = cpvsub(body->p, cm);
@@ -1032,7 +1156,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 		case CP_POLY_SHAPE:
 		{
 			int numVerts = cpPolyShapeGetNumVerts(shape);
-			cpVect *verts = malloc(sizeof(cpVect)*numVerts);
+			cpVect *verts = (cpVect*)malloc(sizeof(cpVect)*numVerts);
 			
 			//have to copy... oh well
 			for (int i = 0; i < numVerts; i++)
@@ -1066,7 +1190,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 
 	for (int i = 0; i < num; i++)
 	{
-		constraint = array->arr[i];
+		constraint = (cpConstraint*)array->arr[i];
 			
 		if (body == constraint->a || body == constraint->b)
 		{
@@ -1302,12 +1426,12 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	//Chipmunk hashes the invocation for us, we must pull it out
 	unsigned int ids[] = {type1, type2};
 	unsigned int hash = CP_HASH_PAIR(type1, type2);
-	cpCollisionHandler *pair = cpHashSetFind(_space->collFuncSet, hash, ids);
+	cpCollisionHandler *pair = (cpCollisionHandler*)cpHashSetFind(_space->collFuncSet, hash, ids);
 	
 	//delete the invocation, if there is one (invoke can be null)
 	if (pair != NULL)
 	{
-		id invoke = pair->data;
+		id invoke = (id)pair->data;
 		[_invocations removeObject:invoke];
 	}
 
