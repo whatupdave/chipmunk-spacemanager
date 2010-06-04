@@ -52,6 +52,7 @@
 	//Constant dt is recommended for chipmunk
 	smgr.constantDt = 1.0/55.0;
 	
+	//Try to load it from file, if not create from scratch
 	if (![smgr loadSpaceFromUserDocs:@"cpSerialized.xml" delegate:self])
 	{
 		//add four walls to our screen

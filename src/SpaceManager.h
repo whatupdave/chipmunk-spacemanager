@@ -161,10 +161,10 @@ typedef enum {
 /* initialization method that takes a precreated space */
 -(id) initWithSpace:(cpSpace*)space;
 
-/*! load a cpSerializer file from a resource file, delegate can be nil */
+/*! load a cpSerializer file from a user docs file, delegate can be nil */
 - (BOOL) loadSpaceFromUserDocs:(NSString*)file delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
 
-/*! save a cpSerializer file to a resource file, delegate can be nil */
+/*! save a cpSerializer file to a user docs file, delegate can be nil */
 - (BOOL) saveSpaceToUserDocs:(NSString*)file delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
 
 /*! load a cpSerializer file from a file (path), delegate can be nil */

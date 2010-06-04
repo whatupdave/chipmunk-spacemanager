@@ -1478,8 +1478,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Robert Blackwood";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Robert Blackwood";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Robert Blackwood (56CK7E4P8A)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Robert Blackwood (56CK7E4P8A)";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1492,8 +1492,6 @@
 				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "Game Resources/Plist/Info.plist";
 				PRODUCT_NAME = Example;
-				PROVISIONING_PROFILE = "CE15A196-6D24-4E6C-AB7B-BD98DB866361";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "CE15A196-6D24-4E6C-AB7B-BD98DB866361";
 			};
 			name = Release;
 		};
@@ -1526,8 +1524,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Robert Blackwood";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Robert Blackwood";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Robert Blackwood (56CK7E4P8A)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Robert Blackwood (56CK7E4P8A)";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1541,8 +1539,6 @@
 				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "Game Resources/Plist/Info copy.plist";
 				PRODUCT_NAME = SerializeTest;
-				PROVISIONING_PROFILE = "CE15A196-6D24-4E6C-AB7B-BD98DB866361";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "CE15A196-6D24-4E6C-AB7B-BD98DB866361";
 			};
 			name = Release;
 		};
