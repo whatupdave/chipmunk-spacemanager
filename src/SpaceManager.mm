@@ -188,7 +188,6 @@ static int handleInvocations(CollisionMoment moment, cpArbiter *arb, struct cpSp
 		//No biggie, continue!
 	}
 	
-	[invocation retain];
 	[invocation invoke];
 	
 	//default is yes, thats what it is in chipmunk
@@ -197,9 +196,6 @@ static int handleInvocations(CollisionMoment moment, cpArbiter *arb, struct cpSp
 	//not sure how heavy these methods are...
 	if ([[invocation methodSignature]  methodReturnLength] > 0)
 		[invocation getReturnValue:&retVal];
-	
-	[invocation release];
-
 	
 	return retVal;
 }
@@ -262,6 +258,25 @@ static void removeShape(cpSpace *space, void *obj, void *data)
 static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 {
 	[(SpaceManager*)(data) removeAndFreeShape:(cpShape*)(obj)];
+}
+
+static void removeCollision(cpSpace *space, void *collision, void *inv_list)
+{
+	cpCollisionHandler *pair = (cpCollisionHandler*)collision;
+	
+	unsigned int ids[] = {pair->a, pair->b};
+	unsigned int hash = CP_HASH_PAIR(pair->a, pair->b);
+	
+	//delete the invocation (invocation can be null)
+	id invocation = (id)pair->data;
+	
+	NSMutableArray *invocations = (NSMutableArray*)inv_list;
+	[invocations removeObject:invocation];
+
+	//Remove the collision callback
+	cpCollisionHandler *old_pair = (cpCollisionHandler*)cpHashSetRemove(space->collFuncSet, hash, ids);
+	free(old_pair);	
+
 }
 
 @interface RayCastInfoArray : NSMutableArray
@@ -637,7 +652,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	return shape;
 }
 
--(cpShape*) addSegmentAtWorldAnchor:(cpVect)fromPos toWorldAnchor:(cpVect)toPos mass:(cpFloat)mass radius:(cpFloat)radius;
+-(cpShape*) addSegmentAtWorldAnchor:(cpVect)fromPos toWorldAnchor:(cpVect)toPos mass:(cpFloat)mass radius:(cpFloat)radius
 {
 	cpVect pos = cpvmult(cpvsub(toPos,fromPos), .5);
 	return [self addSegmentAt:cpvadd(fromPos,pos) fromLocalAnchor:cpvmult(pos,-1) toLocalAnchor:pos mass:mass radius:radius];
@@ -1071,7 +1086,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 			cpVect offset = cpvsub(body->p, cm);
 			
 			//apply the offset (based off type)
-			[self offsetShape:shape  offset:offset];
+			[self offsetShape:shape offset:offset];
 			
 			//summation of inertia
 			moi += (body->i + body->m*cpvdot(offset, offset));
@@ -1098,41 +1113,6 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	
 	//free the array
 	cpArrayFree(ss);
-	
-	/*
-	cpBody *b1 = shape->body;
-	cpBody *b2 = shape2->body;
-	
-	//Calculate the sum of the "first mass moments"
-	//Treating each shape/body as a particle
-	cpVect mr = cpvadd(cpvmult(b1->p, b1->m), cpvmult(b2->p, b2->m));
-	
-	//Calculate the center of mass
-	cpVect cm = cpvmult(mr, 1.0f/(b1->m+b2->m));
-	
-	cpVect offset1 = cpvsub(b1->p, cm);
-	cpVect offset2 = cpvsub(b2->p, cm);
-	
-	//apply the offset (based off type)
-	[self offsetShape:shape  offset:offset1];
-	[self offsetShape:shape2 offset:offset2];
-	
-	cpFloat moi = ((b1->i + b1->m*cpvdot(offset1, offset1)) +
-				   (b2->i + b2->m*cpvdot(offset2, offset2)));
-	
-	cpBodySetMass(shape->body, b1->m + b2->m);
-	cpBodySetMoment(shape->body, moi);
-	
-	
-	//New pos
-	cpBodySetPos(shape->body, cm);
-	
-	//Remove 2nd body
-	cpSpaceRemoveBody(_space, b2);
-	cpBodyFree(b2);
-	
-	//Set second shape's body to new body
-	shape2->body = shape->body;*/
 }
 
 -(void) offsetShape:(cpShape*)shape offset:(cpVect)offset;
@@ -1145,7 +1125,7 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 		case CP_SEGMENT_SHAPE:
 		{
 			cpVect a = cpSegmentShapeGetA(shape);
-			cpVect b = cpSegmentShapeGetA(shape);
+			cpVect b = cpSegmentShapeGetB(shape);
 			
 			cpSegmentShapeSetEndpoints(shape, cpvadd(a, offset), cpvadd(b, offset));
 			break;
@@ -1425,16 +1405,9 @@ static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 	unsigned int hash = CP_HASH_PAIR(type1, type2);
 	cpCollisionHandler *pair = (cpCollisionHandler*)cpHashSetFind(_space->collFuncSet, hash, ids);
 	
-	//delete the invocation, if there is one (invoke can be null)
+	//delete the invocation, if there is one
 	if (pair != NULL)
-	{
-		id invoke = (id)pair->data;
-		[_invocations removeObject:invoke];
-	}
-
-	//Remove the collision callback
-	cpCollisionHandler *old_pair = (cpCollisionHandler*)cpHashSetRemove(_space->collFuncSet, hash, ids);
-	free(old_pair);	
+		cpSpaceAddPostStepCallback(_space, removeCollision, pair, _invocations);
 }
 
 @end

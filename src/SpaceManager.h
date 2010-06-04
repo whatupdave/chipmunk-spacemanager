@@ -19,7 +19,7 @@
 
 // 0x00 HI ME LO
 // 00   00 00 04
-#define SPACE_MANAGER_VERSION 0x00000004
+#define SPACE_MANAGER_VERSION 0x00000005
 
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
 #import "cocos2d.h"
@@ -254,7 +254,7 @@ typedef enum {
 /*! Queries the space as to whether these two shapes are in persistent contact */
 -(BOOL) isPersistentContactOnShape:(cpShape*)shape contactShape:(cpShape*)shape2;
 
-/*! Queries the space as to whether these two shapes are in persistent contact, returns the arbiter info */
+/*! Queries the space as to whether this shape has a persistent contact, returns the first arbiter info */
 -(cpArbiter*) persistentContactInfoOnShape:(cpShape*)shape;
 
 /*! Queries the space as to whether this shape has ANY persistent contact, It will return

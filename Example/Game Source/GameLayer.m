@@ -34,7 +34,7 @@
 {
 	[super init];
 	
-	isTouchEnabled = YES;
+	self.isTouchEnabled = YES;
 	
 	//add a background
 	CCSprite *background = [CCSprite spriteWithFile:@"splash_developed_by.png"];
@@ -104,7 +104,12 @@
 	s3.color = ccYELLOW;
 	[self addChild:s3];
 	
-	[smgr combineShapes:sh1,sh2,sh3,nil];
+	cpShape *sh4 = [smgr addSegmentAtWorldAnchor:cpv(305,130) toWorldAnchor:cpv(330,140) mass:1 radius:2];
+	cpShapeNode *s4 = [cpShapeNode nodeWithShape:sh4];
+	s4.color = ccMAGENTA;
+	[self addChild:s4];
+
+	[smgr combineShapes:sh1,sh2,sh3,sh4,nil];
 }
 
 - (void) setupStaticShapes
@@ -229,7 +234,7 @@
 
 
 #pragma mark Touch Functions
-- (BOOL)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+- (void)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {	
 	//Calculate a vector based on where we touched and where the ball is
 	CGPoint pt = [self convertTouchToNodeSpace:[touches anyObject]];
@@ -240,8 +245,6 @@
 	
 	//This applys a one-time force, pretty much like firing a bullet
 	[ballSprite applyImpulse:ccpMult(forceVect, 1)];
-
-	return YES;
 }
 
 - (BOOL) handleCollisionWithRect:(CollisionMoment)moment arbiter:(cpArbiter*)arb space:(cpSpace*)space
@@ -254,7 +257,12 @@
 - (BOOL) handleCollisionWithCircle:(CollisionMoment)moment arbiter:(cpArbiter*)arb space:(cpSpace*)space
 {
 	if (moment == COLLISION_BEGIN)
+	{
 		[label setString:@"You hit the Circle!"];
+		
+		//Test removal of collision
+		//[smgr removeCollisionCallbackBetweenType:kCircleCollisionType otherType:kBallCollisionType];
+	}
 	return YES;
 }
 

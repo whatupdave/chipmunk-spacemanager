@@ -86,7 +86,7 @@
 	return YES; //This just means accept the reading of this shape
 }
 
-- (BOOL)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+- (void)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {	
 	//Calculate a vector based on where we touched and where the ball is
 	CGPoint pt = [self convertTouchToNodeSpace:[touches anyObject]];
