@@ -1163,9 +1163,8 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 {
 	cpConstraint *constraint;
 	cpArray *array = _space->constraints;
-	const int num = array->num;
 
-	for (int i = 0; i < num; i++)
+	for (int i = 0; i < array->num; i++)
 	{
 		constraint = (cpConstraint*)array->arr[i];
 			
