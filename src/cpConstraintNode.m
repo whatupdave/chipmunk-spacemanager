@@ -17,6 +17,24 @@
 #import "cpConstraintNode.h"
 #import "CCDrawingPrimitives.h"
 
+static void drawCircle(cpVect center, float r, int segs)
+{
+	const float coef = 2.0f * (float)M_PI/segs;
+	float vertices[2*segs];
+	
+	for (int i=0;i<=segs;i++)
+	{
+		float rads = i*coef;
+		float j = r * cosf(rads) + center.x;
+		float k = r * sinf(rads) + center.y;
+		
+		vertices[i*2] = j;
+		vertices[i*2+1] =k;
+	}
+	
+	glVertexPointer(2, GL_FLOAT, 0, vertices);	
+	glDrawArrays(GL_LINE_STRIP, 0, segs);
+}
 
 @interface cpConstraintNode(PrivateMethods)
 - (void) drawPinJoint:(cpPinJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b;
@@ -152,7 +170,7 @@
 	width += padding*2;
 	
 	cpFloat length = cpvlength(cpvsub(bpt, apt)) + padding*2;
-	cpVect halfpt = cpvadd(body_a->p, cpvmult(cpvsub(bpt, apt), 0.5f));
+	cpVect halfpt = cpvadd(apt, cpvmult(cpvsub(bpt, apt), 0.5f));
 	
 	/* Algorithm Explained
 	 
@@ -364,8 +382,8 @@
 
 - (void) drawMotorJoint:(cpSimpleMotor*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
 {
-	ccDrawCircle(body_a->p, 4.0, 0, 12, NO);
-	//drawCircle(body_b->p, 4.0, 0, 12, NO);
+	//ccDrawCircle(body_a->p, 4.0, 0, 12, NO);
+	drawCircle(body_b->p, 4.0, 12);
 }
 
 - (void) drawGearJoint:(cpGearJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
@@ -375,8 +393,10 @@
 	cpFloat radius1 = fabs(5.0 / ratio);
 	cpFloat radius2 = fabs(5.0 * ratio);
 	
-	ccDrawCircle(body_a->p, radius1, 0, radius1*2+3, NO);
-	ccDrawCircle(body_b->p, radius2, 0, radius2*2+3, NO);
+	//ccDrawCircle(body_a->p, radius1, 0, radius1*2+3, NO);
+	//ccDrawCircle(body_b->p, radius2, 0, radius2*2+3, NO);
+	drawCircle(body_b->p, radius1, radius1*2+3);
+	drawCircle(body_b->p, radius2, radius2*2+3);
 	
 	cpVect a = cpv(0,radius1);
 	cpVect b = cpv(0,radius2);
