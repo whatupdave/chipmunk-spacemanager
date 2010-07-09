@@ -716,7 +716,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(NSArray*) getShapesAt:(cpVect)pos
 {
-	return [self getShapesAt:pos layers:0 group:0];
+	return [self getShapesAt:pos layers:-1 group:0];
 }
 
 -(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group

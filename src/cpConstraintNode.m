@@ -33,7 +33,7 @@ static void drawCircle(cpVect center, float r, int segs)
 	}
 	
 	glVertexPointer(2, GL_FLOAT, 0, vertices);	
-	glDrawArrays(GL_LINE_STRIP, 0, segs);
+	glDrawArrays(GL_LINE_LOOP, 0, segs);
 }
 
 @interface cpConstraintNode(PrivateMethods)
