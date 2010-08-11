@@ -17,6 +17,39 @@
 #import "chipmunk_unsafe.h"
 #import "cpSpaceSerializer.h"
 
+typedef struct ExplosionQueryContext {
+	cpLayers layers;
+	cpGroup group;
+	cpVect at;
+	float radius;
+	float maxForce;
+} bbQueryContext;
+
+static void ExplosionQueryHelper(cpBB *bb, cpShape *shape, ExplosionQueryContext *context)
+{
+	if (!(shape->group && context->group == shape->group) && 
+	   (context->layers&shape->layers) &&
+	   cpBBintersects(*bb, shape->bb))
+	{
+		//incredibly cheesy explosion effect (works decent with small objects)
+		cpVect dxdy = cpvsub(shape->body->p, context->at);
+		float distsq = cpvlengthsq(dxdy);
+		
+		// [Factor] = [Distance]/[Explosion Radius] 
+		// [Force] = (1.0 - [Factor]) * [Total Force]
+		// Apply -> [Direction] * [Force]
+		if (distsq <= context->radius*context->radius)
+		{
+			//Distance
+			float dist = cpfsqrt(distsq);
+			
+			//normalize for direction
+			dxdy = cpvmult(dxdy, 1.0f/dist);
+			cpBodyApplyImpulse(shape->body, cpvmult(dxdy, context->maxForce*(1.0f - (dist/context->radius))), cpvzero);
+		}
+	}
+}
+
 class cpSSDelegate : public cpSpaceSerializerDelegate 
 {
 public:
@@ -312,7 +345,6 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 @synthesize iterateStatic = _iterateStatic;
 @synthesize rehashStaticEveryStep = _rehashStaticEveryStep;
 @synthesize iterateFunc = _iterateFunc;
-@synthesize staticBody = _staticBody;
 @synthesize constantDt = _constantDt;
 @synthesize cleanupBodyDependencies = _cleanupBodyDependencies;
 @synthesize constraintCleanupDelegate = _constraintCleanupDelegate;
@@ -336,15 +368,23 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 -(id) initWithSpace:(cpSpace*)space
 {	
 	[super init];
-		
-	cpInitChipmunk();
+	
+	static BOOL initialized = NO;	
+	if (!initialized)
+	{
+		cpInitChipmunk();
+		initialized = YES;
+	}
 	
 	_space = space;
 	
+	//hmmm this gravity is silly.... sorry -rkb
 	_space->gravity = cpv(0, -9.8*10);
 	_space->elasticIterations = _space->iterations;
+	_space->sleepTimeThreshold = .4;	//this is actually a "large" value
+	//_space->idleSpeedThreshold = 0;	//default is zero, chipmunk decides best speed
+	
 	topWall = bottomWall = rightWall = leftWall = nil;
-	_staticBody = cpBodyNew(STATIC_MASS, INFINITY);
 	_steps = 2;
 	_iterateStatic = YES;
 	_rehashStaticEveryStep = NO;
@@ -374,6 +414,14 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 	[_invocations release];
 	
 	[super dealloc];
+}
+
+- (cpBody*) staticBody
+{
+	if (_space)
+		return &_space->staticBody;
+	else
+		return nil;
 }
 
 - (BOOL) loadSpaceFromUserDocs:(NSString*)file delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate
@@ -726,7 +774,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end
 {
-	return [self getShapeFromRayCastSegment:start end:end layers:-1 group:0];
+	return [self getShapeFromRayCastSegment:start end:end layers:CP_ALL_LAYERS group:CP_NO_GROUP];
 }
 
 -(cpSegmentQueryInfo) getInfoFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group
@@ -739,7 +787,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 	 
 -(cpSegmentQueryInfo) getInfoFromRayCastSegment:(cpVect)start end:(cpVect)end
 {
-	return [self getInfoFromRayCastSegment:start end:end layers:-1 group:0];
+	return [self getInfoFromRayCastSegment:start end:end layers:CP_ALL_LAYERS group:CP_NO_GROUP];
 }
 
 -(NSArray*) getShapesFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group
@@ -754,7 +802,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(NSArray*) getShapesFromRayCastSegment:(cpVect)start end:(cpVect)end
 {
-	return [self getShapesFromRayCastSegment:start end:end layers:-1 group:0];
+	return [self getShapesFromRayCastSegment:start end:end layers:CP_ALL_LAYERS group:CP_NO_GROUP];
 }
 
 -(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group
@@ -769,7 +817,14 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end
 {
-	return [self getInfosFromRayCastSegment:start end:end layers:-1 group:0];
+	return [self getInfosFromRayCastSegment:start end:end layers:CP_ALL_LAYERS group:CP_NO_GROUP];
+}
+
+-(void) applyLinearExplosionAt:(cpVect)at radius:(cpFloat)radius maxForce:(cpFloat)maxForce
+{	
+	cpBB bb = {at.x-radius, at.y-radius, at.x+radius, at.y+radius};
+	ExplosionQueryContext context = {CP_ALL_LAYERS, CP_NO_GROUP, at, radius, maxForce};
+	cpSpaceHashQuery(_space->activeShapes, &bb, bb, (cpSpaceHashQueryFunc)ExplosionQueryHelper, &context);
 }
 
 -(BOOL) isPersistentContactOnShape:(cpShape*)shape contactShape:(cpShape*)shape2
@@ -1269,7 +1324,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(cpConstraint*) addMotorToBody:(cpBody*)toBody rate:(cpFloat)rate
 {
-	return [self addMotorToBody:toBody fromBody:_staticBody rate:rate];
+	return [self addMotorToBody:toBody fromBody:&_space->staticBody rate:rate];
 }
 
 -(cpConstraint*) addGearToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody phase:(cpFloat)phase ratio:(cpFloat)ratio
@@ -1299,7 +1354,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(cpConstraint*) addRotaryLimitToBody:(cpBody*)toBody min:(cpFloat)min max:(cpFloat)max
 {
-	return [self addRotaryLimitToBody:toBody fromBody:_staticBody min:min max:max];
+	return [self addRotaryLimitToBody:toBody fromBody:&_space->staticBody min:min max:max];
 }
 
 -(cpConstraint*) addRatchetToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody phase:(cpFloat)phase rachet:(cpFloat)ratchet
@@ -1310,7 +1365,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(cpConstraint*) addRatchetToBody:(cpBody*)toBody phase:(cpFloat)phase rachet:(cpFloat)ratchet
 {
-	return [self addRatchetToBody:toBody fromBody:_staticBody phase:phase rachet:ratchet];
+	return [self addRatchetToBody:toBody fromBody:&_space->staticBody phase:phase rachet:ratchet];
 }
 
 -(void) ignoreCollionBetweenType:(unsigned int)type1 otherType:(unsigned int)type2
@@ -1326,7 +1381,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp
 {
-	return [self addRotarySpringToBody:toBody fromBody:_staticBody restAngle:restAngle stiffness:stiff damping:damp];
+	return [self addRotarySpringToBody:toBody fromBody:&_space->staticBody restAngle:restAngle stiffness:stiff damping:damp];
 }
 
 -(void) addCollisionCallbackBetweenType:(unsigned int)type1 otherType:(unsigned int) type2 target:(id)target selector:(SEL)selector

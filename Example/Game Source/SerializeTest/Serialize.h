@@ -7,8 +7,6 @@
 
 #import "cocos2d.h"
 #import "SpaceManager.h"
-#import "cpCCSprite.h"
-#import "cpShapeNode.h"
 
 #pragma mark Serialize Class
 @interface Serialize : CCLayer<SpaceManagerSerializeDelegate>

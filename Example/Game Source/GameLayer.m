@@ -238,13 +238,16 @@
 {	
 	//Calculate a vector based on where we touched and where the ball is
 	CGPoint pt = [self convertTouchToNodeSpace:[touches anyObject]];
-	CGPoint forceVect = ccpSub(pt, ballSprite.position);
+	//CGPoint forceVect = ccpSub(pt, ballSprite.position);
 	
 	//cpFloat len = cpvlength(forceVect);
 	//cpVect normalized = cpvnormalize(forceVect);
 	
 	//This applys a one-time force, pretty much like firing a bullet
-	[ballSprite applyImpulse:ccpMult(forceVect, 1)];
+	//[ballSprite applyImpulse:ccpMult(forceVect, 1)];
+	
+	//Lets apply an explosion instead
+	[smgr applyLinearExplosionAt:pt radius:100 maxForce:180];
 }
 
 - (BOOL) handleCollisionWithRect:(CollisionMoment)moment arbiter:(cpArbiter*)arb space:(cpSpace*)space

@@ -6,6 +6,9 @@
 //
 
 #import "Serialize.h"
+#import "cpCCSprite.h"
+#import "cpShapeNode.h"
+#import "cpConstraintNode.h"
 
 @interface Serialize (PrivateMethods)
 - (void) setupTest;
@@ -66,6 +69,13 @@
 			
 			[balls addObject:ballSprite];
 		}
+		
+		cpCCSprite *one = [balls objectAtIndex:0];
+		cpCCSprite *two = [balls objectAtIndex:11];
+		cpConstraint *pin = [smgr addPinToBody:one.shape->body fromBody:two.shape->body];
+		cpConstraintNode *pinn = [cpConstraintNode nodeWithConstraint:pin];
+		pinn.color = ccGREEN;
+		[self addChild:pinn];
 	}
 		
 	//start the manager!
@@ -87,6 +97,15 @@
 	return YES; //This just means accept the reading of this shape
 }
 
+-(BOOL) aboutToReadConstraint:(cpConstraint*)constraint constraintId:(long)id
+{
+	cpConstraintNode *pinn = [cpConstraintNode nodeWithConstraint:constraint];
+	pinn.color = ccGREEN;
+	[self addChild:pinn];
+	
+	return YES;
+}
+
 - (void)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {	
 	//Calculate a vector based on where we touched and where the ball is
@@ -99,8 +118,6 @@
 		//This applys a one-time force, pretty much like firing a bullet
 		[ballSprite applyImpulse:ccpMult(forceVect, 1)];
 	}
-	
-	return YES;
 }
 @end
 

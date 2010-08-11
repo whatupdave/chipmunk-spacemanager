@@ -82,8 +82,6 @@ typedef enum {
 	/* Helpful Shapes/Bodies */
 	cpShape			*topWall,*bottomWall,*rightWall,*leftWall;
 	
-	cpBody			*_staticBody;
-	
 	/* Number of steps (across dt) perform on each step call */
 	int		_steps;
 	
@@ -250,6 +248,9 @@ typedef enum {
 -(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
 /*! see getInfosFromRayCastSegment:end:layers:group: */
 -(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end;
+
+/*! Explosion, applied linear force to objects within radius */
+-(void) applyLinearExplosionAt:(cpVect)at radius:(cpFloat)radius maxForce:(cpFloat)maxForce;
 
 /*! Queries the space as to whether these two shapes are in persistent contact */
 -(BOOL) isPersistentContactOnShape:(cpShape*)shape contactShape:(cpShape*)shape2;
