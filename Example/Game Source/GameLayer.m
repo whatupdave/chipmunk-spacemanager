@@ -254,6 +254,7 @@
 {
 	if (moment == COLLISION_BEGIN)
 		[label setString:@"You hit the Rectangle!"];
+	
 	return YES;
 }
 
