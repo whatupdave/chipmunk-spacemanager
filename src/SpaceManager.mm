@@ -23,32 +23,7 @@ typedef struct ExplosionQueryContext {
 	cpVect at;
 	float radius;
 	float maxForce;
-} bbQueryContext;
-
-static void ExplosionQueryHelper(cpBB *bb, cpShape *shape, ExplosionQueryContext *context)
-{
-	if (!(shape->group && context->group == shape->group) && 
-	   (context->layers&shape->layers) &&
-	   cpBBintersects(*bb, shape->bb))
-	{
-		//incredibly cheesy explosion effect (works decent with small objects)
-		cpVect dxdy = cpvsub(shape->body->p, context->at);
-		float distsq = cpvlengthsq(dxdy);
-		
-		// [Factor] = [Distance]/[Explosion Radius] 
-		// [Force] = (1.0 - [Factor]) * [Total Force]
-		// Apply -> [Direction] * [Force]
-		if (distsq <= context->radius*context->radius)
-		{
-			//Distance
-			float dist = cpfsqrt(distsq);
-			
-			//normalize for direction
-			dxdy = cpvmult(dxdy, 1.0f/dist);
-			cpBodyApplyImpulse(shape->body, cpvmult(dxdy, context->maxForce*(1.0f - (dist/context->radius))), cpvzero);
-		}
-	}
-}
+} ExplosionQueryContext;
 
 class cpSSDelegate : public cpSpaceSerializerDelegate 
 {
@@ -130,6 +105,31 @@ public:
 private:
 	NSObject<SpaceManagerSerializeDelegate>* _delegate;
 };
+
+static void ExplosionQueryHelper(cpBB *bb, cpShape *shape, ExplosionQueryContext *context)
+{
+	if (!(shape->group && context->group == shape->group) && 
+		(context->layers&shape->layers) &&
+		cpBBintersects(*bb, shape->bb))
+	{
+		//incredibly cheesy explosion effect (works decent with small objects)
+		cpVect dxdy = cpvsub(shape->body->p, context->at);
+		float distsq = cpvlengthsq(dxdy);
+		
+		// [Factor] = [Distance]/[Explosion Radius] 
+		// [Force] = (1.0 - [Factor]) * [Total Force]
+		// Apply -> [Direction] * [Force]
+		if (distsq <= context->radius*context->radius)
+		{
+			//Distance
+			float dist = cpfsqrt(distsq);
+			
+			//normalize for direction
+			dxdy = cpvmult(dxdy, 1.0f/dist);
+			cpBodyApplyImpulse(shape->body, cpvmult(dxdy, context->maxForce*(1.0f - (dist/context->radius))), cpvzero);
+		}
+	}
+}
 
 void defaultEachShape(void *ptr, void* data)
 {
@@ -333,7 +333,8 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 /* Private Method Declarations */
 @interface SpaceManager (PrivateMethods)
--(void) setupDefaultShape:(cpShape*) s;
+-(void) setupDefaultShape:(cpShape*)s;
+-(void) removeAndMaybeFreeShape:(cpShape*)shape freeShape:(BOOL)freeShape;
 @end
 
 @implementation SpaceManager
@@ -595,33 +596,55 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 	cpSpaceAddPostStepCallback(_space, removeShape, shape, self);
 }
 
--(void) removeAndFreeShape:(cpShape*)shape
+-(void) removeAndMaybeFreeShape:(cpShape*)shape freeShape:(BOOL)freeShape
 {
-	if (_cleanupBodyDependencies)
-		[self removeAndFreeConstraintsOnBody:shape->body];
+	if (shape->body->m == STATIC_MASS)
+		cpSpaceRemoveStaticShape(_space, shape);
+	else		
+		cpSpaceRemoveShape(_space, shape);
 	
-	[self removeShape:shape];
-	cpBodyFree(shape->body);
-	cpShapeFree(shape);	
+	//Make sure it's not our static body
+	if (shape->body != &_space->staticBody)
+	{
+		//Checking if this body is shared....!
+		if (shape->body->space == _space)
+		{
+			BOOL shared = NO;
+			
+			//anyone else have this body?
+			for(cpShape *sh = shape->body->shapesList; sh && !shared; sh=sh->next)
+				shared = (sh != shape);
+				
+			//if not then get rid of it
+			if (!shared)
+			{
+				cpSpaceRemoveBody(_space, shape->body);
+				
+				//Free it
+				if (freeShape)
+				{
+					//cleanup any constraints
+					if (_cleanupBodyDependencies)
+						[self removeAndFreeConstraintsOnBody:shape->body];
+					
+					cpBodyFree(shape->body);
+				}
+			}
+		}
+	}
 	
-	if (_cleanupBodyDependencies)
-		[self removeAndFreeConstraintsOnBody:shape->body];
+	if (freeShape)
+		cpShapeFree(shape);	
+}
+
+-(void) removeAndFreeShape:(cpShape*)shape
+{	
+	[self removeAndMaybeFreeShape:shape freeShape:YES];
 }
 
 -(cpShape*) removeShape:(cpShape*) shape
-{
-	if (shape->body->m == STATIC_MASS)
-	{	
-		//Static Bodies are not added (assumption)
-		//cpSpaceRemoveBody(space, shape->body);
-		cpSpaceRemoveStaticShape(_space, shape);
-	}
-	else
-	{
-		cpSpaceRemoveBody(_space, shape->body);
-		cpSpaceRemoveShape(_space, shape);
-	}
-	
+{	
+	[self removeAndMaybeFreeShape:shape freeShape:NO];
 	return shape;
 }
 
