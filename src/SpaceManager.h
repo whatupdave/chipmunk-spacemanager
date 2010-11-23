@@ -18,8 +18,8 @@
 #define _SPACE_MANAGER_FOR_COCOS2D
 
 // 0x00 HI ME LO
-// 00   00 00 04
-#define SPACE_MANAGER_VERSION 0x00000005
+// 00   00 00 06
+#define SPACE_MANAGER_VERSION 0x00000006
 
 #ifdef _SPACE_MANAGER_FOR_COCOS2D
 #import "cocos2d.h"
@@ -221,8 +221,8 @@ typedef enum {
 /*! Use if you move static shapes during simulation */
 -(void) rehashStaticShapes;
 
-/*! Use to only rehash one static shape */
--(void) rehashStaticShape:(cpShape*)shape;
+/*! Use to only rehash one shape */
+-(void) rehashShape:(cpShape*)shape;
 
 /*! Return an array of NSValues with a pointer to a cpShape */
 -(NSArray*) getShapesAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group;
@@ -251,6 +251,8 @@ typedef enum {
 
 /*! Explosion, applied linear force to objects within radius */
 -(void) applyLinearExplosionAt:(cpVect)at radius:(cpFloat)radius maxForce:(cpFloat)maxForce;
+/*! Explosion, applied linear force to objects within radius given a group and layer(s) */
+-(void) applyLinearExplosionAt:(cpVect)at radius:(cpFloat)radius maxForce:(cpFloat)maxForce layers:(cpLayers)layers group:(cpGroup)group;
 
 /*! Queries the space as to whether these two shapes are in persistent contact */
 -(BOOL) isPersistentContactOnShape:(cpShape*)shape contactShape:(cpShape*)shape2;
@@ -381,16 +383,19 @@ typedef enum {
 /*! This does not work yet */
 -(cpConstraint*) addBreakableToConstraint:(cpConstraint*)breakConstraint maxForce:(cpFloat)max;
 
-/*! */
+/*! Specify a min and a max a body can rotate relative to another body */
 -(cpConstraint*) addRotaryLimitToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody min:(cpFloat)min max:(cpFloat)max;
+/*! Specify a min and a max a body can rotate */
 -(cpConstraint*) addRotaryLimitToBody:(cpBody*)toBody min:(cpFloat)min max:(cpFloat)max;
 
-/*! */
+/*! Add a ratchet between two bodies */
 -(cpConstraint*) addRatchetToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody phase:(cpFloat)phase rachet:(cpFloat)ratchet;
+/*! Add a ratchet to a body */
 -(cpConstraint*) addRatchetToBody:(cpBody*)toBody phase:(cpFloat)phase rachet:(cpFloat)ratchet;
 
-/*! */
+/*! Add a rotary spring between two bodies */
 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp;
+/*! Add a rotary spring to a body */
 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp;
 
 @end

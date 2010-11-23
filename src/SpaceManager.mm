@@ -17,6 +17,12 @@
 #import "chipmunk_unsafe.h"
 #import "cpSpaceSerializer.h"
 
+/* Private Method Declarations */
+@interface SpaceManager (PrivateMethods)
+-(void) setupDefaultShape:(cpShape*)s;
+-(void) removeAndMaybeFreeShape:(cpShape*)shape freeShape:(BOOL)freeShape;
+@end
+
 typedef struct ExplosionQueryContext {
 	cpLayers layers;
 	cpGroup group;
@@ -285,12 +291,12 @@ static void updateBBCache(cpShape *shape, void *unused)
 
 static void removeShape(cpSpace *space, void *obj, void *data)
 {
-	[(SpaceManager*)(data) removeShape:(cpShape*)(obj)];
+	[(SpaceManager*)(data) removeAndMaybeFreeShape:(cpShape*)(obj) freeShape:NO];
 }
 
 static void removeAndFreeShape(cpSpace *space, void *obj, void *data)
 {
-	[(SpaceManager*)(data) removeAndFreeShape:(cpShape*)(obj)];
+	[(SpaceManager*)(data) removeAndMaybeFreeShape:(cpShape*)(obj) freeShape:YES];
 }
 
 static void removeCollision(cpSpace *space, void *collision, void *inv_list)
@@ -328,13 +334,6 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 	[super dealloc];
 }
 
-@end
-
-
-/* Private Method Declarations */
-@interface SpaceManager (PrivateMethods)
--(void) setupDefaultShape:(cpShape*)s;
--(void) removeAndMaybeFreeShape:(cpShape*)shape freeShape:(BOOL)freeShape;
 @end
 
 @implementation SpaceManager
@@ -763,14 +762,14 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 	cpSpaceRehashStatic(_space);
 }
 
--(void) rehashStaticShape:(cpShape*)shape
+-(void) rehashShape:(cpShape*)shape
 {
-	_rehashNextStep = YES;
-	//NEEDS WORK, slows down simulation
-	//cpSpaceHashRemove(_space->staticShapes, shape, shape->id);
-	////shapeRemovalArbiterReject(_space, shape); //I don't think this is necessary
-	//cpShapeCacheBB(shape);
-	//cpSpaceHashInsert(_space->staticShapes, shape, shape->id, shape->bb);
+	//############# Code taken from Chipmunk repo
+	cpShapeCacheBB(shape);
+	
+	// attempt to rehash the shape in both hashes
+	cpSpaceHashRehashObject(_space->activeShapes, shape, shape->hashid);
+	cpSpaceHashRehashObject(_space->staticShapes, shape, shape->hashid);
 }
 
 -(NSArray*) getShapesAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group
@@ -841,21 +840,25 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(void) applyLinearExplosionAt:(cpVect)at radius:(cpFloat)radius maxForce:(cpFloat)maxForce
 {	
+	[self applyLinearExplosionAt:at radius:radius maxForce:maxForce layers:CP_ALL_LAYERS group:CP_NO_GROUP];
+}
+
+-(void) applyLinearExplosionAt:(cpVect)at radius:(cpFloat)radius maxForce:(cpFloat)maxForce layers:(cpLayers)layers group:(cpGroup)group;
+{
 	cpBB bb = {at.x-radius, at.y-radius, at.x+radius, at.y+radius};
-	ExplosionQueryContext context = {CP_ALL_LAYERS, CP_NO_GROUP, at, radius, maxForce};
+	ExplosionQueryContext context = {layers, group, at, radius, maxForce};
 	cpSpaceHashQuery(_space->activeShapes, &bb, bb, (cpSpaceHashQueryFunc)ExplosionQueryHelper, &context);
 }
 
 -(BOOL) isPersistentContactOnShape:(cpShape*)shape contactShape:(cpShape*)shape2
 {
 	cpShape *shape_pair[] = {shape, shape2};
-	int max_contact_staleness = cp_contact_persistence;
 	
 	//Try and find the the persistent contact
 	cpArbiter *arb = (cpArbiter *)cpHashSetFind(_space->contactSet, CP_HASH_PAIR(shape, shape2), shape_pair);
 	
-	//check the freshness, chipmunk keeps them around for cp_contact_persistence "3" times
-	return (arb && _space->stamp - arb->stamp < max_contact_staleness);
+	//check its there, chipmunk keeps them around for cp_contact_persistence "3" times
+	return (arb != NULL);
 }
 
 -(cpShape*) persistentContactOnShape:(cpShape*)shape

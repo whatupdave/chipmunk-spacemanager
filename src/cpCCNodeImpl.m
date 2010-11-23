@@ -74,7 +74,7 @@
 			
 			//If we're static, we need to tell our space that we've changed
 			if (_spaceManager && _shape->body->m == STATIC_MASS)
-				[_spaceManager rehashStaticShape:_shape];
+				[_spaceManager rehashShape:_shape];
 		}
 	}
 }
