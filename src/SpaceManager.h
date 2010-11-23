@@ -268,14 +268,8 @@ typedef enum {
 /*! Will return an array of NSValues that point to the cpConstraints on given body */
 -(NSArray*) getConstraintsOnBody:(cpBody*)body;
 
-/*! Schedule is used for removing & freeing shapes during collisions */
--(void) scheduleToRemoveAndFreeShape:(cpShape*)shape;
-
 /*! Use when removing & freeing shapes */
 -(void) removeAndFreeShape:(cpShape*)shape;
-
-/*! Schedule is used for removing shapes during collisions, ownership is given to caller */
--(void) scheduleToRemoveShape:(cpShape*)shape;
 
 /*! Use when removing shapes, will pass ownership to caller */
 -(cpShape*) removeShape:(cpShape*)shape;

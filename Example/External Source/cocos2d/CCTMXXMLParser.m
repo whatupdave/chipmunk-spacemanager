@@ -28,17 +28,17 @@
  */
 
 
+#import <Foundation/Foundation.h>
 #include <zlib.h>
-#import <UIKit/UIKit.h>
 
 #import "ccMacros.h"
 #import "Support/CGPointExtension.h"
 #import "CCTMXXMLParser.h"
 #import "CCTMXTiledMap.h"
 #import "CCTMXObjectGroup.h"
-#import "Support/CCFileUtils.h"
 #import "Support/base64.h"
 #import "Support/ZipUtils.h"
+#import "Support/CCFileUtils.h"
 
 #pragma mark -
 #pragma mark TMXLayerInfo
@@ -133,7 +133,7 @@
 		
 		self.tilesets = [NSMutableArray arrayWithCapacity:4];
 		self.layers = [NSMutableArray arrayWithCapacity:4];
-		self.filename = [CCFileUtils fullPathFromRelativePath:tmxFile];
+		self.filename = tmxFile;
 		self.objectGroups = [NSMutableArray arrayWithCapacity:4];
 		self.properties = [NSMutableDictionary dictionaryWithCapacity:5];
 		self.tileProperties = [NSMutableDictionary dictionaryWithCapacity:5];
@@ -163,7 +163,7 @@
 
 - (void) parseXMLFile:(NSString *)xmlFilename
 {
-	NSURL *url = [NSURL fileURLWithPath:xmlFilename];
+	NSURL *url = [NSURL fileURLWithPath:[CCFileUtils fullPathFromRelativePath:xmlFilename] ];
 	NSXMLParser *parser = [[NSXMLParser alloc] initWithContentsOfURL:url];
 
 	// we'll do the parsing
@@ -395,7 +395,7 @@
 		
 		if( layerAttribs & TMXLayerAttribGzip ) {
 			unsigned char *deflated;
-			inflateMemory(buffer, len, &deflated);
+			ccInflateMemory(buffer, len, &deflated);
 			free( buffer );
 			
 			if( ! deflated ) {

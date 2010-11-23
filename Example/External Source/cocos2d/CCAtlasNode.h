@@ -42,19 +42,14 @@
 	CCTextureAtlas	*textureAtlas_;
 
 	// chars per row
-	int				itemsPerRow;
+	int				itemsPerRow_;
 	// chars per column
-	int				itemsPerColumn;
-	
-	// texture coordinate x increment
-	float			texStepX;
-	// texture coordinate y increment
-	float			texStepY;
-	
+	int				itemsPerColumn_;
+		
 	// width of each char
-	int				itemWidth;
+	int				itemWidth_;
 	// height of each char
-	int				itemHeight;
+	int				itemHeight_;
 
 	// blend function
 	ccBlendFunc		blendFunc_;
@@ -78,10 +73,10 @@
 @property (nonatomic,readwrite) ccColor3B color;
 
 
-/** creates a CCAtlasNode  with an Atlas file the width and height of each item and the quantity of items to render*/
+/** creates a CCAtlasNode  with an Atlas file the width and height of each item measured in points and the quantity of items to render*/
 +(id) atlasWithTileFile:(NSString*)tile tileWidth:(int)w tileHeight:(int)h itemsToRender: (int) c;
 
-/** initializes an CCAtlasNode  with an Atlas file the width and height of each item and the quantity of items to render*/
+/** initializes an CCAtlasNode  with an Atlas file the width and height of each item measured in points and the quantity of items to render*/
 -(id) initWithTileFile:(NSString*)tile tileWidth:(int)w tileHeight:(int)h itemsToRender: (int) c;
 
 /** updates the Atlas (indexed vertex array).

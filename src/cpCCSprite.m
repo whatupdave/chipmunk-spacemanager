@@ -23,7 +23,7 @@
 	return [[[self alloc] initWithShape:shape file:filename] autorelease];
 }
 
-+ (id) spriteWithShape:(cpShape*)shape spriteSheet:(CCSpriteSheet*)spriteSheet rect:(CGRect)rect
++ (id) spriteWithShape:(cpShape*)shape spriteSheet:(CCSpriteBatchNode*)spriteSheet rect:(CGRect)rect
 {
 	return [[[self alloc] initWithShape:shape spriteSheet:spriteSheet rect:rect] autorelease];
 }
@@ -47,9 +47,9 @@
 	return self;
 }
 
--(id) initWithShape:(cpShape*)shape spriteSheet:(CCSpriteSheet*)spriteSheet rect:(CGRect)rect
+-(id) initWithShape:(cpShape*)shape spriteSheet:(CCSpriteBatchNode*)spriteSheet rect:(CGRect)rect
 {
-	[super initWithSpriteSheet:spriteSheet rect:rect];
+	[super initWithBatchNode:spriteSheet rect:rect];
 	
 	CPCCNODE_MEM_VARS_INIT(shape)
 
@@ -79,14 +79,15 @@
 -(void) draw
 {
 	cpShape *shape = _implementation.shape;
-	if (shape->klass->type == CP_CIRCLE_SHAPE)
+	if (shape && shape->klass->type == CP_CIRCLE_SHAPE)
 	{
 		cpVect offset = cpCircleShapeGetOffset(shape);
 		
 		if (offset.x != 0 && offset.y != 0)
 		{
 			glPushMatrix();
-			glTranslatef(RENDER_IN_SUBPIXEL(offset.x), RENDER_IN_SUBPIXEL(offset.y), 0);
+			ccglTranslate(RENDER_IN_SUBPIXEL(offset.x*CC_CONTENT_SCALE_FACTOR()), 
+						  RENDER_IN_SUBPIXEL(offset.y*CC_CONTENT_SCALE_FACTOR()), 0);
 			[super draw];
 			glPopMatrix();
 		}

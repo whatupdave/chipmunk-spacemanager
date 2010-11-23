@@ -39,7 +39,7 @@
 	{
 		_shape->data = NULL;
 		if (_autoFreeShape)
-			[_spaceManager scheduleToRemoveAndFreeShape:_shape];
+			[_spaceManager removeAndFreeShape:_shape];
 	}
 	_shape = nil;
 		

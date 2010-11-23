@@ -23,14 +23,15 @@
  * THE SOFTWARE.
  */
 
+#import <Availability.h>
 
-#import <OpenGLES/ES1/gl.h>
-
+#import "Platforms/CCGL.h"
 #import "CCAction.h"
 #import "ccTypes.h"
 #import "CCTexture2D.h"
 #import "CCProtocols.h"
 #import "ccConfig.h"
+#import "Support/CCArray.h"
 
 enum {
 	kCCNodeTagInvalid = -1,
@@ -103,6 +104,7 @@ enum {
 	
 	// position of the node
 	CGPoint position_;
+	CGPoint	positionInPixels_;
 
 	// is visible
 	BOOL visible_;
@@ -118,6 +120,7 @@ enum {
 	
 	// untransformed size of the node
 	CGSize	contentSize_;
+	CGSize	contentSizeInPixels_;
 	
 	// transform
 	CGAffineTransform transform_, inverse_;
@@ -135,19 +138,19 @@ enum {
 	CCGridBase *grid_;
 	
 	// z-order value
-	int zOrder_;
+	NSInteger zOrder_;
 	
 	// array of children
-	NSMutableArray *children_;
+	CCArray *children_;
 	
 	// weakref to parent
 	CCNode *parent_;
 	
 	// a tag. any number you want to assign to the node
-	int tag_;
+	NSInteger tag_;
     
 	// user data field
-	void *userData;
+	void *userData_;
 
 	// Is running
 	BOOL isRunning_;
@@ -161,7 +164,7 @@ enum {
 }
 
 /** The z order of the node relative to it's "brothers": children of the same parent */
-@property(nonatomic,readonly) int zOrder;
+@property(nonatomic,readonly) NSInteger zOrder;
 /** The real openGL Z vertex.
  Differences between openGL Z vertex and cocos2d Z order:
    - OpenGL Z modifies the Z vertex, and not the Z order in the relation between parent-children
@@ -179,11 +182,15 @@ enum {
 @property(nonatomic,readwrite,assign) float scaleX;
 /** The scale factor of the node. 1.0 is the default scale factor. It only modifies the Y scale factor. */
 @property(nonatomic,readwrite,assign) float scaleY;
-/** Position (x,y) of the node in OpenGL coordinates. (0,0) is the left-bottom corner. */
+/** Position (x,y) of the node in points. (0,0) is the left-bottom corner. */
 @property(nonatomic,readwrite,assign) CGPoint position;
+/** Position (x,y) of the node in points. (0,0) is the left-bottom corner. */
+@property(nonatomic,readwrite,assign) CGPoint positionInPixels;
 /** A CCCamera object that lets you move the node using a gluLookAt
 */
- @property(nonatomic,readonly) CCCamera* camera;
+@property(nonatomic,readonly) CCCamera* camera;
+/** Array of children */
+@property(nonatomic,readonly) CCArray *children;
 /** A CCGrid object that is used when applying effects */
 @property(nonatomic,readwrite,retain) CCGridBase* grid;
 /** Whether of not the node is visible. Default is YES */
@@ -201,12 +208,20 @@ enum {
  */
 @property(nonatomic,readonly) CGPoint anchorPointInPixels;
 
-/** The untransformed size of the node.
+/** The untransformed size of the node in Points
  The contentSize remains the same no matter the node is scaled or rotated.
  All nodes has a size. Layer and Scene has the same size of the screen.
  @since v0.8
  */
 @property (nonatomic,readwrite) CGSize contentSize;
+
+/** The untransformed size of the node in Pixels
+ The contentSize remains the same no matter the node is scaled or rotated.
+ All nodes has a size. Layer and Scene has the same size of the screen.
+ @since v0.8
+ */
+@property (nonatomic,readwrite) CGSize contentSizeInPixels;
+
 /** whether or not the node is running */
 @property(nonatomic,readonly) BOOL isRunning;
 /** A weak reference to the parent */
@@ -217,7 +232,7 @@ enum {
  */
 @property(nonatomic,readwrite,assign) BOOL isRelativeAnchorPoint;
 /** A tag used to identify the node easily */
-@property(nonatomic,readwrite,assign) int tag;
+@property(nonatomic,readwrite,assign) NSInteger tag;
 /** A custom user data pointer */
 @property(nonatomic,readwrite,assign) void *userData;
 
@@ -252,22 +267,22 @@ enum {
 // composition: ADD
 
 /** Adds a child to the container with z-order as 0.
- It returns self, so you can chain several addChilds.
+ If the child is added to a 'running' node, then 'onEnter' and 'onEnterTransitionDidFinish' will be called immediately.
  @since v0.7.1
  */
--(id) addChild: (CCNode*)node;
+-(void) addChild: (CCNode*)node;
 
-/** Adds a child to the container with a z-order
- It returns self, so you can chain several addChilds.
+/** Adds a child to the container with a z-order.
+ If the child is added to a 'running' node, then 'onEnter' and 'onEnterTransitionDidFinish' will be called immediately.
  @since v0.7.1
  */
--(id) addChild: (CCNode*)node z:(int)z;
+-(void) addChild: (CCNode*)node z:(int)z;
 
-/** Adds a child to the container with z order and tag
- It returns self, so you can chain several addChilds.
+/** Adds a child to the container with z order and tag.
+ If the child is added to a 'running' node, then 'onEnter' and 'onEnterTransitionDidFinish' will be called immediately.
  @since v0.7.1
  */
--(id) addChild: (CCNode*)node z:(int)z tag:(int)tag;
+-(void) addChild: (CCNode*)node z:(int)z tag:(int)tag;
 
 // composition: REMOVE
 
@@ -298,9 +313,6 @@ enum {
  @since v0.7.1
  */
 -(CCNode*) getChildByTag:(int) tag;
-
-/** Returns the array that contains all the children */
-- (NSArray *)children;
 
 /** Reorders a child according to a new z value.
  * The child MUST be already added.
@@ -341,12 +353,21 @@ enum {
  */
 -(void) transformAncestors;
 
-/** returns a "local" axis aligned bounding box of the node.
+/** returns a "local" axis aligned bounding box of the node in points.
  The returned box is relative only to its parent.
+ The returned box is in Points.
  
  @since v0.8.2
  */
 - (CGRect) boundingBox;
+
+/** returns a "local" axis aligned bounding box of the node in pixels.
+ The returned box is relative only to its parent.
+ The returned box is in Points.
+ 
+ @since v0.99.5
+ */
+- (CGRect) boundingBoxInPixels;
 
 
 // actions
@@ -412,7 +433,9 @@ enum {
 -(void) schedule: (SEL) s;
 /** schedules a custom selector with an interval time in seconds.
  If time is 0 it will be ticked every frame.
- If tiem is 0, it is recommended to use 'scheduleUpdate' instead.
+ If time is 0, it is recommended to use 'scheduleUpdate' instead.
+ 
+ If the selector is already scheduled, then the interval parameter will be updated without scheduling it again.
  */
 -(void) schedule: (SEL) s interval:(ccTime)seconds;
 /** unschedules a custom selector.*/
@@ -433,48 +456,55 @@ enum {
  */
 -(void) pauseSchedulerAndActions;
 
+
 // transformation methods
 
-/** Returns the local affine transform matrix
+/** Returns the matrix that transform the node's (local) space coordinates into the parent's space coordinates.
+ The matrix is in Pixels.
  @since v0.7.1
  */
 - (CGAffineTransform)nodeToParentTransform;
-/** Returns the inverse local affine transform matrix
+/** Returns the matrix that transform parent's space coordinates to the node's (local) space coordinates.
+ The matrix is in Pixels.
  @since v0.7.1
  */
 - (CGAffineTransform)parentToNodeTransform;
-/** Retrusn the world affine transform matrix
+/** Retrusn the world affine transform matrix. The matrix is in Pixels.
  @since v0.7.1
  */
 - (CGAffineTransform)nodeToWorldTransform;
-/** Returns the inverse world affine transform matrix
+/** Returns the inverse world affine transform matrix. The matrix is in Pixels.
  @since v0.7.1
  */
 - (CGAffineTransform)worldToNodeTransform;
-/** converts a world coordinate to local coordinate
+/** Converts a Point to node (local) space coordinates. The result is in Points.
  @since v0.7.1
  */
 - (CGPoint)convertToNodeSpace:(CGPoint)worldPoint;
-/** converts local coordinate to world space
+/** Converts a Point to world space coordinates. The result is in Points.
  @since v0.7.1
  */
 - (CGPoint)convertToWorldSpace:(CGPoint)nodePoint;
-/** converts a world coordinate to local coordinate
- treating the returned/received node point as anchor relative
+/** Converts a Point to node (local) space coordinates. The result is in Points.
+ treating the returned/received node point as anchor relative.
  @since v0.7.1
  */
 - (CGPoint)convertToNodeSpaceAR:(CGPoint)worldPoint;
-/** converts local coordinate to world space
- treating the returned/received node point as anchor relative
+/** Converts a local Point to world space coordinates.The result is in Points.
+ treating the returned/received node point as anchor relative.
  @since v0.7.1
  */
 - (CGPoint)convertToWorldSpaceAR:(CGPoint)nodePoint;
-/** convenience methods which take a UITouch instead of CGPoint
+
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
+/** Converts a UITouch to node (local) space coordinates. The result is in Points.
  @since v0.7.1
  */
 - (CGPoint)convertTouchToNodeSpace:(UITouch *)touch;
-/** converts a UITouch (world coordinates) into a local coordiante. This method is AR (Anchor Relative).
+/** Converts a UITouch to node (local) space coordinates. The result is in Points.
+ This method is AR (Anchor Relative)..
  @since v0.7.1
  */
 - (CGPoint)convertTouchToNodeSpaceAR:(UITouch *)touch;
+#endif // __IPHONE_OS_VERSION_MAX_ALLOWED
 @end

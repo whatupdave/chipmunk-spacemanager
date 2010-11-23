@@ -14,8 +14,10 @@
  **********************************************************************/
 
 #import "GameDelegate.h"
-#import "GameLayer.h"
+
 #import "Serialize.h"
+#import "Retina.h"
+#import "GameLayer.h"
 
 @interface GameDelegate (PrivateMethods)
 
@@ -28,27 +30,45 @@
 {
 	[application setIdleTimerDisabled:YES];
 	
-	// NEW: Init the window
 	window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-	[window setUserInteractionEnabled:YES];
-	[window setMultipleTouchEnabled:YES];
-
+	//if( ! [CCDirector setDirectorType:kCCDirectorTypeDisplayLink] )
+	//	[CCDirector setDirectorType:kCCDirectorTypeNSTimer];
 	[CCDirector setDirectorType:CCDirectorTypeThreadMainLoop];
-	[[CCDirector sharedDirector] setDeviceOrientation:CCDeviceOrientationLandscapeLeft];
-	[[CCDirector sharedDirector] setDisplayFPS:YES];
-
-	[[CCDirector sharedDirector] attachInWindow:window];	
 	
-	[window makeKeyAndVisible];
+	CCDirector *director = [CCDirector sharedDirector];
+	
+	[director setDeviceOrientation:kCCDeviceOrientationPortrait];
+	[director setDisplayFPS:NO];
+	[director setAnimationInterval:1.0/60];
+	EAGLView *glView = [EAGLView viewWithFrame:[window bounds]
+									 pixelFormat:kEAGLColorFormatRGB565
+									 depthFormat:0 /* GL_DEPTH_COMPONENT24_OES */
+							  preserveBackbuffer:NO
+									  sharegroup:nil
+								   multiSampling:NO
+								 numberOfSamples:0
+						  ];
+	[director setOpenGLView:glView];
+	[window addSubview:glView];																
+	[window makeKeyAndVisible];		
+	
+	//[window setUserInteractionEnabled:YES];
+	//[window setMultipleTouchEnabled:YES];
+
+	[director setDeviceOrientation:CCDeviceOrientationLandscapeLeft];
+	[director setDisplayFPS:YES];
 
 	CCScene *game = [CCScene node];
 #if SERIALIZE_TEST
 	Serialize *layer = [Serialize node];
+#elif RETINA_TEST
+	[director enableRetinaDisplay:YES];
+	Retina *layer = [Retina node];
 #else
 	GameLayer *layer = [GameLayer node];
 #endif
 	[game addChild:layer];
-	[[CCDirector sharedDirector] runWithScene:game];
+	[director runWithScene:game];
 }
 
 - (void)applicationWillTerminate:(UIApplication*)application

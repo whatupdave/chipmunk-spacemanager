@@ -590,12 +590,6 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 		cpSpaceHashEach(_space->staticShapes, _iterateFunc, self);	
 }
 
-
--(void) scheduleToRemoveShape:(cpShape*)shape
-{
-	cpSpaceAddPostStepCallback(_space, removeShape, shape, self);
-}
-
 -(void) removeAndMaybeFreeShape:(cpShape*)shape freeShape:(BOOL)freeShape
 {
 	if (shape->body->m == STATIC_MASS)
@@ -637,20 +631,22 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 		cpShapeFree(shape);	
 }
 
--(void) removeAndFreeShape:(cpShape*)shape
-{	
-	[self removeAndMaybeFreeShape:shape freeShape:YES];
-}
-
--(cpShape*) removeShape:(cpShape*) shape
-{	
-	[self removeAndMaybeFreeShape:shape freeShape:NO];
+-(cpShape*) removeShape:(cpShape*)shape
+{
+	if (_space->locked)
+		cpSpaceAddPostStepCallback(_space, removeShape, shape, self);
+	else
+		[self removeAndMaybeFreeShape:shape freeShape:NO];
+	
 	return shape;
 }
 
--(void) scheduleToRemoveAndFreeShape:(cpShape*)shape
+-(void) removeAndFreeShape:(cpShape*)shape
 {
-	cpSpaceAddPostStepCallback(_space, removeAndFreeShape, shape, self);
+	if (_space->locked)
+		cpSpaceAddPostStepCallback(_space, removeAndFreeShape, shape, self);
+	else
+		[self removeAndMaybeFreeShape:shape freeShape:YES];
 }
 
 -(void) setupDefaultShape:(cpShape*) s
@@ -753,7 +749,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(cpShape*) getShapeAt:(cpVect)pos
 {
-	return [self getShapeAt:pos layers:-1 group:0];
+	return [self getShapeAt:pos layers:CP_ALL_LAYERS group:CP_NO_GROUP];
 }
 
 -(void) rehashActiveShapes
@@ -787,7 +783,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(NSArray*) getShapesAt:(cpVect)pos
 {
-	return [self getShapesAt:pos layers:-1 group:0];
+	return [self getShapesAt:pos layers:CP_ALL_LAYERS group:CP_NO_GROUP];
 }
 
 -(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group
@@ -1484,7 +1480,12 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 	
 	//delete the invocation, if there is one
 	if (pair != NULL)
-		cpSpaceAddPostStepCallback(_space, removeCollision, pair, _invocations);
+	{
+		if (_space->locked)
+			cpSpaceAddPostStepCallback(_space, removeCollision, pair, _invocations);
+		else
+			removeCollision(_space, pair, _invocations);
+	}
 }
 
 @end

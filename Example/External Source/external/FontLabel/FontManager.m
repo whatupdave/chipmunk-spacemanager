@@ -21,6 +21,7 @@
 
 #import "FontManager.h"
 #import "ZFont.h"
+#import "CCConfiguration.h"
 
 static FontManager *sharedFontManager = nil;
 

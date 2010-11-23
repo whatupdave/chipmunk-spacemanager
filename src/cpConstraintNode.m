@@ -106,29 +106,29 @@ static void drawCircle(cpVect center, float r, int segs)
 	{
 		cpPinJoint *joint = (cpPinJoint*)constraint;
 		
-		apt = cpBodyLocal2World(body_a, joint->anchr1);
-		bpt = cpBodyLocal2World(body_b, joint->anchr2);
+		apt = cpvmult(cpBodyLocal2World(body_a, joint->anchr1), CC_CONTENT_SCALE_FACTOR());
+		bpt = cpvmult(cpBodyLocal2World(body_b, joint->anchr2), CC_CONTENT_SCALE_FACTOR());
 	}
 	else if(klass == cpSlideJointGetClass())
 	{
 		cpSlideJoint *joint = (cpSlideJoint*)constraint;
 		
-		apt = cpBodyLocal2World(body_a, joint->anchr1);
-		bpt = cpBodyLocal2World(body_b, joint->anchr2);
+		apt = cpvmult(cpBodyLocal2World(body_a, joint->anchr1), CC_CONTENT_SCALE_FACTOR());
+		bpt = cpvmult(cpBodyLocal2World(body_b, joint->anchr2), CC_CONTENT_SCALE_FACTOR());
 	}
 	else if(klass == cpPivotJointGetClass())
 	{
 		cpPivotJoint* joint = (cpPivotJoint*)constraint;
 		
-		apt = cpBodyLocal2World(body_a, joint->anchr1);
-		bpt = cpBodyLocal2World(body_b, joint->anchr2);
+		apt = cpvmult(cpBodyLocal2World(body_a, joint->anchr1), CC_CONTENT_SCALE_FACTOR());
+		bpt = cpvmult(cpBodyLocal2World(body_b, joint->anchr2), CC_CONTENT_SCALE_FACTOR());
 	}
 	else if(klass == cpGrooveJointGetClass())
 	{
 		cpGrooveJoint *joint = (cpGrooveJoint*)constraint;
 		
-		apt = cpBodyLocal2World(body_a, joint->grv_a);
-		bpt = cpBodyLocal2World(body_a, joint->grv_b);
+		apt = cpvmult(cpBodyLocal2World(body_a, joint->grv_a), CC_CONTENT_SCALE_FACTOR());
+		bpt = cpvmult(cpBodyLocal2World(body_a, joint->grv_b), CC_CONTENT_SCALE_FACTOR());
 	}
 	//else if(klass == cpBreakableJointGetClass())
 	//{
@@ -138,7 +138,7 @@ static void drawCircle(cpVect center, float r, int segs)
 	//}
 	else if (klass == cpSimpleMotorGetClass())
 	{
-		apt = bpt = body_a->p;
+		apt = bpt = cpvmult(body_a->p, CC_CONTENT_SCALE_FACTOR());
 	}
 	else if (klass == cpGearJointGetClass())
 	{
@@ -146,30 +146,30 @@ static void drawCircle(cpVect center, float r, int segs)
 		
 		cpFloat ratio = joint->ratio;
 		
-		cpFloat radius1 = 5.0 / ratio;
-		cpFloat radius2 = 5.0 * ratio;
+		cpFloat radius1 = 5.0 / ratio * CC_CONTENT_SCALE_FACTOR();
+		cpFloat radius2 = 5.0 * ratio * CC_CONTENT_SCALE_FACTOR();
 
 		// pad it out by radius (half diameter as the biggest gear...)
 		padding += (radius1 > radius2) ? radius1 : radius2;
 		
-		apt = body_a->p;
-		bpt = body_b->p;
+		apt = cpvmult(body_a->p, CC_CONTENT_SCALE_FACTOR());
+		bpt = cpvmult(body_b->p, CC_CONTENT_SCALE_FACTOR());
 	}
 	else if(klass == cpDampedSpringGetClass())
 	{
 		padding += 20; // 20 is width of spring
 		cpDampedSpring *joint = (cpDampedSpring*)constraint;
 		
-		apt = cpBodyLocal2World(body_a, joint->anchr1);
-		bpt = cpBodyLocal2World(body_b, joint->anchr2);
+		apt = cpvmult(cpBodyLocal2World(body_a, joint->anchr1), CC_CONTENT_SCALE_FACTOR());
+		bpt = cpvmult(cpBodyLocal2World(body_b, joint->anchr2), CC_CONTENT_SCALE_FACTOR());
 	}
 	else
 		return NO;
 		
 	cpFloat width = (_pointSize > _lineWidth) ? _pointSize : _lineWidth;
-	width += padding*2;
+	width += padding*2*CC_CONTENT_SCALE_FACTOR();
 	
-	cpFloat length = cpvlength(cpvsub(bpt, apt)) + padding*2;
+	cpFloat length = cpvlength(cpvsub(bpt, apt)) + padding*2*CC_CONTENT_SCALE_FACTOR();
 	cpVect halfpt = cpvadd(apt, cpvmult(cpvsub(bpt, apt), 0.5f));
 	
 	/* Algorithm Explained
@@ -200,8 +200,8 @@ static void drawCircle(cpVect center, float r, int segs)
 	glDisable(GL_TEXTURE_2D);
 
 	glColor4ub(_color.r, _color.g, _color.b, _opacity);
-	glPointSize(_pointSize);
-	glLineWidth(_lineWidth);
+	glPointSize(_pointSize * CC_CONTENT_SCALE_FACTOR());
+	glLineWidth(_lineWidth * CC_CONTENT_SCALE_FACTOR());
 	if (_smoothDraw && _lineWidth <= 1) //OpelGL ES doesn't support smooth lineWidths > 1
 	{
 		glEnable(GL_LINE_SMOOTH);
@@ -249,8 +249,8 @@ static void drawCircle(cpVect center, float r, int segs)
 
 - (void) drawPinJoint:(cpPinJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
 {	
-	cpVect a = cpvadd(body_a->p, cpvrotate(joint->anchr1, body_a->rot));
-	cpVect b = cpvadd(body_b->p, cpvrotate(joint->anchr2, body_b->rot));
+	cpVect a = cpvmult(cpvadd(body_a->p, cpvrotate(joint->anchr1, body_a->rot)), CC_CONTENT_SCALE_FACTOR());
+	cpVect b = cpvmult(cpvadd(body_b->p, cpvrotate(joint->anchr2, body_b->rot)), CC_CONTENT_SCALE_FACTOR());
 	
 	const float array[] = { a.x, a.y, b.x, b.y };
 	
@@ -265,8 +265,8 @@ static void drawCircle(cpVect center, float r, int segs)
 
 - (void) drawSlideJoint:(cpSlideJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
 {	
-	cpVect a = cpvadd(body_a->p, cpvrotate(joint->anchr1, body_a->rot));
-	cpVect b = cpvadd(body_b->p, cpvrotate(joint->anchr2, body_b->rot));
+	cpVect a = cpvmult(cpvadd(body_a->p, cpvrotate(joint->anchr1, body_a->rot)), CC_CONTENT_SCALE_FACTOR());
+	cpVect b = cpvmult(cpvadd(body_b->p, cpvrotate(joint->anchr2, body_b->rot)), CC_CONTENT_SCALE_FACTOR());
 	
 	const float array[] = { a.x, a.y, b.x, b.y };
 	
@@ -281,8 +281,8 @@ static void drawCircle(cpVect center, float r, int segs)
 
 - (void) drawPivotJoint:(cpPivotJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
 {	
-	cpVect a = cpvadd(body_a->p, cpvrotate(joint->anchr1, body_a->rot));
-	cpVect b = cpvadd(body_b->p, cpvrotate(joint->anchr2, body_b->rot));
+	cpVect a = cpvmult(cpvadd(body_a->p, cpvrotate(joint->anchr1, body_a->rot)), CC_CONTENT_SCALE_FACTOR());
+	cpVect b = cpvmult(cpvadd(body_b->p, cpvrotate(joint->anchr2, body_b->rot)), CC_CONTENT_SCALE_FACTOR());
 	
 	const float array[] = { a.x, a.y, b.x, b.y };
 	
@@ -296,10 +296,10 @@ static void drawCircle(cpVect center, float r, int segs)
 
 - (void) drawGrooveJoint:(cpGrooveJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
 {
-	cpVect a = cpvadd(body_a->p, cpvrotate(joint->grv_a, body_a->rot));
-	cpVect b = cpvadd(body_a->p, cpvrotate(joint->grv_b, body_a->rot));
+	cpVect a = cpvmult(cpvadd(body_a->p, cpvrotate(joint->grv_a, body_a->rot)), CC_CONTENT_SCALE_FACTOR());
+	cpVect b = cpvmult(cpvadd(body_a->p, cpvrotate(joint->grv_b, body_a->rot)), CC_CONTENT_SCALE_FACTOR());
 		
-	cpVect grv = cpvadd(body_a->p, cpvrotate(joint->r1, body_a->rot));
+	cpVect grv = cpvmult(cpvadd(body_a->p, cpvrotate(joint->r1, body_a->rot)), CC_CONTENT_SCALE_FACTOR());
 	
 	float *groove = malloc(sizeof(float)*6);
 	groove[0] = a.x;
@@ -341,8 +341,8 @@ static void drawCircle(cpVect center, float r, int segs)
 	};
 	static const int springVAR_count = sizeof(springVAR)/sizeof(GLfloat)/2;
 	
-	cpVect a = cpvadd(body_a->p, cpvrotate(joint->anchr1, body_a->rot));
-	cpVect b = cpvadd(body_b->p, cpvrotate(joint->anchr2, body_b->rot));
+	cpVect a = cpvmult(cpvadd(body_a->p, cpvrotate(joint->anchr1, body_a->rot)), CC_CONTENT_SCALE_FACTOR());
+	cpVect b = cpvmult(cpvadd(body_b->p, cpvrotate(joint->anchr2, body_b->rot)), CC_CONTENT_SCALE_FACTOR());
 	
 	const float array[] = { a.x, a.y, b.x, b.y };
 	
@@ -383,34 +383,35 @@ static void drawCircle(cpVect center, float r, int segs)
 - (void) drawMotorJoint:(cpSimpleMotor*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
 {
 	//ccDrawCircle(body_a->p, 4.0, 0, 12, NO);
-	drawCircle(body_b->p, 4.0, 12);
+	drawCircle(cpvmult(body_b->p, CC_CONTENT_SCALE_FACTOR()), 4.0*CC_CONTENT_SCALE_FACTOR(), 12);
 }
 
 - (void) drawGearJoint:(cpGearJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
 {
 	cpFloat ratio = joint->ratio;
 	
-	cpFloat radius1 = fabs(5.0 / ratio);
-	cpFloat radius2 = fabs(5.0 * ratio);
-	
-	//ccDrawCircle(body_a->p, radius1, 0, radius1*2+3, NO);
-	//ccDrawCircle(body_b->p, radius2, 0, radius2*2+3, NO);
-	drawCircle(body_b->p, radius1, radius1*2+3);
-	drawCircle(body_b->p, radius2, radius2*2+3);
+	cpFloat radius1 = fabs(5.0 / ratio) * CC_CONTENT_SCALE_FACTOR();
+	cpFloat radius2 = fabs(5.0 * ratio) * CC_CONTENT_SCALE_FACTOR();
+
+	cpVect a_pos = cpvmult(body_a->p, CC_CONTENT_SCALE_FACTOR());
+	cpVect b_pos = cpvmult(body_b->p, CC_CONTENT_SCALE_FACTOR());
+
+	drawCircle(a_pos, radius1, radius1*2+3);
+	drawCircle(b_pos, radius2, radius2*2+3);
 	
 	cpVect a = cpv(0,radius1);
 	cpVect b = cpv(0,radius2);
 	cpVect c = cpv(0,-radius1);
 	cpVect d = cpv(0,-radius2);
 	
-	float dx = body_a->p.x - body_b->p.x;
-	float dy = body_a->p.y - body_b->p.y;
+	float dx = a_pos.x - b_pos.x;
+	float dy = a_pos.y - b_pos.y;
 	cpVect rotation = cpvforangle(atan2f(dy,dx));	
 	
-	a = cpvadd(body_a->p, cpvrotate(a,rotation));
-	b = cpvadd(body_b->p, cpvrotate(b,rotation));
-	c = cpvadd(body_a->p, cpvrotate(c,rotation));
-	d = cpvadd(body_b->p, cpvrotate(d,rotation));
+	a = cpvadd(a_pos, cpvrotate(a,rotation));
+	b = cpvadd(b_pos, cpvrotate(b,rotation));
+	c = cpvadd(a_pos, cpvrotate(c,rotation));
+	d = cpvadd(b_pos, cpvrotate(d,rotation));
 	
 	float array[8];
 	array[0] = a.x;

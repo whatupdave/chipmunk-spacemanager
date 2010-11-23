@@ -29,8 +29,7 @@
 
 
 #import "CCAtlasNode.h"
-#import "CCSpriteSheet.h"
-#import "Support/ccArray.h"
+#import "CCSpriteBatchNode.h"
 
 
 @class CCTMXMapInfo;
@@ -40,7 +39,7 @@
 /** CCTMXLayer represents the TMX layer.
  
  It is a subclass of CCSpriteSheet. By default the tiles are rendered using a CCTextureAtlas.
- If you mofify a tile on runtime, then, that tile will become a CCSprite.
+ If you mofify a tile on runtime, then, that tile will become a CCSprite, otherwise no CCSprite objects are created.
  The benefits of using CCSprite objects as tiles are:
  - tiles (CCSprite) can be rotated/scaled/moved with a nice API
  
@@ -48,7 +47,7 @@
  then all the tiles belonging to the layer will use that value as their OpenGL vertex Z for depth.
 
  On the other hand, if the "cc_vertexz" property has the "automatic" value, then the tiles will use an automatic vertex Z value.
- Also before drawing the tiles, GL_ALPHA_TEST will be enabled, and disabled after drawin them. The used alpha func will be:
+ Also before drawing the tiles, GL_ALPHA_TEST will be enabled, and disabled after drawing them. The used alpha func will be:
 
     glAlphaFunc( GL_GREATER, value )
  
@@ -62,7 +61,7 @@
  
  @since v0.8.1
  */
-@interface CCTMXLayer : CCSpriteSheet
+@interface CCTMXLayer : CCSpriteBatchNode
 {
 	CCTMXTilesetInfo	*tileset_;
 	NSString			*layerName_;
@@ -150,5 +149,5 @@
 /** CCTMXLayer doesn't support adding a CCSprite manually.
  @warning addchild:z:tag: is not supported on CCTMXLayer. Instead of setTileGID:at:/tileAt:
  */
--(id) addChild: (CCNode*)node z:(int)z tag:(int)tag;
+-(void) addChild: (CCNode*)node z:(int)z tag:(int)tag;
 @end

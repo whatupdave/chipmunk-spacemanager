@@ -26,17 +26,9 @@
 
 #import <Foundation/Foundation.h>
 
-/*! creates a copy of block with a retain count of 1
+/** @file
+ cocos2d blocks support
  */
-#define BLOCK_COPY(block) [block copy]
-
-/*! retains the specified block
- */
-#define BLOCK_RETAIN(block) [block retain]
-
-/*! creates a Copy of a Block and adds to the Autorelease pool
- */
-#define BCA(block)	[[block copy] autorelease]
 
 // To comply with Apple Objective C runtime (this is defined in NSObjCRuntime.h)
 #if !defined(NS_BLOCKS_AVAILABLE)

@@ -24,29 +24,104 @@
  */
 
 
+#import <Availability.h>
 #import "CCFileUtils.h"
-#import "CCConfiguration.h"
+#import "../CCConfiguration.h"
+#import "../ccMacros.h"
+#import "../ccConfig.h"
 
-@implementation CCFileUtils
-+(NSString*) fullPathFromRelativePath:(NSString*) relPath
-{
-	// do not convert an absolute path (starting with '/')
-	if(([relPath length] > 0) && ([relPath characterAtIndex:0] == '/'))
-	{
-		return relPath;
+static NSFileManager *__localFileManager=nil;
+
+// 
+int ccLoadFileIntoMemory(const char *filename, unsigned char **out) 
+{ 
+	assert( out );
+	assert( &*out );
+
+	int size = 0;
+	FILE *f = fopen(filename, "rb");
+	if( !f ) { 
+		*out = NULL;
+		return -1;
+	} 
+	
+	fseek(f, 0, SEEK_END);
+	size = ftell(f);
+	fseek(f, 0, SEEK_SET);
+	
+	*out = malloc(size);
+	int read = fread(*out, 1, size, f);
+	if( read != size ) { 
+		free(*out);
+		*out = NULL;
+		return -1;
 	}
 	
-	NSMutableArray *imagePathComponents = [NSMutableArray arrayWithArray:[relPath pathComponents]];
-	NSString *file = [imagePathComponents lastObject];
+	fclose(f);
 	
-	[imagePathComponents removeLastObject];
-	NSString *imageDirectory = [NSString pathWithComponents:imagePathComponents];
+	return size;
+}
+
+@implementation CCFileUtils
+
++(NSString*) getDoubleResolutionImage:(NSString*)path
+{
+	if( CC_CONTENT_SCALE_FACTOR() == 2 )
+	{
+		
+		NSString *pathWithoutExtension = [path stringByDeletingPathExtension];
+		NSString *name = [pathWithoutExtension lastPathComponent];
+		
+		// check if path already has the suffix. If so, ignore it.			
+		if( [name rangeOfString:CC_RETINA_DISPLAY_FILENAME_SUFFIX].location != NSNotFound ) {
+		
+			CCLOG(@"cocos2d: CCFileUtils: FileName(%@) with %@. Using it.", name, CC_RETINA_DISPLAY_FILENAME_SUFFIX);			
+			return path;
+		}
+
+		
+		NSString *extension = [path pathExtension];
+		NSString *retinaName = [pathWithoutExtension stringByAppendingString:CC_RETINA_DISPLAY_FILENAME_SUFFIX];
+		retinaName = [retinaName stringByAppendingPathExtension:extension];
+
+		if( ! __localFileManager ) 
+			__localFileManager = [[NSFileManager alloc] init];
+		
+		if( [__localFileManager fileExistsAtPath:retinaName] )
+			return retinaName;
+
+		CCLOG(@"cocos2d: CCFileUtils: Warning HD file not found: %@", [retinaName lastPathComponent] );
+	}
 	
-	NSString *fullpath = [[CCConfiguration sharedConfiguration].loadingBundle pathForResource:file
-														 ofType:nil
-													inDirectory:imageDirectory];
+	return path;
+}
+
++(NSString*) fullPathFromRelativePath:(NSString*) relPath
+{
+	NSAssert(relPath != nil, @"CCFileUtils: Invalid path");
+
+	NSString *fullpath = nil;
+	
+	// only if it is not an absolute path
+	if( ! [relPath isAbsolutePath] )
+	{
+		NSMutableArray *imagePathComponents = [NSMutableArray arrayWithArray:[relPath pathComponents]];
+		NSString *file = [imagePathComponents lastObject];
+		
+		[imagePathComponents removeLastObject];
+		NSString *imageDirectory = [NSString pathWithComponents:imagePathComponents];
+		
+		fullpath = [[NSBundle mainBundle] pathForResource:file
+												   ofType:nil
+											  inDirectory:imageDirectory];
+	}
+	
 	if (fullpath == nil)
 		fullpath = relPath;
+	
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
+	fullpath = [self getDoubleResolutionImage:fullpath];
+#endif // __IPHONE_OS_VERSION_MAX_ALLOWED
 	
 	return fullpath;	
 }

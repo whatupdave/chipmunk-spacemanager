@@ -31,6 +31,22 @@
 @interface CCFileUtils : NSObject
 {
 }
-/** converts a relative path to a full path */
+
+/** Returns the fullpath of an filename.
+ 
+ If this method is when Retina Display is enabled, then the
+ Retina Display suffix will be appended to the file (See ccConfig.h).
+ 
+ If the Retina Display image doesn't exist, then it will return the "non-Retina Display" image
+ 
+ */
 +(NSString*) fullPathFromRelativePath:(NSString*) relPath;
 @end
+
+/** loads a file into memory.
+ the caller should release the allocated buffer.
+ 
+ @returns the size of the allocated buffer
+ @since v0.99.5
+ */
+int ccLoadFileIntoMemory(const char *filename, unsigned char **out);

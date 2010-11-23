@@ -23,14 +23,11 @@
  */
 
 
-#import <Foundation/Foundation.h>
-#import "Support/uthash.h"
-#import "Support/ccArray.h"
 
+#import "Support/uthash.h"
 #import "ccTypes.h"
 
 typedef void (*TICK_IMP)(id, SEL, ccTime);
-
 
 //
 // CCTimer
@@ -41,10 +38,10 @@ typedef void (*TICK_IMP)(id, SEL, ccTime);
 	id target;
 	TICK_IMP impMethod;
 	
-	ccTime interval;
 	ccTime elapsed;
 
 @public					// optimization
+	ccTime interval;
 	SEL selector;
 }
 
@@ -140,10 +137,11 @@ struct _hashUpdateEntry;
 /** The scheduled method will be called every 'interval' seconds.
  If paused is YES, then it won't be called until it is resumed.
  If 'interval' is 0, it will be called every frame, but if so, it recommened to use 'scheduleUpdateForTarget:' instead.
+ If the selector is already scheduled, then only the interval parameter will be updated without re-scheduling it again.
 
  @since v0.99.3
  */
--(void) scheduleSelector:(SEL)selector forTarget:(id)target interval:(float)interval paused:(BOOL)paused;
+-(void) scheduleSelector:(SEL)selector forTarget:(id)target interval:(ccTime)interval paused:(BOOL)paused;
 
 /** Schedules the 'update' selector for a given target with a given priority.
  The 'update' selector will be called every frame.
@@ -196,13 +194,13 @@ struct _hashUpdateEntry;
  
  @deprecated Use scheduleSelector:forTarget:interval:paused instead. Will be removed in 1.0
  */
--(void) scheduleTimer: (CCTimer*) timer __attribute__((deprecated));
+-(void) scheduleTimer: (CCTimer*) timer DEPRECATED_ATTRIBUTE;
 
 /** unschedules an already scheduled Timer
  
  @deprecated Use unscheduleSelector:forTarget. Will be removed in v1.0
  */
--(void) unscheduleTimer: (CCTimer*) timer __attribute__((deprecated));
+-(void) unscheduleTimer: (CCTimer*) timer DEPRECATED_ATTRIBUTE;
 
 /** unschedule all timers.
  You should NEVER call this method, unless you know what you are doing.
@@ -210,5 +208,5 @@ struct _hashUpdateEntry;
  @deprecated Use scheduleAllSelectors instead. Will be removed in 1.0
  @since v0.8
  */
--(void) unscheduleAllTimers __attribute__ ((deprecated));
+-(void) unscheduleAllTimers DEPRECATED_ATTRIBUTE;
 @end

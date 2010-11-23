@@ -28,16 +28,21 @@
 #import "CCSprite.h"
 #import "Support/OpenGL_Internal.h"
 
+#import <Availability.h>
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
+#import <UIKit/UIKit.h>
+#endif // iPHone
 
 enum  
 {
-	kImageFormatJPG = 0,
-	kImageFormatPNG = 1
+	kCCImageFormatJPG = 0,
+	kCCImageFormatPNG = 1,
+	kCCImageFormatRawData =2
 };
 
 
 /**
- RenderTexture is a generic rendering target. To render things into it,
+ CCRenderTexture is a generic rendering target. To render things into it,
  simply construct a render target, call begin on it, call visit on any cocos
  scenes or objects to render them, and call end. For convienience, render texture
  adds a sprite as it's display child with the results, so you can simply add
@@ -52,25 +57,52 @@ enum
 	GLint				oldFBO_;
 	CCTexture2D*		texture_;
 	CCSprite*			sprite_;
+	
+	GLenum				pixelFormat_;
+	GLfloat				clearColor_[4];
+
 }
 
-/** sprite being used */
+/** The CCSprite being used.
+ The sprite, by default, will use the following blending function: GL_ONE, GL_ONE_MINUS_SRC_ALPHA.
+ The blending function can be changed in runtime by calling:
+	- [[renderTexture sprite] setBlendFunc:(ccBlendFunc){GL_ONE, GL_ONE_MINUS_SRC_ALPHA}];
+*/
 @property (nonatomic,readwrite, assign) CCSprite* sprite;
 
-/** creates a RenderTexture object with width and height */
-+(id)renderTextureWithWidth:(int)width height:(int)height;
-/** initializes a RenderTexture object with width and height */
--(id)initWithWidth:(int)width height:(int)height;
+/** creates a RenderTexture object with width and height in Points and a pixel format, only RGB and RGBA formats are valid */
++(id)renderTextureWithWidth:(int)w height:(int)h pixelFormat:(CCTexture2DPixelFormat) format;
+
+/** creates a RenderTexture object with width and height in Points, pixel format is RGBA8888 */
++(id)renderTextureWithWidth:(int)w height:(int)h;
+
+/** initializes a RenderTexture object with width and height in Points and a pixel format, only RGB and RGBA formats are valid */
+-(id)initWithWidth:(int)w height:(int)h pixelFormat:(CCTexture2DPixelFormat) format;
+
+/** starts grabbing */
 -(void)begin;
+
+/** starts rendering to the texture while clearing the texture first.
+ This is more efficient then calling -clear first and then -begin */
+-(void)beginWithClear:(float)r g:(float)g b:(float)b a:(float)a;
+
+/** ends grabbing */
 -(void)end;
-/* get buffer as UIImage */
--(UIImage *)getUIImageFromBuffer;
+
+/** clears the texture with a color */
+-(void)clear:(float)r g:(float)g b:(float)b a:(float)a;
+
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
+
 /** saves the texture into a file */
 -(BOOL)saveBuffer:(NSString*)name;
 /** saves the texture into a file. The format can be JPG or PNG */
 -(BOOL)saveBuffer:(NSString*)name format:(int)format;
-/** clears the texture with a color */
--(void)clear:(float)r g:(float)g b:(float)b a:(float)a;
+/* get buffer as UIImage, can only save a render buffer which has a RGBA8888 pixel format */
+-(NSData*)getUIImageAsDataFromBuffer:(int) format;
+
+#endif // __IPHONE_OS_VERSION_MAX_ALLOWED
+
 @end
 
 

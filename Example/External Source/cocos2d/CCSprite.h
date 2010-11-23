@@ -28,14 +28,16 @@
 #import "CCProtocols.h"
 #import "CCTextureAtlas.h"
 
+@class CCSpriteBatchNode;
 @class CCSpriteSheet;
+@class CCSpriteSheetInternalOnly;
 @class CCSpriteFrame;
 @class CCAnimation;
 
 #pragma mark CCSprite
 
 enum {
-	/// CCSprite invalid index on the CCSpriteSheet
+	/// CCSprite invalid index on the CCSpriteBatchode
 	CCSpriteIndexNotInitialized = 0xffffffff,
 };
 
@@ -62,15 +64,15 @@ typedef enum {
  *
  * CCSprite can be created with an image, or with a sub-rectangle of an image.
  *
- * If the parent or any of its ancestors is a CCSpriteSheet then the following features/limitations are valid
- *	- Features when the parent is a CCSpriteSheet:
- *		- MUCH faster rendering, specially if the CCSpriteSheet has many children. All the children will be drawn in a single batch.
+ * If the parent or any of its ancestors is a CCSpriteBatchNode then the following features/limitations are valid
+ *	- Features when the parent is a CCBatchNode:
+ *		- MUCH faster rendering, specially if the CCSpriteBatchNode has many children. All the children will be drawn in a single batch.
  *
  *	- Limitations
  *		- Camera is not supported yet (eg: CCOrbitCamera action doesn't work)
  *		- GridBase actions are not supported (eg: CCLens, CCRipple, CCTwirl)
- *		- The Alias/Antialias property belongs to CCSpriteSheet, so you can't individually set the aliased property.
- *		- The Blending function property belongs to CCSpriteSheet, so you can't individually set the blending function property.
+ *		- The Alias/Antialias property belongs to CCSpriteBatchNode, so you can't individually set the aliased property.
+ *		- The Blending function property belongs to CCSpriteBatchNode, so you can't individually set the blending function property.
  *		- Parallax scroller is not supported, but can be simulated with a "proxy" sprite.
  *
  *  If the parent is an standard CCNode, then CCSprite behaves like any other CCNode:
@@ -83,11 +85,11 @@ typedef enum {
 {
 	
 	//
-	// Data used when the sprite is rendered using a CCSpriteSheet
+	// Data used when the sprite is rendered using a CCSpriteBatchNode
 	//
 	CCTextureAtlas			*textureAtlas_;			// Sprite Sheet texture atlas (weak reference)
-	NSUInteger				atlasIndex_;			// Absolute (real) Index on the SpriteSheet
-	CCSpriteSheet			*spriteSheet_;			// Used spritesheet (weak reference)
+	NSUInteger				atlasIndex_;			// Absolute (real) Index on the batch node
+	CCSpriteBatchNode		*batchNode_;			// Used batch node (weak reference)
 	ccHonorParentTransform	honorParentTransform_;	// whether or not to transform according to its parent transformations
 	BOOL					dirty_;					// Sprite needs to be updated
 	BOOL					recursiveDirty_;		// Subchildren needs to be updated
@@ -103,14 +105,17 @@ typedef enum {
 	// Shared data
 	//
 
-	// whether or not it's parent is a CCSpriteSheet
-	BOOL	usesSpriteSheet_;
+	// whether or not it's parent is a CCSpriteBatchNode
+	BOOL	usesBatchNode_;
 
-	// texture pixels
-	CGRect rect_;
+	// texture
+	CGRect	rect_;
+	CGRect	rectInPixels_;
+	BOOL	rectRotated_;
 	
 	// Offset Position (used by Zwoptex)
-	CGPoint	offsetPosition_;
+	CGPoint	offsetPositionInPixels_;
+	CGPoint unflippedOffsetPositionFromCenter_;
 
 	// vertex coords, texture coords and color info
 	ccV3F_C4B_T2F_Quad quad_;
@@ -136,8 +141,10 @@ typedef enum {
 @property (nonatomic,readonly) ccV3F_C4B_T2F_Quad quad;
 /** The index used on the TextureATlas. Don't modify this value unless you know what you are doing */
 @property (nonatomic,readwrite) NSUInteger atlasIndex;
-/** returns the rect of the CCSprite */
+/** returns the rect of the CCSprite in points */
 @property (nonatomic,readonly) CGRect textureRect;
+/** returns whether or not the texture rectangle is rotated */
+@property (nonatomic,readonly) BOOL textureRectRotated;
 /** whether or not the sprite is flipped horizontally. 
  It only flips the texture of the sprite, and not the texture of the sprite's children.
  Also, flipping the texture doesn't alter the anchorPoint.
@@ -146,7 +153,7 @@ typedef enum {
 	sprite.scaleX *= -1;
  */
 @property (nonatomic,readwrite) BOOL flipX;
-/** whether or not the sprite is flipped vertically\ 
+/** whether or not the sprite is flipped vertically.
  It only flips the texture of the sprite, and not the texture of the sprite's children.
  Also, flipping the texture doesn't alter the anchorPoint.
  If you want to flip the anchorPoint too, and/or to flip the children too use:
@@ -158,22 +165,22 @@ typedef enum {
 @property (nonatomic,readwrite) GLubyte opacity;
 /** RGB colors: conforms to CCRGBAProtocol protocol */
 @property (nonatomic,readwrite) ccColor3B color;
-/** whether or not the Sprite is rendered using a CCSpriteSheet */
-@property (nonatomic,readwrite) BOOL usesSpriteSheet;
-/** weak reference of the CCTextureAtlas used when the sprite is rendered using a CCSpriteSheet */
+/** whether or not the Sprite is rendered using a CCSpriteBatchNode */
+@property (nonatomic,readwrite) BOOL usesBatchNode;
+/** weak reference of the CCTextureAtlas used when the sprite is rendered using a CCSpriteBatchNode */
 @property (nonatomic,readwrite,assign) CCTextureAtlas *textureAtlas;
-/** weak reference to the CCSpriteSheet that renders the CCSprite */
-@property (nonatomic,readwrite,assign) CCSpriteSheet *spriteSheet;
+/** weak reference to the CCSpriteBatchNode that renders the CCSprite */
+@property (nonatomic,readwrite,assign) CCSpriteBatchNode *batchNode;
 /** whether or not to transform according to its parent transfomrations.
  Useful for health bars. eg: Don't rotate the health bar, even if the parent rotates.
- IMPORTANT: Only valid if it is rendered using an CCSpriteSheet.
+ IMPORTANT: Only valid if it is rendered using an CCSpriteBatchNode.
  @since v0.99.0
  */
 @property (nonatomic,readwrite) ccHonorParentTransform honorParentTransform;
-/** offset position of the sprite. Calculated automatically by editors like Zwoptex.
+/** offset position in pixels of the sprite in points. Calculated automatically by editors like Zwoptex.
  @since v0.99.0
  */
-@property (nonatomic,readwrite) CGPoint	offsetPosition;
+@property (nonatomic,readonly) CGPoint	offsetPositionInPixels;
 /** conforms to CCTextureProtocol protocol */
 @property (nonatomic,readwrite) ccBlendFunc blendFunc;
 
@@ -189,10 +196,6 @@ typedef enum {
  The offset will be (0,0).
  */
 +(id) spriteWithTexture:(CCTexture2D*)texture rect:(CGRect)rect;
-
-/** Creates an sprite with a texture, a rect and offset.
- */
-+(id) spriteWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset;
 
 /** Creates an sprite with an sprite frame.
  */
@@ -219,7 +222,7 @@ typedef enum {
 /** Creates an sprite with a CGImageRef.
  @deprecated Use spriteWithCGImage:key: instead. Will be removed in v1.0 final
  */
-+(id) spriteWithCGImage: (CGImageRef)image __attribute__((deprecated));
++(id) spriteWithCGImage: (CGImageRef)image DEPRECATED_ATTRIBUTE;
 
 /** Creates an sprite with a CGImageRef and a key.
  The key is used by the CCTextureCache to know if a texture was already created with this CGImage.
@@ -230,9 +233,11 @@ typedef enum {
 +(id) spriteWithCGImage: (CGImageRef)image key:(NSString*)key;
 
 
-/** Creates an sprite with an CCSpriteSheet and a rect
+/** Creates an sprite with an CCBatchNode and a rect
  */
-+(id) spriteWithSpriteSheet:(CCSpriteSheet*)spritesheet rect:(CGRect)rect;
++(id) spriteWithBatchNode:(CCSpriteBatchNode*)batchNode rect:(CGRect)rect;
+
++(id) spriteWithSpriteSheet:(CCSpriteSheetInternalOnly*)spritesheet rect:(CGRect)rect DEPRECATED_ATTRIBUTE;
 
 
 /** Initializes an sprite with a texture.
@@ -241,7 +246,7 @@ typedef enum {
  */
 -(id) initWithTexture:(CCTexture2D*)texture;
 
-/** Initializes an sprite with a texture and a rect.
+/** Initializes an sprite with a texture and a rect in points.
  The offset will be (0,0).
  */
 -(id) initWithTexture:(CCTexture2D*)texture rect:(CGRect)rect;
@@ -271,7 +276,7 @@ typedef enum {
 /** Initializes an sprite with a CGImageRef
  @deprecated Use spriteWithCGImage:key: instead. Will be removed in v1.0 final
  */
--(id) initWithCGImage: (CGImageRef)image __attribute__((deprecated));
+-(id) initWithCGImage: (CGImageRef)image DEPRECATED_ATTRIBUTE;
 
 /** Initializes an sprite with a CGImageRef and a key
  The key is used by the CCTextureCache to know if a texture was already created with this CGImage.
@@ -281,30 +286,41 @@ typedef enum {
  */
 -(id) initWithCGImage:(CGImageRef)image key:(NSString*)key;
 
-/** Initializes an sprite with an CCSpriteSheet and a rect
+/** Initializes an sprite with an CCSpriteSheet and a rect in points
  */
--(id) initWithSpriteSheet:(CCSpriteSheet*)spritesheet rect:(CGRect)rect;
+-(id) initWithBatchNode:(CCSpriteBatchNode*)batchNode rect:(CGRect)rect;
+-(id) initWithSpriteSheet:(CCSpriteSheetInternalOnly*)spritesheet rect:(CGRect)rect DEPRECATED_ATTRIBUTE;
+
+/** Initializes an sprite with an CCSpriteSheet and a rect in pixels
+ @since v0.99.5
+ */
+-(id) initWithBatchNode:(CCSpriteBatchNode*)batchNode rectInPixels:(CGRect)rect;
 
 
-#pragma mark CCSprite - SpriteSheet methods
+
+#pragma mark CCSprite - BatchNode methods
 
 /** updates the quad according the the rotation, position, scale values.
  */
 -(void)updateTransform;
 
-/** updates the texture rect of the CCSprite.
+/** updates the texture rect of the CCSprite in points.
  */
 -(void) setTextureRect:(CGRect) rect;
+/** updates the texture rect, rectRotated and untrimmed size of the CCSprite in pixels
+ */
+-(void) setTextureRectInPixels:(CGRect)rect rotated:(BOOL)rotated untrimmedSize:(CGSize)size;
 
 /** tell the sprite to use self-render.
  @since v0.99.0
  */
 -(void) useSelfRender;
 
-/** tell the sprite to use sprite sheet render.
+/** tell the sprite to use sprite batch node
  @since v0.99.0
  */
--(void) useSpriteSheetRender:(CCSpriteSheet*)spriteSheet;
+-(void) useBatchNode:(CCSpriteBatchNode*)batchNode;
+-(void) useSpriteSheetRender:(CCSpriteSheetInternalOnly*)spriteSheet DEPRECATED_ATTRIBUTE;
 
 
 #pragma mark CCSprite - Frames
@@ -320,13 +336,27 @@ typedef enum {
 
 #pragma mark CCSprite - Animation
 
-/** changes the display frame based on an animation and an index. */
--(void) setDisplayFrame: (NSString*) animationName index:(int) frameIndex;
+/** changes the display frame based on an animation and an index.
+ @deprecated Will be removed in 1.0.1. Use setDisplayFrameWithAnimationName:index instead
+ */
+-(void) setDisplayFrame: (NSString*) animationName index:(int) frameIndex DEPRECATED_ATTRIBUTE;
 
-/** returns an Animation given it's name. */
--(CCAnimation*)animationByName: (NSString*) animationName;
+/** changes the display frame with animation name and index.
+ The animation name will be get from the CCAnimationCache
+ @since v0.99.5
+ */
+-(void) setDisplayFrameWithAnimationName:(NSString*)animationName index:(int) frameIndex;
 
-/** adds an Animation to the Sprite. */
--(void) addAnimation: (CCAnimation*) animation;
+/** returns an Animation given it's name.
+ 
+ @deprecated Use CCAnimationCache instead. Will be removed in 1.0.1
+ */
+-(CCAnimation*)animationByName: (NSString*) animationName DEPRECATED_ATTRIBUTE;
+
+/** adds an Animation to the Sprite.
+ 
+ @deprecated Use CCAnimationCache instead. Will be removed in 1.0.1
+ */
+-(void) addAnimation: (CCAnimation*) animation DEPRECATED_ATTRIBUTE;
 
 @end

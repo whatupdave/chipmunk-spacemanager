@@ -24,14 +24,21 @@
  */
 
 
+#import <Availability.h>
+
 #import "ccMacros.h"
 #import "CCGrid.h"
 #import "CCTexture2D.h"
 #import "CCDirector.h"
 #import "CCGrabber.h"
 
-#import "Support/glu.h"
+#import "Platforms/CCGL.h"
 #import "Support/CGPointExtension.h"
+#import "Support/ccUtils.h"
+
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
+#import "Platforms/iOS/CCDirectorIOS.h"
+#endif // __IPHONE_OS_VERSION_MAX_ALLOWED
 
 #pragma mark -
 #pragma mark CCGridBase
@@ -51,7 +58,7 @@
 
 +(id) gridWithSize:(ccGridSize)gridSize
 {
-	return [[[self alloc] initWithSize:gridSize] autorelease];
+	return [[(CCGridBase*)[self alloc] initWithSize:gridSize] autorelease];
 }
 
 -(id) initWithSize:(ccGridSize)gridSize texture:(CCTexture2D*)texture flippedTexture:(BOOL)flipped
@@ -65,7 +72,7 @@
 		self.texture = texture;
 		isTextureFlipped_ = flipped;
 		
-		CGSize texSize = [texture_ contentSize];
+		CGSize texSize = [texture_ contentSizeInPixels];
 		step_.x = texSize.width / gridSize_.x;
 		step_.y = texSize.height / gridSize_.y;
 		
@@ -80,28 +87,39 @@
 -(id)initWithSize:(ccGridSize)gSize
 {
 	CCDirector *director = [CCDirector sharedDirector];
-	CGSize s = [director winSize];
-	int textureSize = 8;
-	while (textureSize < s.width || textureSize < s.height)
-		textureSize *= 2;
+	CGSize s = [director winSizeInPixels];
 	
-	CCTexture2DPixelFormat format = [director pixelFormat] == kCCPixelFormatRGB565 ? kCCTexture2DPixelFormat_RGB565 : kCCTexture2DPixelFormat_RGBA8888;
+	unsigned int POTWide = ccNextPOT(s.width);
+	unsigned int POTHigh = ccNextPOT(s.height);
 	
-	void *data = malloc((int)(textureSize * textureSize * 4));
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
+	EAGLView *glview = [[CCDirector sharedDirector] openGLView];
+	NSString *pixelFormat = [glview pixelFormat];
+
+	CCTexture2DPixelFormat format = [pixelFormat isEqualToString: kEAGLColorFormatRGB565] ? kCCTexture2DPixelFormat_RGB565 : kCCTexture2DPixelFormat_RGBA8888;
+#else
+	CCTexture2DPixelFormat format = kCCTexture2DPixelFormat_RGBA8888;
+#endif
+	
+	void *data = calloc((int)(POTWide * POTHigh * 4), 1);
 	if( ! data ) {
 		CCLOG(@"cocos2d: CCGrid: not enough memory");
 		[self release];
 		return nil;
 	}
-	memset(data, 0, (int)(textureSize * textureSize * 4));
 	
-	CCTexture2D *texture = [[[CCTexture2D alloc] initWithData:data pixelFormat:format pixelsWide:textureSize pixelsHigh:textureSize contentSize:s] autorelease];
+	CCTexture2D *texture = [[CCTexture2D alloc] initWithData:data pixelFormat:format pixelsWide:POTWide pixelsHigh:POTHigh contentSize:s];
 	free( data );
 
-	if ( (self = [self initWithSize:gSize texture:texture flippedTexture:NO] ) )
-	{
-		// do something
+	if( ! texture ) {
+		CCLOG(@"cocos2d: CCGrid: error creating texture");
+		[self release];
+		return nil;
 	}
+	
+	self = [self initWithSize:gSize texture:texture flippedTexture:NO];
+	
+	[texture release];
 	
 	return self;
 }
@@ -151,11 +169,12 @@
 }
 
 // This routine can be merged with Director
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
 -(void)applyLandscape
 {
 	CCDirector *director = [CCDirector sharedDirector];
 	
-	CGSize winSize = [director displaySize];
+	CGSize winSize = [director displaySizeInPixels];
 	float w = winSize.width / 2;
 	float h = winSize.height / 2;
 
@@ -181,23 +200,26 @@
 			break;
 	}
 }
+#endif
 
 -(void)set2DProjection
 {
-	CGSize	winSize = [[CCDirector sharedDirector] winSize];
+	CGSize	winSize = [[CCDirector sharedDirector] winSizeInPixels];
 	
 	glLoadIdentity();
 	glViewport(0, 0, winSize.width, winSize.height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrthof(0, winSize.width, 0, winSize.height, -100, 100);
+	ccglOrtho(0, winSize.width, 0, winSize.height, -1024, 1024);
 	glMatrixMode(GL_MODELVIEW);
 }
 
 // This routine can be merged with Director
 -(void)set3DProjection
 {
-	CGSize	winSize = [[CCDirector sharedDirector] displaySize];
+	CCDirector *director = [CCDirector sharedDirector];
+	
+	CGSize	winSize = [director displaySizeInPixels];
 	
 	glViewport(0, 0, winSize.width, winSize.height);
 	glMatrixMode(GL_PROJECTION);
@@ -206,7 +228,7 @@
 	
 	glMatrixMode(GL_MODELVIEW);	
 	glLoadIdentity();
-	gluLookAt( winSize.width/2, winSize.height/2, [[CCDirector sharedDirector] getZEye],
+	gluLookAt( winSize.width/2, winSize.height/2, [director getZEye],
 			  winSize.width/2, winSize.height/2, 0,
 			  0.0f, 1.0f, 0.0f
 			  );
@@ -223,7 +245,9 @@
 	[grabber_ afterRender:texture_];
 	
 	[self set3DProjection];
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
 	[self applyLandscape];
+#endif
 
 	if( target.camera.dirty ) {
 
@@ -232,9 +256,9 @@
 		//
 		// XXX: Camera should be applied in the AnchorPoint
 		//
-		glTranslatef(offset.x, offset.y, 0);
+		ccglTranslate(offset.x, offset.y, 0);
 		[target.camera locate];
-		glTranslatef(-offset.x, -offset.y, 0);
+		ccglTranslate(-offset.x, -offset.y, 0);
 	}
 		
 	glBindTexture(GL_TEXTURE_2D, texture_.name);
@@ -295,7 +319,7 @@
 {
 	float width = (float)texture_.pixelsWide;
 	float height = (float)texture_.pixelsHigh;
-	float imageH = texture_.contentSize.height;
+	float imageH = texture_.contentSizeInPixels.height;
 	
 	int x, y, i;
 	
@@ -434,7 +458,7 @@
 {
 	float width = (float)texture_.pixelsWide;
 	float height = (float)texture_.pixelsHigh;
-	float imageH = texture_.contentSize.height;
+	float imageH = texture_.contentSizeInPixels.height;
 	
 	int numQuads = gridSize_.x * gridSize_.y;
 	

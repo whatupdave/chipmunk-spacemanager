@@ -24,71 +24,87 @@
  */
 
 
-#import "CCPointParticleSystem.h"
-#import "CCQuadParticleSystem.h"
+#import <Availability.h>
+
+#import "CCParticleSystemPoint.h"
+#import "CCParticleSystemQuad.h"
+
+// build each architecture with the optimal particle system
+
+// ARMv7, Mac or Simulator use "Quad" particle
+#if defined(__ARM_NEON__) || defined(__MAC_OS_X_VERSION_MAX_ALLOWED) || TARGET_IPHONE_SIMULATOR
+	#define ARCH_OPTIMAL_PARTICLE_SYSTEM CCParticleSystemQuad
+
+// ARMv6 use "Point" particle
+#elif __arm__
+	#define ARCH_OPTIMAL_PARTICLE_SYSTEM CCParticleSystemPoint
+#else
+	#error(unknown architecture)
+#endif
+
 
 //! A fire particle system
-@interface CCParticleFire: CCPointParticleSystem
+@interface CCParticleFire: ARCH_OPTIMAL_PARTICLE_SYSTEM
 {
 }
 @end
 
 //! A fireworks particle system
-@interface CCParticleFireworks : CCPointParticleSystem
+@interface CCParticleFireworks : ARCH_OPTIMAL_PARTICLE_SYSTEM
 {
 }
 @end
 
 //! A sun particle system
-@interface CCParticleSun : CCPointParticleSystem
+@interface CCParticleSun : ARCH_OPTIMAL_PARTICLE_SYSTEM
 {
 }
 @end
 
 //! A galaxy particle system
-@interface CCParticleGalaxy : CCPointParticleSystem
+@interface CCParticleGalaxy : ARCH_OPTIMAL_PARTICLE_SYSTEM
 {
 }
 @end
 
 //! A flower particle system
-@interface CCParticleFlower : CCPointParticleSystem
+@interface CCParticleFlower : ARCH_OPTIMAL_PARTICLE_SYSTEM
 {
 }
 @end
 
 //! A meteor particle system
-@interface CCParticleMeteor : CCPointParticleSystem
+@interface CCParticleMeteor : ARCH_OPTIMAL_PARTICLE_SYSTEM
 {
 }
 @end
 
 //! An spiral particle system
-@interface CCParticleSpiral : CCPointParticleSystem
+@interface CCParticleSpiral : ARCH_OPTIMAL_PARTICLE_SYSTEM
 {
 }
 @end
 
 //! An explosion particle system
-@interface CCParticleExplosion : CCPointParticleSystem
+@interface CCParticleExplosion : ARCH_OPTIMAL_PARTICLE_SYSTEM
 {
 }
 @end
 
 //! An smoke particle system
-@interface CCParticleSmoke : CCPointParticleSystem
+@interface CCParticleSmoke : ARCH_OPTIMAL_PARTICLE_SYSTEM
 {
 }
 @end
 
 //! An snow particle system
-@interface CCParticleSnow : CCPointParticleSystem
+@interface CCParticleSnow : ARCH_OPTIMAL_PARTICLE_SYSTEM
 {
 }
 @end
 
 //! A rain particle system
-@interface CCParticleRain : CCPointParticleSystem
+@interface CCParticleRain : ARCH_OPTIMAL_PARTICLE_SYSTEM
 {
 }
 @end

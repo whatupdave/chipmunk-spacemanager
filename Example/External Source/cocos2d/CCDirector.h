@@ -23,60 +23,24 @@
  */
 
 
-
-//
 #import "ccConfig.h"
 #import "ccTypes.h"
 
 // OpenGL related
-#import "Support/EAGLView.h"
-
-/** @typedef tPixelFormat
- Possible Pixel Formats for the EAGLView
- */
-typedef enum {
-	/** RGB565 pixel format. No alpha. 16-bit. (Default) */
-	kCCPixelFormatRGB565,
-	/** RGBA format. 32-bit. Needed for some 3D effects. It is not as fast as the RGB565 format. */
-	kCCPixelFormatRGBA8888,
-	/** default pixel format */
-	kCCPixelFormatDefault = kCCPixelFormatRGB565,
-
-	// backward compatibility stuff
-	kPixelFormatRGB565 = kCCPixelFormatRGB565,
-	kRGB565 = kCCPixelFormatRGB565,
-	kPixelFormatRGBA8888 = kCCPixelFormatRGBA8888,
-	kRGBA8 = kCCPixelFormatRGBA8888,
-} tPixelFormat;
-
-/** @typedef tDepthBufferFormat
- Possible DepthBuffer Formats for the EAGLView.
- Use 16 or 24 bit depth buffers if you are going to use real 3D objects.
- */
-typedef enum {
-	/// A Depth Buffer of 0 bits will be used (default)
-	kCCDepthBufferNone,
-	/// A depth buffer of 16 bits will be used
-	kCCDepthBuffer16,
-	/// A depth buffer of 24 bits will be used
-	kCCDepthBuffer24,
-	
-	// backward compatibility stuff
-	kDepthBuffer16 = kCCDepthBuffer16,
-	kDepthBuffer24 = kCCDepthBuffer24,
-} tDepthBufferFormat;
+#import "Platforms/CCGL.h"
+#import "CCProtocols.h"
 
 /** @typedef ccDirectorProjection
  Possible OpenGL projections used by director
  */
 typedef enum {
-	/// sets a 2D projection (orthogonal projection)
+	/// sets a 2D projection (orthogonal projection).
 	kCCDirectorProjection2D,
 	
 	/// sets a 3D projection with a fovy=60, znear=0.5f and zfar=1500.
 	kCCDirectorProjection3D,
 	
-	/// it does nothing. But if you are using a custom projection set it this value.
+	/// it calls "updateProjection" on the projection delegate.
 	kCCDirectorProjectionCustom,
 	
 	/// Detault projection is 3D projection
@@ -89,81 +53,6 @@ typedef enum {
 
 } ccDirectorProjection;
 
-/** @typedef ccDirectorType
- Possible Director Types.
- @since v0.8.2
- */
-typedef enum {
-	/** Will use a Director that triggers the main loop from an NSTimer object
-	 *
-	 * Features and Limitations:
-	 * - Integrates OK with UIKit objects
-	 * - It the slowest director
-	 * - The invertal update is customizable from 1 to 60
-	 */
-	kCCDirectorTypeNSTimer,
-	
-	/** will use a Director that triggers the main loop from a custom main loop.
-	 *
-	 * Features and Limitations:
-	 * - Faster than NSTimer Director
-	 * - It doesn't integrate well with UIKit objecgts
-	 * - The interval update can't be customizable
-	 */
-	kCCDirectorTypeMainLoop,
-	
-	/** Will use a Director that triggers the main loop from a thread, but the main loop will be executed on the main thread.
-	 *
-	 * Features and Limitations:
-	 * - Faster than NSTimer Director
-	 * - It doesn't integrate well with UIKit objecgts
-	 * - The interval update can't be customizable
-	 */
-	kCCDirectorTypeThreadMainLoop,
-	
-	/** Will use a Director that synchronizes timers with the refresh rate of the display.
-	 *
-	 * Features and Limitations:
-	 * - Faster than NSTimer Director
-	 * - Only available on 3.1+
-	 * - Scheduled timers & drawing are synchronizes with the refresh rate of the display
-	 * - Integrates OK with UIKit objects
-	 * - The interval update can be 1/60, 1/30, 1/15
-	 */	
-	kCCDirectorTypeDisplayLink,
-	
-	/** Default director is the NSTimer directory */
-	kCCDirectorTypeDefault = kCCDirectorTypeNSTimer,
-	
-	// backward compatibility stuff
-	CCDirectorTypeNSTimer = kCCDirectorTypeNSTimer,
-	CCDirectorTypeMainLoop = kCCDirectorTypeMainLoop,
-	CCDirectorTypeThreadMainLoop = kCCDirectorTypeThreadMainLoop,
-	CCDirectorTypeDisplayLink = kCCDirectorTypeDisplayLink,
-	CCDirectorTypeDefault =kCCDirectorTypeDefault,
-
-
-} ccDirectorType;
-
-/** @typedef ccDeviceOrientation
- Possible device orientations
- */
-typedef enum {
-	/// Device oriented vertically, home button on the bottom
-	kCCDeviceOrientationPortrait = UIDeviceOrientationPortrait,	
-	/// Device oriented vertically, home button on the top
-    kCCDeviceOrientationPortraitUpsideDown = UIDeviceOrientationPortraitUpsideDown,
-	/// Device oriented horizontally, home button on the right
-    kCCDeviceOrientationLandscapeLeft = UIDeviceOrientationLandscapeLeft,
-	/// Device oriented horizontally, home button on the left
-    kCCDeviceOrientationLandscapeRight = UIDeviceOrientationLandscapeRight,
-	
-	// Backward compatibility stuff
-	CCDeviceOrientationPortrait = kCCDeviceOrientationPortrait,
-	CCDeviceOrientationPortraitUpsideDown = kCCDeviceOrientationPortraitUpsideDown,
-	CCDeviceOrientationLandscapeLeft = kCCDeviceOrientationLandscapeLeft,
-	CCDeviceOrientationLandscapeRight = kCCDeviceOrientationLandscapeRight,
-} ccDeviceOrientation;
 
 @class CCLabelAtlas;
 @class CCScene;
@@ -173,15 +62,15 @@ and when to execute the Scenes.
  
  The CCDirector is also resposible for:
   - initializing the OpenGL ES context
-  - setting the OpenGL ES pixel format (default on is RGB565)
-  - setting the OpenGL ES buffer depth (default one is 0-bit)
-  - setting the projection (default one is 2D)
+  - setting the OpenGL pixel format (default on is RGB565)
+  - setting the OpenGL buffer depth (default one is 0-bit)
+  - setting the projection (default one is 3D)
   - setting the orientation (default one is Protrait)
  
  Since the CCDirector is a singleton, the standard way to use it is by calling:
-  - [[CCDirector sharedDirector] xxxx];
+  - [[CCDirector sharedDirector] methodName];
  
- The CCDirector also sets the default OpenGL ES context:
+ The CCDirector also sets the default OpenGL context:
   - GL_TEXTURE_2D is enabled
   - GL_VERTEX_ARRAY is enabled
   - GL_COLOR_ARRAY is enabled
@@ -189,29 +78,20 @@ and when to execute the Scenes.
 */
 @interface CCDirector : NSObject
 {
-	EAGLView	*openGLView_;
+	CC_GLVIEW	*openGLView_;
 
-  NSBundle* loadingBundle;
 	// internal timer
-	NSTimeInterval animationInterval;
-	NSTimeInterval oldAnimationInterval;
-
-	tPixelFormat pixelFormat_;
-	tDepthBufferFormat depthBufferFormat_;
-
-	/* landscape mode ? */
-	BOOL landscape;
-	
-	/* orientation */
-	ccDeviceOrientation	deviceOrientation_;
+	NSTimeInterval animationInterval_;
+	NSTimeInterval oldAnimationInterval_;	
 	
 	/* display FPS ? */
-	BOOL displayFPS;
-	int frames;
-	ccTime accumDt;
-	ccTime frameRate;
+	BOOL displayFPS_;
+
+	NSUInteger frames_;
+	ccTime accumDt_;
+	ccTime frameRate_;
 #if	CC_DIRECTOR_FAST_FPS
-	CCLabelAtlas *FPSLabel;
+	CCLabelAtlas *FPSLabel_;
 #endif
 	
 	/* is the running scene paused */
@@ -219,6 +99,9 @@ and when to execute the Scenes.
 	
 	/* The running scene */
 	CCScene *runningScene_;
+	
+	/* This object will be visited after the scene. Useful to hook a notification node */
+	id notificationNode_;
 	
 	/* will be the next 'runningScene' in the next frame
 	 nextScene is a weak reference. */
@@ -231,7 +114,7 @@ and when to execute the Scenes.
 	NSMutableArray *scenesStack_;
 	
 	/* last time the main loop was updated */
-	struct timeval lastUpdate;
+	struct timeval lastUpdate_;
 	/* delta time since last tick to main loop */
 	ccTime dt;
 	/* whether or not the next delta time will be zero */
@@ -240,25 +123,40 @@ and when to execute the Scenes.
 	/* projection used */
 	ccDirectorProjection projection_;
 	
+	/* Projection protocol delegate */
+	id<CCProjectionProtocol>	projectionDelegate_;
+
+	/* window size in points */
+	CGSize	winSizeInPoints_;
+	
+	/* window size in pixels */
+	CGSize	winSizeInPixels_;
+
+	/* the cocos2d running thread */
+	NSThread	*runningThread_;
+
+	// profiler
 #if CC_ENABLE_PROFILERS
-	ccTime accumDtForProfiler;
+	ccTime accumDtForProfiler_;
 #endif
 }
 
+/** returns the cocos2d thread.
+ If you want to run any cocos2d task, run it in this thread.
+ On iOS usually it is the main thread.
+ @since v0.99.5
+ */
+@property (readonly, nonatomic ) NSThread *runningThread;
 /** The current running Scene. Director can only run one Scene at the time */
 @property (nonatomic,readonly) CCScene* runningScene;
 /** The FPS value */
 @property (nonatomic,readwrite, assign) NSTimeInterval animationInterval;
 /** Whether or not to display the FPS on the bottom-left corner */
 @property (nonatomic,readwrite, assign) BOOL displayFPS;
-/** The OpenGL view */
-@property (nonatomic,readonly) EAGLView *openGLView;
-/** Pixel format used to create the context */
-@property (nonatomic,readonly) tPixelFormat pixelFormat;
+/** The OpenGLView, where everything is rendered */
+@property (nonatomic,readwrite,retain) CC_GLVIEW *openGLView;
 /** whether or not the next delta time will be zero */
 @property (nonatomic,readwrite,assign) BOOL nextDeltaTimeZero;
-/** The device orientattion */
-@property (nonatomic,readwrite) ccDeviceOrientation deviceOrientation;
 /** Whether or not the Director is paused */
 @property (nonatomic,readonly) BOOL isPaused;
 /** Sets an OpenGL projection
@@ -271,62 +169,43 @@ and when to execute the Scenes.
  If the new scene replaces the old one, the it will receive the "cleanup" message.
  @since v0.99.0
  */
-@property (nonatomic, readonly) BOOL	sendCleanupToScene;
+@property (nonatomic, readonly) BOOL sendCleanupToScene;
+
+/** This object will be visited after the main scene is visited.
+ This object MUST implement the "visit" selector.
+ Useful to hook a notification object, like CCNotifications (http://github.com/manucorporat/CCNotifications)
+ @since v0.99.5
+ */
+@property (nonatomic, readwrite, retain) id	notificationNode;
+
+/** This object will be called when the OpenGL projection is udpated and only when the kCCDirectorProjectionCustom projection is used.
+ @since v0.99.5
+ */
+@property (nonatomic, readwrite, retain) id<CCProjectionProtocol> projectionDelegate;
 
 /** returns a shared instance of the director */
 +(CCDirector *)sharedDirector;
 
-/** There are 4 types of Director.
- - CCDirectorTypeNSTimer (default)
- - CCDirectorTypeMainLoop
- - CCDirectorTypeThreadMainLoop
- - CCDirectorTypeDisplayLink
- 
- Each Director has it's own benefits, limitations.
- If you are using SDK 3.1 or newer it is recommed to use the DisplayLink director
- 
- This method should be called before any other call to the director.
 
- It will return NO if the director type is CCDirectorTypeDisplayLink and the running SDK is < 3.1. Otherwise it will return YES.
- 
- @since v0.8.2
+
+// Window size
+
+/** returns the size of the OpenGL view in points.
+ It takes into account any possible rotation (device orientation) of the window
  */
-+(BOOL) setDirectorType:(ccDirectorType) directorType;
-
-
-// iPhone Specific
-
-/** change default pixel format.
- Call this class method before attaching it to a UIWindow/UIView
- Default pixel format: kRGB565. Supported pixel formats: kRGBA8 and kRGB565
- */
--(void) setPixelFormat: (tPixelFormat) p;
-
-/** change depth buffer format.
- Call this class method before attaching it to a UIWindow/UIView
- Default depth buffer: 0 (none).  Supported: kDepthBufferNone, kDepthBuffer16, and kDepthBuffer24
- */
--(void) setDepthBufferFormat: (tDepthBufferFormat) db;
-
-// Integration with UIKit
-/** detach the cocos2d view from the view/window */
--(BOOL)detach;
-
-/** attach in UIWindow using the full frame */
--(BOOL)attachInWindow:(UIWindow *)window;
-
-/** attach in UIView using the full frame */
--(BOOL)attachInView:(UIView *)view;
-
-/** attach in UIView using the given frame */
--(BOOL)attachInView:(UIView *)view withFrame:(CGRect)frame;
-
-// Landscape
-
-/** returns the size of the OpenGL view according to the landspace */
 - (CGSize) winSize;
-/** returns the display size of the OpenGL view */
--(CGSize) displaySize;
+
+/** returns the size of the OpenGL view in pixels.
+ It takes into account any possible rotation (device orientation) of the window.
+ On Mac winSize and winSizeInPixels return the same value.
+ */
+- (CGSize) winSizeInPixels;
+/** returns the display size of the OpenGL view in pixels.
+ It doesn't take into account any possible rotation of the window.
+ */
+-(CGSize) displaySizeInPixels;
+/** changes the projection size */
+-(void) reshapeProjection:(CGSize)newWindowSize;
 
 /** converts a UIKit coordinate to an OpenGL coordinate
  Useful to convert (multi) touchs coordinates to the current layout (portrait or landscape)
@@ -336,9 +215,6 @@ and when to execute the Scenes.
  Useful to convert node points to window points for calls such as glScissor
  */
 -(CGPoint) convertToUI:(CGPoint)p;
-
-// rotates the screen if Landscape mode is activated
--(void) applyLandscape;
 
 /// XXX: missing description
 -(float) getZEye;
@@ -370,7 +246,9 @@ and when to execute the Scenes.
  */
 -(void) replaceScene: (CCScene*) scene;
 
-/** Ends the execution, releases the running scene */
+/** Ends the execution, releases the running scene.
+ It doesn't remove the OpenGL view from its parent. You have to do it manually.
+ */
 -(void) end;
 
 /** Pauses the running scene.
@@ -396,86 +274,31 @@ and when to execute the Scenes.
  */
 -(void) startAnimation;
 
+/** Draw the scene.
+ This method is called every frame. Don't call it manually.
+ */
+-(void) drawScene;
+
 // Memory Helper
 
-/** Removes cached all cocos2d cached data.
- It will purge the CCTextureCache, CCSpriteFrameCache, CCBitmapFont cache
+/** Removes all the cocos2d data that was cached automatically.
+ It will purge the CCTextureCache, CCBitmapFont cache.
+ IMPORTANT: The CCSpriteFrameCache won't be purged. If you want to purge it, you have to purge it manually.
  @since v0.99.3
  */
--(void) purgeCachedData;
- 
+-(void) purgeCachedData; 
 
 // OpenGL Helper
+
+/** sets the OpenGL default values */
+-(void) setGLDefaultValues;
 
 /** enables/disables OpenGL alpha blending */
 - (void) setAlphaBlending: (BOOL) on;
 /** enables/disables OpenGL depth test */
 - (void) setDepthTest: (BOOL) on;
 
-@end
+// Profiler
+-(void) showProfilers;
 
-/** FastDirector is a Director that triggers the main loop as fast as possible.
- *
- * Features and Limitations:
- *  - Faster than "normal" director
- *  - Consumes more battery than the "normal" director
- *  - It has some issues while using UIKit objects
- */
-@interface CCFastDirector : CCDirector
-{
-	BOOL isRunning;
-	
-	NSAutoreleasePool	*autoreleasePool;
-}
--(void) preMainLoop;
 @end
-
-/** ThreadedFastDirector is a Director that triggers the main loop from a thread.
- *
- * Features and Limitations:
- *  - Faster than "normal" director
- *  - Consumes more battery than the "normal" director
- *  - It can be used with UIKit objects
- *
- * @since v0.8.2
- */
-@interface CCThreadedFastDirector : CCDirector
-{
-	BOOL isRunning;	
-}
--(void) preMainLoop;
-@end
-
-/** DisplayLinkDirector is a Director that synchronizes timers with the refresh rate of the display.
- *
- * Features and Limitations:
- * - Only available on 3.1+
- * - Scheduled timers & drawing are synchronizes with the refresh rate of the display
- * - Only supports animation intervals of 1/60 1/30 & 1/15
- *
- * It is the recommended Director if the SDK is 3.1 or newer
- *
- * @since v0.8.2
- */
-@interface CCDisplayLinkDirector : CCDirector
-{
-	id displayLink;
-}
--(void) preMainLoop:(id)sender;
-@end
-
-/** TimerDirector is a Director that calls the main loop from an NSTimer object
- *
- * Features and Limitations:
- * - Integrates OK with UIKit objects
- * - It the slowest director
- * - The invertal update is customizable from 1 to 60
- *
- * It is the default Director.
- */
-@interface CCTimerDirector : CCDirector
-{
-	NSTimer *animationTimer;
-}
-@end
-

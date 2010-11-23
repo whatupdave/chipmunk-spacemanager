@@ -27,9 +27,6 @@
 #import "CCNode.h"
 #import "CCProtocols.h"
 
-#pragma mark -
-#pragma mark CCSpriteFrame
-
 /** A CCSpriteFrame has:
 	- texture: A CCTexture2D that will be used by the CCSprite
 	- rectangle: A rectangle of the texture
@@ -43,103 +40,50 @@
 @interface CCSpriteFrame : NSObject <NSCopying>
 {
 	CGRect			rect_;
-	CGPoint			offset_;
-	CGSize			originalSize_;
+	CGRect			rectInPixels_;
+	BOOL			rotated_;
+	CGPoint			offsetInPixels_;
+	CGSize			originalSizeInPixels_;
 	CCTexture2D		*texture_;
 }
-/** rect of the frame */
+/** rect of the frame in points */
 @property (nonatomic,readwrite) CGRect rect;
 
-/** offset of the frame */
-@property (nonatomic,readwrite) CGPoint offset;
+/** rect of the frame in pixels */
+@property (nonatomic,readwrite) CGRect rectInPixels;
 
-/** original size of the trimmed image */
-@property (nonatomic,readwrite) CGSize originalSize;
+/** whether or not the rect of the frame is rotated ( x = x+width, y = y+height, width = height, height = width ) */
+@property (nonatomic,readwrite) BOOL rotated;
+
+/** offset of the frame in pixels */
+@property (nonatomic,readwrite) CGPoint offsetInPixels;
+
+/** original size of the trimmed image in pixels */
+@property (nonatomic,readwrite) CGSize originalSizeInPixels;
 
 /** texture of the frame */
 @property (nonatomic, retain, readwrite) CCTexture2D *texture;
 
-/** Create a CCSpriteFrame with a texture, rect and offset.
+/** Create a CCSpriteFrame with a texture, rect in points.
  It is assumed that the frame was not trimmed.
  */
-+(id) frameWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset;
++(id) frameWithTexture:(CCTexture2D*)texture rect:(CGRect)rect;
 
-/** Create a CCSpriteFrame with a texture, rect, offset and originalSize.
- The originalSize is the size in pixels of the frame before being trimmed.
+/** Create a CCSpriteFrame with a texture, rect, rotated, offset and originalSize in pixels.
+ The originalSize is the size in points of the frame before being trimmed.
  */
-+(id) frameWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset originalSize:(CGSize)originalSize;
++(id) frameWithTexture:(CCTexture2D*)texture rectInPixels:(CGRect)rect rotated:(BOOL)rotated offset:(CGPoint)offset originalSize:(CGSize)originalSize;
 
-/** Initializes a CCSpriteFrame with a texture, rect and offset.
+
+/** Initializes a CCSpriteFrame with a texture, rect in points;
  It is assumed that the frame was not trimmed.
  */
--(id) initWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset;
+-(id) initWithTexture:(CCTexture2D*)texture rect:(CGRect)rect;
 
-/** Initializes a CCSpriteFrame with a texture, rect, offset and originalSize.
- The originalSize is the size in pixels of the frame before being trimmed.
+/** Initializes a CCSpriteFrame with a texture, rect, rotated, offset and originalSize in pixels.
+ The originalSize is the size in points of the frame before being trimmed.
  */
--(id) initWithTexture:(CCTexture2D*)texture rect:(CGRect)rect offset:(CGPoint)offset originalSize:(CGSize)originalSize;
+-(id) initWithTexture:(CCTexture2D*)texture rectInPixels:(CGRect)rect rotated:(BOOL)rotated offset:(CGPoint)offset originalSize:(CGSize)originalSize;
+
 @end
 
-#pragma mark -
-#pragma mark CCAnimation
-
-/** an Animation object used within Sprites to perform animations */
-@interface CCAnimation : NSObject
-{
-	NSString			*name_;
-	float				delay_;
-	NSMutableArray		*frames_;
-}
-
-/** name of the animation */
-@property (nonatomic,readwrite,retain) NSString *name;
-/** delay between frames in seconds. */
-@property (nonatomic,readwrite,assign) float delay;
-/** array of frames */
-@property (nonatomic,readwrite,retain) NSMutableArray *frames;
-
-/** Creates a CCAnimation with a name
- @since v0.99.3
- */
-+(id) animationWithName:(NSString*)name;
-
-/** Creates a CCAnimation with a name and frames
- @since v0.99.3
- */
-+(id) animationWithName:(NSString*)name frames:(NSArray*)frames;
-
-/** Creates a CCAnimation with a name and delay between frames. */
-+(id) animationWithName:(NSString*)name delay:(float)delay;
-
-/** Creates a CCAnimation with a name, delay and an array of CCSpriteFrames. */
-+(id) animationWithName:(NSString*)name delay:(float)delay frames:(NSArray*)frames;
-
-/** Initializes a CCAnimation with a name
- @since v0.99.3
- */
--(id) initWithName:(NSString*)name;
-
-/** Initializes a CCAnimation with a name and frames
- @since v0.99.3
- */
--(id) initWithName:(NSString*)name frames:(NSArray*)frames;
-
-/** Initializes a CCAnimation with a name and delay between frames. */
--(id) initWithName:(NSString*)name delay:(float)delay;
-
-/** Initializes a CCAnimation with a name, delay and an array of CCSpriteFrames. */
--(id) initWithName:(NSString*)name delay:(float)delay frames:(NSArray*)frames;
-
-/** Adds a frame to a CCAnimation. */
--(void) addFrame:(CCSpriteFrame*)frame;
-
-/** Adds a frame with an image filename. Internally it will create a CCSpriteFrame and it will add it.
- Added to facilitate the migration from v0.8 to v0.9.
- */
--(void) addFrameWithFilename:(NSString*)filename;
-
-/** Adds a frame with a texture and a rect. Internally it will create a CCSpriteFrame and it will add it.
- Added to facilitate the migration from v0.8 to v0.9.
- */
--(void) addFrameWithTexture:(CCTexture2D*)texture rect:(CGRect)rect;
-@end

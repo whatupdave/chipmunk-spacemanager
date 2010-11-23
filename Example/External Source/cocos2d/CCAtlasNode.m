@@ -27,9 +27,8 @@
 #import "ccMacros.h"
 
 
-@interface CCAtlasNode (Private)
+@interface CCAtlasNode ()
 -(void) calculateMaxItems;
--(void) calculateTexCoordsSteps;
 -(void) updateBlendFunc;
 -(void) updateOpacityModifyRGB;
 @end
@@ -50,8 +49,8 @@
 {
 	if( (self=[super init]) ) {
 	
-		itemWidth = w;
-		itemHeight = h;
+		itemWidth_ = w * CC_CONTENT_SCALE_FACTOR();
+		itemHeight_ = h * CC_CONTENT_SCALE_FACTOR();
 
 		opacity_ = 255;
 		color_ = colorUnmodified_ = ccWHITE;
@@ -65,11 +64,17 @@
 		self.textureAtlas = [[CCTextureAtlas alloc] initWithFile:tile capacity:c];
 		[textureAtlas_ release];
 		
+		if( ! textureAtlas_ ) {
+			CCLOG(@"cocos2d: Could not initialize CCAtlasNode. Invalid Texture");
+			[self release];
+			return nil;
+		}
+		
 		[self updateBlendFunc];
 		[self updateOpacityModifyRGB];
-			
+		
 		[self calculateMaxItems];
-		[self calculateTexCoordsSteps];
+		
 	}
 	
 	return self;
@@ -86,16 +91,9 @@
 
 -(void) calculateMaxItems
 {
-	CGSize s = [[textureAtlas_ texture] contentSize];
-	itemsPerColumn = s.height / itemHeight;
-	itemsPerRow = s.width / itemWidth;
-}
-
--(void) calculateTexCoordsSteps
-{
-	CCTexture2D *tex = [textureAtlas_ texture];
-	texStepX = itemWidth / (float) [tex pixelsWide];
-	texStepY = itemHeight / (float) [tex pixelsHigh]; 	
+	CGSize s = [[textureAtlas_ texture] contentSizeInPixels];
+	itemsPerColumn_ = s.height / itemHeight_;
+	itemsPerRow_ = s.width / itemWidth_;
 }
 
 -(void) updateAtlasValues

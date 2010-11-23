@@ -15,10 +15,10 @@
 {
 	SpaceManager *smgr;
 	cpCCSprite *ballSprite;
-	CCLabel *label;
+	CCLabelTTF *label;
 }
 
-@property (readonly) CCLabel *label;
+@property (readonly) CCLabelTTF *label;
 
 @end
 

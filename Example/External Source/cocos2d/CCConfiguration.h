@@ -22,28 +22,44 @@
  * THE SOFTWARE.
  */
 
+#import <Foundation/Foundation.h>
 
-#import <OpenGLES/ES1/gl.h>
+#import "Platforms/CCGL.h"
+
+/** OS version definitions. Includes both iOS and Mac OS versions
+ */
+enum {
+	kCCiOSVersion_3_0   = 0x03000000,
+	kCCiOSVersion_3_1   = 0x03010000,
+	kCCiOSVersion_3_1_1 = 0x03010100,
+	kCCiOSVersion_3_1_2 = 0x03010200,
+	kCCiOSVersion_3_1_3 = 0x03010300,
+	kCCiOSVersion_3_2   = 0x03020000,
+	kCCiOSVersion_3_2_1 = 0x03020100,
+	kCCiOSVersion_4_0   = 0x04000000,
+	kCCiOSVersion_4_0_1 = 0x04000100,
+	kCCiOSVersion_4_1   = 0x04010000,
+
+	kCCMacVersion_10_5  = 0x0a050000,
+	kCCMacVersion_10_6  = 0x0a060000,
+	kCCMacVersion_10_7  = 0x0a070000,
+};
 
 /**
  CCConfiguration contains some openGL variables
  @since v0.99.0
  */
-
 @interface CCConfiguration : NSObject {
 
-	NSBundle	*loadingBundle_;
-	
-	GLint		maxTextureSize_;
-	GLint		maxModelviewStackDepth_;
-	BOOL		supportsPVRTC_;
-	BOOL		supportsNPOT_;
-	BOOL		supportsBGRA8888_;
-	BOOL		supportsDiscardFramebuffer_;
+	GLint			maxTextureSize_;
+	GLint			maxModelviewStackDepth_;
+	BOOL			supportsPVRTC_;
+	BOOL			supportsNPOT_;
+	BOOL			supportsBGRA8888_;
+	BOOL			supportsDiscardFramebuffer_;
+	unsigned int	OSVersion_;
+	GLint			maxSamplesAllowed_;
 }
-
-/** the bundle we load everything from */
-@property (nonatomic, readwrite, assign) NSBundle* loadingBundle;
 
 /** OpenGL Max texture size. */
 @property (nonatomic, readonly) GLint maxTextureSize;
@@ -75,10 +91,20 @@
  */
 @property (nonatomic, readonly) BOOL supportsDiscardFramebuffer;
 
+/** returns the OS version.
+	- On iOS devices it returns the firmware version.
+	- On Mac returns the OS version
+ 
+ @since v0.99.5
+ */
+@property (nonatomic, readonly) unsigned int OSVersion;
+
 /** returns a shared instance of the CCConfiguration */
 +(CCConfiguration *) sharedConfiguration;
 
 /** returns whether or not an OpenGL is supported */
 - (BOOL) checkForGLExtension:(NSString *)searchName;
+
+
 
 @end

@@ -73,7 +73,7 @@
 	ballSprite.ignoreRotation = YES;
 	
 	//collisions will change label text
-	label = [CCLabel labelWithString:@"" fontName:@"Helvetica" fontSize:20];
+	label = [CCLabelTTF labelWithString:@"" fontName:@"Helvetica" fontSize:20];
 	label.position = ccp(240,280);
 	[self addChild:label];
 	
