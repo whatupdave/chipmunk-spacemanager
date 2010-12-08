@@ -23,6 +23,18 @@
 -(void) removeAndMaybeFreeShape:(cpShape*)shape freeShape:(BOOL)freeShape;
 @end
 
+@interface RayCastInfoValue : NSValue
+@end
+@implementation RayCastInfoValue
+- (void) dealloc
+{
+	cpSegmentQueryInfo *info = (cpSegmentQueryInfo*)[self pointerValue];
+	free(info);
+	
+	[super dealloc];
+}
+@end
+
 typedef struct ExplosionQueryContext {
 	cpLayers layers;
 	cpGroup group;
@@ -137,6 +149,7 @@ static void ExplosionQueryHelper(cpBB *bb, cpShape *shape, ExplosionQueryContext
 	}
 }
 
+/* Look into position_func off of cpBody for more efficient sync */
 void defaultEachShape(void *ptr, void* data)
 {
 	cpShape *shape = (cpShape*) ptr;
@@ -276,7 +289,7 @@ static void collectAllSegmentQueryInfos(cpShape *shape, cpFloat t, cpVect n, NSM
 	info->shape = shape;
 	info->t = t;
 	info->n = n;
-	[outInfos addObject:[NSValue valueWithPointer:info]];
+	[outInfos addObject:[RayCastInfoValue valueWithPointer:info]];
 }
 	 
 static void collectAllSegmentQueryShapes(cpShape *shape, cpFloat t, cpVect n, NSMutableArray *outShapes)
@@ -319,21 +332,6 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 }
 
 @interface RayCastInfoArray : NSMutableArray
-@end
-
-@implementation RayCastInfoArray
-
-- (void) dealloc
-{
-	for (NSValue *value in self)
-	{
-		cpSegmentQueryInfo *info = (cpSegmentQueryInfo*)[value pointerValue];
-		free(info);
-	}
-	
-	[super dealloc];
-}
-
 @end
 
 @implementation SpaceManager
@@ -810,7 +808,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(NSArray*) getShapesFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group
 {
-	RayCastInfoArray *array = [[RayCastInfoArray alloc] autorelease];
+	NSMutableArray *array = [[[NSMutableArray alloc] init] autorelease];
 	
 	if (cpSpaceSegmentQuery(_space, start, end, layers, group, (cpSpaceSegmentQueryFunc)collectAllSegmentQueryShapes, array))
 		return array;
@@ -825,7 +823,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 
 -(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group
 {
-	RayCastInfoArray *array = [[RayCastInfoArray alloc] autorelease];
+	NSMutableArray *array = [[[NSMutableArray alloc] init] autorelease];
 	
 	if (cpSpaceSegmentQuery(_space, start, end, layers, group, (cpSpaceSegmentQueryFunc)collectAllSegmentQueryInfos, array))
 		return array;
