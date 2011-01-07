@@ -57,7 +57,7 @@
 - (void) setupExample
 {
 	//allocate our space manager
-	smgr = [[SpaceManager alloc] init];
+	smgr = [[SpaceManagerCocos2d alloc] init];
 	
 	//add four walls to our screen
 	[smgr addWindowContainmentWithFriction:1.0 elasticity:1.0 inset:cpvzero];

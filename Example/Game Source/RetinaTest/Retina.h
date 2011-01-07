@@ -6,13 +6,11 @@
 //  Copyright Mobile Bros 2010. All rights reserved.
 //
 
-#import "cocos2d.h"
-#import "chipmunk.h"
-#import "SpaceManager.h"
+#import "SpaceManagerCocos2d.h"
 
 @interface Retina : CCLayer
 {
-	SpaceManager *smgr;
+	SpaceManagerCocos2d *smgr;
 	CGPoint _lastPt;
 }
 

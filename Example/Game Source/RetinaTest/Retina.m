@@ -19,7 +19,7 @@
 {
 	if( (self=[super init])) 
 	{
-		smgr = [[SpaceManager alloc] init];
+		smgr = [[SpaceManagerCocos2d alloc] init];
 		[smgr addWindowContainmentWithFriction:1.0 elasticity:1.0 inset:cpv(0,0)];
 		
 		[[CCTouchDispatcher sharedDispatcher] addTargetedDelegate:self priority:0 swallowsTouches:NO];
@@ -47,6 +47,19 @@
 		[self addChild:gear];
 		
 		[smgr addMotorToBody:ball.shape->body rate:3];
+		
+		//// Quick Ray test
+		[smgr step:1/60.0];
+		CGPoint dir = ccpNormalize(ccpSub(ball.position, box.position));
+		CGPoint pt1 = ccpAdd(ball.position, ccpMult(dir, -100));
+		CGPoint pt2 = ccpAdd(box.position, ccpMult(dir, 100));
+
+		NSArray *array = [smgr getShapesFromRayCastSegment:pt1 end:pt2];
+		NSAssert([array count] == 2, @"Raycast did not find ball and box");
+		
+		array = [smgr getInfosFromRayCastSegment:pt1 end:pt2];
+		NSAssert([array count] == 2, @"Raycast did not find ball and box infos");
+		/////////////////////
 		
 		[self schedule: @selector(step:)];
 	}

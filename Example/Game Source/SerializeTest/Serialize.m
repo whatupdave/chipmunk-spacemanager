@@ -50,7 +50,7 @@
 - (void) setupTest
 {
 	//allocate our space manager
-	smgr = [[SpaceManager alloc] init];
+	smgr = [[SpaceManagerCocos2d alloc] init];
 	
 	//Constant dt is recommended for chipmunk
 	smgr.constantDt = 1.0/55.0;

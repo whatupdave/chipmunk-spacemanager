@@ -5,13 +5,12 @@
 //  Created by Rob Blackwood on 5/30/10.
 //
 
-#import "cocos2d.h"
-#import "SpaceManager.h"
+#import "SpaceManagerCocos2d.h"
 
 #pragma mark Serialize Class
 @interface Serialize : CCLayer<SpaceManagerSerializeDelegate>
 {
-	SpaceManager *smgr;
+	SpaceManagerCocos2d *smgr;
 	NSMutableArray *balls;
 }
 

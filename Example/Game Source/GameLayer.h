@@ -5,15 +5,12 @@
 //  Created by Rob Blackwood on 5/11/09.
 //
 
-#import "cocos2d.h"
-#import "SpaceManager.h"
-#import "cpCCSprite.h"
-#import "cpShapeNode.h"
+#import "SpaceManagerCocos2d.h"
 
 #pragma mark GameLayer Class
 @interface GameLayer : CCLayer
 {
-	SpaceManager *smgr;
+	SpaceManagerCocos2d *smgr;
 	cpCCSprite *ballSprite;
 	CCLabelTTF *label;
 }
