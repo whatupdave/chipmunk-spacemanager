@@ -20,9 +20,8 @@
  */
  
 #include <stdlib.h>
-#include <stdio.h>
 
-#include "chipmunk.h"
+#include "chipmunk_private.h"
 #include "chipmunk_unsafe.h"
 
 cpPolyShape *
@@ -138,7 +137,7 @@ static const cpShapeClass polyClass = {
 };
 
 cpBool
-cpPolyValidate(cpVect *verts, int numVerts)
+cpPolyValidate(const cpVect *verts, const int numVerts)
 {
 	for(int i=0; i<numVerts; i++){
 		cpVect a = verts[i];
@@ -211,8 +210,8 @@ cpPolyShapeNew(cpBody *body, int numVerts, cpVect *verts, cpVect offset)
 cpPolyShape *
 cpBoxShapeInit(cpPolyShape *poly, cpBody *body, cpFloat width, cpFloat height)
 {
-	cpFloat hw = width/2.0;
-	cpFloat hh = height/2.0;
+	cpFloat hw = width/2.0f;
+	cpFloat hh = height/2.0f;
 	
 	cpVect verts[] = {
 		cpv(-hw,-hh),

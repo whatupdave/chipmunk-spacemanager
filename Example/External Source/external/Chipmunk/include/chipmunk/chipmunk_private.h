@@ -19,36 +19,31 @@
  * SOFTWARE.
  */
 
-#include <stdlib.h>
+#define CP_ALLOW_PRIVATE_ACCESS 1
+#include "chipmunk.h"
 
-#include "chipmunk_private.h"
-#include "constraints/util.h"
+void *cpSpaceGetPostStepData(cpSpace *space, void *obj);
 
-// TODO: Comment me!
+void cpSpaceActivateBody(cpSpace *space, cpBody *body);
 
-cpFloat cp_constraint_bias_coef = 0.1f;
-
-void cpConstraintDestroy(cpConstraint *constraint){}
-
-void
-cpConstraintFree(cpConstraint *constraint)
+static inline void
+cpSpaceLock(cpSpace *space)
 {
-	if(constraint){
-		cpConstraintDestroy(constraint);
-		cpfree(constraint);
-	}
+	space->locked++;
 }
 
-// *** defined in util.h
-
-void
-cpConstraintInit(cpConstraint *constraint, const cpConstraintClass *klass, cpBody *a, cpBody *b)
+static inline void
+cpSpaceUnlock(cpSpace *space)
 {
-	constraint->klass = klass;
-	constraint->a = a;
-	constraint->b = b;
+	space->locked--;
+	cpAssert(space->locked >= 0, "Internal error:Space lock underflow.");
 	
-	constraint->maxForce = (cpFloat)INFINITY;
-	constraint->biasCoef = cp_constraint_bias_coef;
-	constraint->maxBias = (cpFloat)INFINITY;
+	if(!space->locked){
+		cpArray *waking = space->rousedBodies;
+		for(int i=0, count=waking->num; i<count; i++){
+			cpSpaceActivateBody(space, (cpBody *)waking->arr[i]);
+		}
+		
+		waking->num = 0;
+	}
 }
