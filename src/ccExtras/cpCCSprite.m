@@ -38,6 +38,26 @@
 	return [[[self alloc] initWithShape:shape texture:texture rect:rect] autorelease];
 }
 
++ (id) spriteWithShape:(cpShape *)shape spriteFrameName:(NSString*)frameName 
+{
+	return [[[self alloc] initWithShape:shape spriteFrameName:frameName] autorelease];
+}
+
++ (id)spriteWithShape:(cpShape *)shape SpriteFrame:(CCSpriteFrame*)spriteFrame
+{
+	return [[[self alloc] initWithShape:shape spriteFrame:spriteFrame] autorelease];
+}
+
++ (id) spriteWithShape:(cpShape *)shape batchNode:(CCSpriteBatchNode*)batchNode rect:(CGRect)rect
+{
+	return [[[self alloc] initWithShape:shape batchNode:batchNode rect:rect] autorelease];
+}
+
++ (id) spriteWithShape:(cpShape *)shape batchNode:(CCSpriteBatchNode*)batchNode rectInPixels:(CGRect)rect
+{
+	return [[[self alloc] initWithShape:shape batchNode:batchNode rectInPixels:rect] autorelease];
+}
+
 - (id) initWithShape:(cpShape*)shape file:(NSString*) filename
 {
 	[super initWithFile:filename];
@@ -73,6 +93,43 @@
 	
 	return self;
 }
+
+- (id) initWithShape:(cpShape *)shape spriteFrameName:(NSString*)spriteFrameName 
+{	
+	[super initWithSpriteFrameName:spriteFrameName];
+		
+	CPCCNODE_MEM_VARS_INIT(shape)
+	
+	return self;
+}
+
+- (id) initWithShape:(cpShape *)shape spriteFrame:(CCSpriteFrame*)spriteFrame
+{
+	[super initWithSpriteFrame:spriteFrame];
+	
+	CPCCNODE_MEM_VARS_INIT(shape)
+	
+	return self;
+}
+
+-(id) initWithShape:(cpShape *)shape batchNode:(CCSpriteBatchNode*)batchNode rect:(CGRect)rect
+{
+	[super initWithBatchNode:batchNode rect:rect];
+	
+	CPCCNODE_MEM_VARS_INIT(shape)
+	
+	return self;
+}
+
+-(id) initWithShape:(cpShape *)shape batchNode:(CCSpriteBatchNode*)batchNode rectInPixels:(CGRect)rect
+{
+	[super initWithBatchNode:batchNode rectInPixels:rect];
+	
+	CPCCNODE_MEM_VARS_INIT(shape)
+	
+	return self;
+}
+
 
 #define RENDER_IN_SUBPIXEL
 

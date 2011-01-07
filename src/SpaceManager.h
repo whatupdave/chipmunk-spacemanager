@@ -13,17 +13,22 @@
  *
  **********************************************************************/
 
-//Comment this out if you don't want cocos2d support
-//(cleaner to move it to target specific options)
-#define _SPACE_MANAGER_FOR_COCOS2D
+/*
+	ATTENTION! COCOS2D USERS
+ 
+	Large change: Include and use SpaceManagerCocos2d class now found
+	in the ccExtras folder. This design change gives a better seperation
+	and will prove much more flexible in the long run, thanks for
+	understanding.
+ 
+	p.s. You may need to add the ccExtras folder path to your
+	"Header Search Paths" found under your Target Info->Build area.
+ */
 
 // 0x00 HI ME LO
 // 00   00 00 06
 #define SPACE_MANAGER_VERSION 0x00000006
 
-#ifdef _SPACE_MANAGER_FOR_COCOS2D
-#import "cocos2d.h"
-#endif
 #import "chipmunk.h"
 
 //A more definitive sounding define
@@ -72,11 +77,11 @@ typedef enum {
 @interface SpaceManager : NSObject
 {
 	
-@private
+@protected
 	/* our chipmunk space! */
 	cpSpace			*_space;
 	
-	/* Internal devices */
+	/* Internal devices (dev: Consider revamping) */
 	NSMutableArray	*_invocations;
 
 	/* Helpful Shapes/Bodies */
@@ -160,35 +165,17 @@ typedef enum {
 -(id) initWithSpace:(cpSpace*)space;
 
 /*! load a cpSerializer file from a user docs file, delegate can be nil */
-- (BOOL) loadSpaceFromUserDocs:(NSString*)file delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
+-(BOOL) loadSpaceFromUserDocs:(NSString*)file delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
 
 /*! save a cpSerializer file to a user docs file, delegate can be nil */
-- (BOOL) saveSpaceToUserDocs:(NSString*)file delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
+-(BOOL) saveSpaceToUserDocs:(NSString*)file delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
 
 /*! load a cpSerializer file from a file (path), delegate can be nil */
-- (BOOL) loadSpaceFromPath:(NSString*)path delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
+-(BOOL) loadSpaceFromPath:(NSString*)path delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
 
 /*! save a cpSerializer file to a resource file (path), delegate can be nil */
-- (BOOL) saveSpaceToPath:(NSString*)path delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
+-(BOOL) saveSpaceToPath:(NSString*)path delegate:(NSObject<SpaceManagerSerializeDelegate>*)delegate;
 
-#ifdef _SPACE_MANAGER_FOR_COCOS2D
-
-/*! Schedule a timed loop (against step:) using Cocos2d's default dt */
--(void) start;
-
-/*! Schedule a timed loop (against step:) using dt */
--(void) start:(float)dt;
-
-/*! Stop the timed loop */
--(void) stop;
-
-/*! Attach cpShapeNode's and cpConstraintNode's to shapes/constraints that have NULL data fields */
--(CCLayer*) createDebugLayer;
-
-/*! Convenience method for adding a containment rect around the view */
--(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset;
--(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset radius:(cpFloat)radius;
-#endif
 -(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity size:(CGSize)wins inset:(cpVect)inset radius:(cpFloat)radius;
 
 /*! Manually advance time within the space */

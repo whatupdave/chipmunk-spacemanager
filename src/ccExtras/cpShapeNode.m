@@ -119,7 +119,6 @@
 
 - (void) drawCircleShape
 {
-	
 	static const GLfloat circleVAR[] = {
 		0.0000,  1.0000,
 		0.2588,  0.9659,

@@ -28,7 +28,7 @@
 #include "constraints/util.h"
 #include "cpPulleyJoint.h"
 
-const cpFloat cp_min_pulley_len = 0.5f;
+cpFloat cp_min_pulley_len = 0.5f;
 
 // Pulley:
 // length1 = norm(p1 - s1)

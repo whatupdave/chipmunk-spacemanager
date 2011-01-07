@@ -20,9 +20,9 @@
 static void drawCircle(cpVect center, float r, int segs)
 {
 	const float coef = 2.0f * (float)M_PI/segs;
-	float vertices[2*segs];
+	float *vertices = malloc(sizeof(float)*2*segs);
 	
-	for (int i=0;i<=segs;i++)
+	for (int i=0;i<segs;i++)
 	{
 		float rads = i*coef;
 		float j = r * cosf(rads) + center.x;
@@ -34,6 +34,8 @@ static void drawCircle(cpVect center, float r, int segs)
 	
 	glVertexPointer(2, GL_FLOAT, 0, vertices);	
 	glDrawArrays(GL_LINE_LOOP, 0, segs);
+	
+	free(vertices);
 }
 
 @interface cpConstraintNode(PrivateMethods)
@@ -301,7 +303,7 @@ static void drawCircle(cpVect center, float r, int segs)
 		
 	cpVect grv = cpvmult(cpvadd(body_a->p, cpvrotate(joint->r1, body_a->rot)), CC_CONTENT_SCALE_FACTOR());
 	
-	float *groove = malloc(sizeof(float)*6);
+	float groove[6];
 	groove[0] = a.x;
 	groove[1] = a.y;
 	groove[2] = b.x;
@@ -316,8 +318,6 @@ static void drawCircle(cpVect center, float r, int segs)
 	glDrawArrays(GL_LINES, 0, 2);
 		
 	//glDisableClientState(GL_VERTEX_ARRAY);	
-	
-	free(groove);
 }
 
 - (void) drawSpringJoint:(cpDampedSpring*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
