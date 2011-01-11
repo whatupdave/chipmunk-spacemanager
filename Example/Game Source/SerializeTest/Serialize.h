@@ -15,6 +15,7 @@
 }
 
 -(BOOL) aboutToReadShape:(cpShape*)shape shapeId:(long)id;
+-(void) save;
 
 @end
 

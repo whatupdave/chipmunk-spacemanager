@@ -67,7 +67,7 @@
 #else
 	GameLayer *layer = [GameLayer node];
 #endif
-	[game addChild:layer];
+	[game addChild:layer z:0 tag:1];
 	[director runWithScene:game];
 }
 
@@ -84,6 +84,9 @@
 
 -(void) applicationWillResignActive:(UIApplication *)application
 {
+#if SERIALIZE_TEST
+	[(Serialize*)[[[CCDirector sharedDirector] runningScene] getChildByTag:1] save];
+#endif
 	[[CCDirector sharedDirector] pause];
 }
 

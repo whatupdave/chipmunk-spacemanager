@@ -31,6 +31,9 @@
 
 #import "chipmunk.h"
 
+//cp extras
+#import "cpExtras/cpPulleyJoint.h"
+
 //A more definitive sounding define
 #define STATIC_MASS	INFINITY
 
@@ -385,4 +388,14 @@ typedef enum {
 /*! Add a rotary spring to a body */
 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp;
 
+/*! Add a pulley between two bodies and another body which is the actual pulley */
+-(cpConstraint*) addPulleyToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody pulleyBody:(cpBody*)pulleyBody
+					toBodyAnchor:(cpVect)anchor1 fromBodyAnchor:(cpVect)anchor2
+				  toPulleyAnchor:(cpVect)anchor3a fromPulleyAnchor:(cpVect)anchor3b
+						   ratio:(cpFloat)ratio;
+/*! Add a pulley between two bodies */
+-(cpConstraint*) addPulleyToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody
+					toBodyAnchor:(cpVect)anchor1 fromBodyAnchor:(cpVect)anchor2
+				  toPulleyWorldAnchor:(cpVect)anchor3a fromPulleyWorldAnchor:(cpVect)anchor3b
+						   ratio:(cpFloat)ratio;
 @end

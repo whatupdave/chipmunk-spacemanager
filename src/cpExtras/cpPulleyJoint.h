@@ -22,6 +22,13 @@
  * SOFTWARE.
  */
 
+#ifndef CPPULLEYJOINT_H
+#define CPPULLEYJOINT_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 const cpConstraintClass *cpPulleyJointGetClass();
 
 extern cpFloat cp_min_pulley_len;
@@ -87,4 +94,9 @@ cpConstraint *cpPulleyJointNew(cpBody* a, cpBody* b, cpBody* c,
 CP_DefineConstraintProperty(cpPulleyJoint, cpVect, anchr1, Anchr1);
 CP_DefineConstraintProperty(cpPulleyJoint, cpVect, anchr2, Anchr2);
 CP_DefineConstraintProperty(cpPulleyJoint, cpFloat, ratio, Ratio);
-
+	
+#ifdef __cplusplus
+}
+#endif
+				
+#endif //CPPULLEYJOINT_H

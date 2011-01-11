@@ -47,6 +47,7 @@ static void drawCircle(cpVect center, float r, int segs)
 //- (void) drawBreakableJoint:(cpBreakableJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b;
 - (void) drawMotorJoint:(cpSimpleMotor*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b;
 - (void) drawGearJoint:(cpGearJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b;
+- (void) drawPulleyJoint:(cpPulleyJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b;
 
 - (BOOL) containsPoint:(cpVect)pt padding:(cpFloat)padding constraint:(cpConstraint*)constraint;
 @end
@@ -240,6 +241,8 @@ static void drawCircle(cpVect center, float r, int segs)
 		[self drawGearJoint:(cpGearJoint*)_constraint bodyA:body_a bodyB:body_b];
 	else if(klass == cpDampedSpringGetClass())
 		[self drawSpringJoint:(cpDampedSpring *)_constraint bodyA:body_a bodyB:body_b];
+	else if (klass == cpPulleyJointGetClass())
+		[self drawPulleyJoint:(cpPulleyJoint*)_constraint bodyA:body_a bodyB:body_b];
 	
 	if( _opacity != 255 )
 		glBlendFunc(CC_BLEND_SRC, CC_BLEND_DST);
@@ -440,6 +443,23 @@ static void drawCircle(cpVect center, float r, int segs)
 	//glDrawArrays(GL_POINTS, 0, 4);	
 	glDrawArrays(GL_LINES, 0, 4);
 	//glDisableClientState(GL_VERTEX_ARRAY);	
+}
+
+- (void) drawPulleyJoint:(cpPulleyJoint*)joint bodyA:(cpBody*)body_a bodyB:(cpBody*)body_b
+{
+	cpBody *body_c = joint->c;
+	
+	cpVect a = cpBodyLocal2World(body_a, joint->anchr1);
+	cpVect b = cpBodyLocal2World(body_b, joint->anchr2);
+	cpVect c = cpBodyLocal2World(body_c, joint->anchr3a);
+	cpVect d = cpBodyLocal2World(body_c, joint->anchr3b);
+	
+	float array[] = {a.x,a.y,c.x,c.y,b.x,b.y,d.x,d.y};
+	
+	glVertexPointer(2, GL_FLOAT, 0, array);
+	
+	glDrawArrays(GL_POINTS, 0, 4);
+	glDrawArrays(GL_LINES, 0, 4);
 }
 
 @end

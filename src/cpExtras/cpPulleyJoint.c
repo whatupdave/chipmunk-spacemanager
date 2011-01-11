@@ -25,6 +25,7 @@
 #include <stdlib.h>
 
 #include "chipmunk.h"
+//#include "chipmunk_private.h"
 #include "constraints/util.h"
 #include "cpPulleyJoint.h"
 

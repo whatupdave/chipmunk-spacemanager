@@ -2045,6 +2045,7 @@
 					"\"./External Source/external/Chipmunk/include/chipmunk\"",
 				);
 				INFOPLIST_FILE = "Game Resources/Plist/Info copy.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 3.2;
 				PRODUCT_NAME = SerializeTest;
 				PROVISIONING_PROFILE = "CE15A196-6D24-4E6C-AB7B-BD98DB866361";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "CE15A196-6D24-4E6C-AB7B-BD98DB866361";
@@ -2073,6 +2074,7 @@
 					"\"./External Source/external/Chipmunk/include/chipmunk\"",
 				);
 				INFOPLIST_FILE = "Game Resources/Plist/Info copy.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 3.2;
 				PRODUCT_NAME = SerializeTest;
 				SDKROOT = iphoneos4.1;
 			};

@@ -1292,6 +1292,25 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 	return [self addRotarySpringToBody:toBody fromBody:&_space->staticBody restAngle:restAngle stiffness:stiff damping:damp];
 }
 
+-(cpConstraint*) addPulleyToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody pulleyBody:(cpBody*)pulleyBody
+					toBodyAnchor:(cpVect)anchor1 fromBodyAnchor:(cpVect)anchor2
+				  toPulleyAnchor:(cpVect)anchor3a fromPulleyAnchor:(cpVect)anchor3b
+						   ratio:(cpFloat)ratio
+{
+	cpConstraint* pulley = cpPulleyJointNew(toBody, fromBody, pulleyBody, anchor1, anchor2, anchor3a, anchor3b, ratio);
+	return cpSpaceAddConstraint(_space, pulley);
+}
+
+-(cpConstraint*) addPulleyToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody
+					toBodyAnchor:(cpVect)anchor1 fromBodyAnchor:(cpVect)anchor2
+			 toPulleyWorldAnchor:(cpVect)anchor3a fromPulleyWorldAnchor:(cpVect)anchor3b
+						   ratio:(cpFloat)ratio
+{
+	return [self addPulleyToBody:toBody fromBody:fromBody pulleyBody:&_space->staticBody 
+					toBodyAnchor:anchor1 fromBodyAnchor:anchor2
+			 toPulleyAnchor:anchor3a fromPulleyAnchor:anchor3b ratio:ratio];
+}
+
 -(void) addCollisionCallbackBetweenType:(unsigned int)type1 otherType:(unsigned int) type2 target:(id)target selector:(SEL)selector
 {
 	//set up the invocation

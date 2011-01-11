@@ -37,8 +37,13 @@
 - (void) onExit
 {
 	[smgr stop];
-	[smgr saveSpaceToUserDocs:@"cpSerialized.xml" delegate:self];	
+	[self save];
 	[super onExit];
+}
+
+-(void)save
+{
+	[smgr saveSpaceToUserDocs:@"cpSerialized.xml" delegate:self];
 }
 
 - (void) dealloc
