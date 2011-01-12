@@ -247,7 +247,7 @@
 	//[ballSprite applyImpulse:ccpMult(forceVect, 1)];
 	
 	//Lets apply an explosion instead
-	[smgr applyLinearExplosionAt:pt radius:100 maxForce:180];
+	[smgr applyLinearExplosionAt:pt radius:240 maxForce:200];
 }
 
 - (BOOL) handleCollisionWithRect:(CollisionMoment)moment arbiter:(cpArbiter*)arb space:(cpSpace*)space

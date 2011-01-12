@@ -81,6 +81,15 @@
 		cpConstraintNode *pinn = [cpConstraintNode nodeWithConstraint:pin];
 		pinn.color = ccGREEN;
 		[self addChild:pinn];
+		
+		cpCCSprite *three = [balls objectAtIndex:1];
+		cpCCSprite *four = [balls objectAtIndex:10];
+		cpConstraint *pulley = [smgr addPulleyToBody:three.shape->body fromBody:four.shape->body 
+										toBodyAnchor:cpvzero fromBodyAnchor:cpvzero
+									  toPulleyWorldAnchor:cpv(200,270) fromPulleyWorldAnchor:cpv(300,270) ratio:1];
+		cpConstraintNode *pulleyn = [cpConstraintNode nodeWithConstraint:pulley];
+		pulleyn.color = ccORANGE;
+		[self addChild:pulleyn];
 	}
 		
 	//start the manager!

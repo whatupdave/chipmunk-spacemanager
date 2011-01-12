@@ -858,7 +858,6 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 								cpMomentForSegment(mass, cpSegmentShapeGetA(shape), cpSegmentShapeGetB(shape)));
 				break;
 			case CP_POLY_SHAPE:
-				
 				cpBodySetMoment(shape->body,
 								cpMomentForPoly(mass, cpPolyShapeGetNumVerts(shape), ((cpPolyShape*)shape)->verts, cpvzero));
 				break;

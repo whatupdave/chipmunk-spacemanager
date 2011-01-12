@@ -449,10 +449,10 @@ static void drawCircle(cpVect center, float r, int segs)
 {
 	cpBody *body_c = joint->c;
 	
-	cpVect a = cpBodyLocal2World(body_a, joint->anchr1);
-	cpVect b = cpBodyLocal2World(body_b, joint->anchr2);
-	cpVect c = cpBodyLocal2World(body_c, joint->anchr3a);
-	cpVect d = cpBodyLocal2World(body_c, joint->anchr3b);
+	cpVect a = cpvmult(cpBodyLocal2World(body_a, joint->anchr1), CC_CONTENT_SCALE_FACTOR());
+	cpVect b = cpvmult(cpBodyLocal2World(body_b, joint->anchr2), CC_CONTENT_SCALE_FACTOR());
+	cpVect c = cpvmult(cpBodyLocal2World(body_c, joint->anchr3a), CC_CONTENT_SCALE_FACTOR());
+	cpVect d = cpvmult(cpBodyLocal2World(body_c, joint->anchr3b), CC_CONTENT_SCALE_FACTOR());
 	
 	float array[] = {a.x,a.y,c.x,c.y,b.x,b.y,d.x,d.y};
 	
