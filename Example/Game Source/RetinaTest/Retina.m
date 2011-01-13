@@ -15,6 +15,7 @@
 @interface Retina (OtherTests)
 - (void) raycastTest:(CGPoint)ballPos boxPos:(CGPoint)boxPos;
 - (void) shapeQueryTest:(CGPoint)ballPos boxPos:(CGPoint)boxPos;
+- (void) pulleyTest;
 @end
 
 
@@ -58,6 +59,8 @@
 		//// Ray test
 		[self raycastTest:ball.position boxPos:box.position];
 		
+		[self pulleyTest];
+		
 		[self schedule: @selector(step:)];
 	}
 	
@@ -89,6 +92,24 @@
 	NSArray *array = [smgr getShapesAt:ballPos radius:ccpDistance(ballPos, boxPos)];
 	
 	NSAssert([array count] == 2, @"Shape Query did not find ball and box (count: %d)", [array count]);
+}
+
+- (void) pulleyTest
+{
+	cpShape *b1 = [smgr addCircleAt:cpv(190,220) mass:1.0 radius:10];
+	cpCCSprite *three = [cpCCSprite spriteWithShape:b1 file:@"ball.png"];
+	[self addChild:three z:100];		
+	
+	cpShape *b2 = [smgr addCircleAt:cpv(350,220) mass:1.0 radius:10];
+	cpCCSprite *four = [cpCCSprite spriteWithShape:b2 file:@"ball.png"];
+	[self addChild:four z:100];		
+	
+	cpConstraint *pulley = [smgr addPulleyToBody:three.shape->body fromBody:four.shape->body 
+									toBodyAnchor:cpvzero fromBodyAnchor:cpvzero
+							 toPulleyWorldAnchor:cpv(200,270) fromPulleyWorldAnchor:cpv(300,270) ratio:1];
+	cpConstraintNode *pulleyn = [cpConstraintNode nodeWithConstraint:pulley];
+	pulleyn.color = ccORANGE;
+	[self addChild:pulleyn];
 }
 
 -(void) onEnter
