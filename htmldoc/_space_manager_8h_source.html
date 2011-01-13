@@ -12,7 +12,7 @@
   <div class="tabs">
     <ul>
       <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
-      <li><a href="annotated.html"><span>Data&nbsp;Structures</span></a></li>
+      <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
     </ul>
   </div>
@@ -36,280 +36,283 @@
 <a name="l00013"></a>00013 <span class="comment"> *</span>
 <a name="l00014"></a>00014 <span class="comment"> **********************************************************************/</span>
 <a name="l00015"></a>00015 
-<a name="l00016"></a>00016 <span class="comment">//Comment this out if you don&apos;t want cocos2d support</span>
-<a name="l00017"></a>00017 <span class="comment">//(cleaner to move it to target specific options)</span>
-<a name="l00018"></a>00018 <span class="preprocessor">#define _SPACE_MANAGER_FOR_COCOS2D</span>
-<a name="l00019"></a>00019 <span class="preprocessor"></span>
-<a name="l00020"></a>00020 <span class="comment">// 0x00 HI ME LO</span>
-<a name="l00021"></a>00021 <span class="comment">// 00   00 00 04</span>
-<a name="l00022"></a>00022 <span class="preprocessor">#define SPACE_MANAGER_VERSION 0x00000005</span>
-<a name="l00023"></a>00023 <span class="preprocessor"></span>
-<a name="l00024"></a>00024 <span class="preprocessor">#ifdef _SPACE_MANAGER_FOR_COCOS2D</span>
-<a name="l00025"></a>00025 <span class="preprocessor"></span><span class="preprocessor">#import &quot;cocos2d.h&quot;</span>
-<a name="l00026"></a>00026 <span class="preprocessor">#endif</span>
-<a name="l00027"></a>00027 <span class="preprocessor"></span><span class="preprocessor">#import &quot;chipmunk.h&quot;</span>
-<a name="l00028"></a>00028 
-<a name="l00029"></a>00029 <span class="comment">//A more definitive sounding define</span>
-<a name="l00030"></a>00030 <span class="preprocessor">#define STATIC_MASS     INFINITY</span>
+<a name="l00016"></a>00016 <span class="comment">/*</span>
+<a name="l00017"></a>00017 <span class="comment">        ATTENTION! COCOS2D USERS</span>
+<a name="l00018"></a>00018 <span class="comment"> </span>
+<a name="l00019"></a>00019 <span class="comment">        Large change: Include and use SpaceManagerCocos2d class now found</span>
+<a name="l00020"></a>00020 <span class="comment">        in the ccExtras folder. This design change gives a better seperation</span>
+<a name="l00021"></a>00021 <span class="comment">        and will prove much more flexible in the long run, thanks for</span>
+<a name="l00022"></a>00022 <span class="comment">        understanding.</span>
+<a name="l00023"></a>00023 <span class="comment"> </span>
+<a name="l00024"></a>00024 <span class="comment">        p.s. You may need to add the ccExtras folder path to your</span>
+<a name="l00025"></a>00025 <span class="comment">        &quot;Header Search Paths&quot; found under your Target Info-&gt;Build area.</span>
+<a name="l00026"></a>00026 <span class="comment"> */</span>
+<a name="l00027"></a>00027 
+<a name="l00028"></a>00028 <span class="comment">// 0x00 HI ME LO</span>
+<a name="l00029"></a>00029 <span class="comment">// 00   00 00 06</span>
+<a name="l00030"></a>00030 <span class="preprocessor">#define SPACE_MANAGER_VERSION 0x00000006</span>
 <a name="l00031"></a>00031 <span class="preprocessor"></span>
-<a name="l00032"></a>00032 <span class="keywordtype">void</span> defaultEachShape(<span class="keywordtype">void</span> *ptr, <span class="keywordtype">void</span>* data);
+<a name="l00032"></a>00032 <span class="preprocessor">#import &quot;chipmunk.h&quot;</span>
 <a name="l00033"></a>00033 
-<a name="l00035"></a>00035 <span class="keyword">typedef</span> <span class="keyword">enum</span> { 
-<a name="l00036"></a>00036         COLLISION_BEGIN = 1, 
-<a name="l00037"></a>00037         COLLISION_PRESOLVE, 
-<a name="l00038"></a>00038         COLLISION_POSTSOLVE, 
-<a name="l00039"></a>00039         COLLISION_SEPARATE
-<a name="l00040"></a>00040 } CollisionMoment;
+<a name="l00034"></a>00034 <span class="comment">//cp extras</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#import &quot;cpExtras/cpPulleyJoint.h&quot;</span>
+<a name="l00036"></a>00036 
+<a name="l00037"></a>00037 <span class="comment">//A more definitive sounding define</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#define STATIC_MASS     INFINITY</span>
+<a name="l00039"></a>00039 <span class="preprocessor"></span>
+<a name="l00040"></a>00040 <span class="keywordtype">void</span> defaultEachShape(<span class="keywordtype">void</span> *ptr, <span class="keywordtype">void</span>* data);
 <a name="l00041"></a>00041 
-<a name="l00044"></a><a class="code" href="protocolcp_constraint_cleanup_delegate-p.html">00044</a> <span class="keyword">@protocol </span>cpConstraintCleanupDelegate&lt;NSObject&gt;
-<a name="l00045"></a>00045 -(void) aboutToFreeConstraint:(cpConstraint*)constraint;
-<a name="l00046"></a>00046 <span class="keyword">@end</span>
-<a name="l00047"></a>00047 
-<a name="l00056"></a><a class="code" href="protocol_space_manager_serialize_delegate-p.html">00056</a> <span class="keyword">@protocol </span>SpaceManagerSerializeDelegate
-<a name="l00057"></a>00057 <span class="keyword">@optional</span>
-<a name="l00058"></a>00058 -(long) makeShapeId:(cpShape*)shape;
-<a name="l00059"></a>00059 -(long) makeBodyId:(cpBody*)body;
-<a name="l00060"></a>00060 -(long) makeConstraintId:(cpConstraint*)constraint;
-<a name="l00061"></a>00061 
-<a name="l00062"></a>00062 -(BOOL) aboutToWriteShape:(cpShape*)shape shapeId:(<span class="keywordtype">long</span>)id;
-<a name="l00063"></a>00063 -(BOOL) aboutToWriteBody:(cpBody*)body bodyId:(<span class="keywordtype">long</span>)id;
-<a name="l00064"></a>00064 -(BOOL) aboutToWriteConstraint:(cpConstraint*)constraint constraintId:(<span class="keywordtype">long</span>)id;
-<a name="l00065"></a>00065 
-<a name="l00066"></a>00066 -(BOOL) aboutToReadShape:(cpShape*)shape shapeId:(<span class="keywordtype">long</span>)id;
-<a name="l00067"></a>00067 -(BOOL) aboutToReadBody:(cpBody*)body bodyId:(<span class="keywordtype">long</span>)id;
-<a name="l00068"></a>00068 -(BOOL) aboutToReadConstraint:(cpConstraint*)constraint constraintId:(<span class="keywordtype">long</span>)id;
-<a name="l00069"></a>00069 <span class="keyword">@end</span>
-<a name="l00070"></a>00070 
-<a name="l00072"></a><a class="code" href="interface_space_manager.html">00072</a> <span class="keyword">@interface </span><a class="code" href="interface_space_manager.html">SpaceManager</a> : NSObject
-<a name="l00073"></a>00073 {
-<a name="l00074"></a>00074         
-<a name="l00075"></a>00075 <span class="keyword">@private</span>
-<a name="l00076"></a>00076         <span class="comment">/* our chipmunk space! */</span>
-<a name="l00077"></a>00077         cpSpace                 *_space;
-<a name="l00078"></a>00078         
-<a name="l00079"></a>00079         <span class="comment">/* Internal devices */</span>
-<a name="l00080"></a>00080         NSMutableArray  *_invocations;
-<a name="l00081"></a>00081 
-<a name="l00082"></a>00082         <span class="comment">/* Helpful Shapes/Bodies */</span>
-<a name="l00083"></a><a class="code" href="interface_space_manager.html#a6a7b1c52ac0fa4941018aa2dda1fe5a2">00083</a>         cpShape                 *<a class="code" href="interface_space_manager.html#a6a7b1c52ac0fa4941018aa2dda1fe5a2">topWall</a>,*bottomWall,*rightWall,*leftWall;
-<a name="l00084"></a>00084         
-<a name="l00085"></a>00085         cpBody                  *_staticBody;
+<a name="l00043"></a>00043 <span class="keyword">typedef</span> <span class="keyword">enum</span> { 
+<a name="l00044"></a>00044         COLLISION_BEGIN = 1, 
+<a name="l00045"></a>00045         COLLISION_PRESOLVE, 
+<a name="l00046"></a>00046         COLLISION_POSTSOLVE, 
+<a name="l00047"></a>00047         COLLISION_SEPARATE
+<a name="l00048"></a>00048 } CollisionMoment;
+<a name="l00049"></a>00049 
+<a name="l00052"></a><a class="code" href="protocolcp_constraint_cleanup_delegate-p.html">00052</a> <span class="keyword">@protocol </span>cpConstraintCleanupDelegate&lt;NSObject&gt;
+<a name="l00053"></a>00053 -(void) aboutToFreeConstraint:(cpConstraint*)constraint;
+<a name="l00054"></a>00054 <span class="keyword">@end</span>
+<a name="l00055"></a>00055 
+<a name="l00064"></a><a class="code" href="protocol_space_manager_serialize_delegate-p.html">00064</a> <span class="keyword">@protocol </span>SpaceManagerSerializeDelegate
+<a name="l00065"></a>00065 <span class="keyword">@optional</span>
+<a name="l00066"></a>00066 -(long) makeShapeId:(cpShape*)shape;
+<a name="l00067"></a>00067 -(long) makeBodyId:(cpBody*)body;
+<a name="l00068"></a>00068 -(long) makeConstraintId:(cpConstraint*)constraint;
+<a name="l00069"></a>00069 
+<a name="l00070"></a>00070 -(BOOL) aboutToWriteShape:(cpShape*)shape shapeId:(<span class="keywordtype">long</span>)id;
+<a name="l00071"></a>00071 -(BOOL) aboutToWriteBody:(cpBody*)body bodyId:(<span class="keywordtype">long</span>)id;
+<a name="l00072"></a>00072 -(BOOL) aboutToWriteConstraint:(cpConstraint*)constraint constraintId:(<span class="keywordtype">long</span>)id;
+<a name="l00073"></a>00073 
+<a name="l00074"></a>00074 -(BOOL) aboutToReadShape:(cpShape*)shape shapeId:(<span class="keywordtype">long</span>)id;
+<a name="l00075"></a>00075 -(BOOL) aboutToReadBody:(cpBody*)body bodyId:(<span class="keywordtype">long</span>)id;
+<a name="l00076"></a>00076 -(BOOL) aboutToReadConstraint:(cpConstraint*)constraint constraintId:(<span class="keywordtype">long</span>)id;
+<a name="l00077"></a>00077 <span class="keyword">@end</span>
+<a name="l00078"></a>00078 
+<a name="l00080"></a><a class="code" href="interface_space_manager.html">00080</a> <span class="keyword">@interface </span><a class="code" href="interface_space_manager.html">SpaceManager</a> : NSObject
+<a name="l00081"></a>00081 {
+<a name="l00082"></a>00082         
+<a name="l00083"></a>00083 <span class="keyword">@protected</span>
+<a name="l00084"></a>00084         <span class="comment">/* our chipmunk space! */</span>
+<a name="l00085"></a>00085         cpSpace                 *_space;
 <a name="l00086"></a>00086         
-<a name="l00087"></a>00087         <span class="comment">/* Number of steps (across dt) perform on each step call */</span>
-<a name="l00088"></a>00088         <span class="keywordtype">int</span>             _steps;
-<a name="l00089"></a>00089         
-<a name="l00090"></a>00090         <span class="comment">/* The dt used last within step */</span>
-<a name="l00091"></a>00091         cpFloat _lastDt;
+<a name="l00087"></a>00087         <span class="comment">/* Internal devices (dev: Consider revamping) */</span>
+<a name="l00088"></a>00088         NSMutableArray  *_invocations;
+<a name="l00089"></a>00089 
+<a name="l00090"></a>00090         <span class="comment">/* Helpful Shapes/Bodies */</span>
+<a name="l00091"></a><a class="code" href="interface_space_manager.html#adc21c34da440076e273517a26d8b5018">00091</a>         cpShape                 *<a class="code" href="interface_space_manager.html#adc21c34da440076e273517a26d8b5018">topWall</a>,*bottomWall,*rightWall,*leftWall;
 <a name="l00092"></a>00092         
-<a name="l00093"></a>00093         <span class="comment">/* If constant dt used, then this accumulates left over */</span>
-<a name="l00094"></a>00094         cpFloat _timeAccumulator;
+<a name="l00093"></a>00093         <span class="comment">/* Number of steps (across dt) perform on each step call */</span>
+<a name="l00094"></a>00094         <span class="keywordtype">int</span>             _steps;
 <a name="l00095"></a>00095         
-<a name="l00096"></a>00096         <span class="comment">/* hack to fix rehashing one static */</span>
-<a name="l00097"></a>00097         BOOL _rehashNextStep;
+<a name="l00096"></a>00096         <span class="comment">/* The dt used last within step */</span>
+<a name="l00097"></a>00097         cpFloat _lastDt;
 <a name="l00098"></a>00098         
-<a name="l00099"></a>00099         <span class="comment">/* Options:</span>
-<a name="l00100"></a>00100 <span class="comment">                -cleanupBodyDependencies will also free contraints connected to a free&apos;d shape</span>
-<a name="l00101"></a>00101 <span class="comment">                -constraintCleanupDelegate is the delegate that will be called when the above variable is true</span>
-<a name="l00102"></a>00102 <span class="comment">                -iterateStatic will call _iterateFunc on static shapes</span>
-<a name="l00103"></a>00103 <span class="comment">                -rehashStaticEveryStep will rehash static shapes at the end of every step</span>
-<a name="l00104"></a>00104 <span class="comment">                -iterateFunc; default will update cocosnodes for pos and rotation</span>
-<a name="l00105"></a>00105 <span class="comment">                -constantDt; set this to a non-zero number to always step the simulation with that dt</span>
-<a name="l00106"></a>00106 <span class="comment">        */</span>
-<a name="l00107"></a>00107         BOOL                                                    _cleanupBodyDependencies;
-<a name="l00108"></a>00108         id&lt;cpConstraintCleanupDelegate&gt; _constraintCleanupDelegate;
-<a name="l00109"></a>00109         BOOL                                                    _iterateStatic;
-<a name="l00110"></a>00110         BOOL                                                    _rehashStaticEveryStep;
-<a name="l00111"></a>00111         cpSpaceHashIterator                             _iterateFunc;
-<a name="l00112"></a>00112         cpFloat                                                 _constantDt;
-<a name="l00113"></a>00113 }
-<a name="l00114"></a>00114 
-<a name="l00116"></a><a class="code" href="interface_space_manager.html#a1fb5a8642a2d62049f7ac1e5dd4cd50a">00116</a> @property (readonly) cpSpace* space;
-<a name="l00117"></a>00117 
-<a name="l00119"></a>00119 @property (readwrite, assign) cpShape *topWall,*bottomWall,*rightWall,*leftWall;
-<a name="l00120"></a>00120  
-<a name="l00122"></a><a class="code" href="interface_space_manager.html#ab4ae7205573977222eadd0795db193e2">00122</a> @property (readwrite, assign) <span class="keywordtype">int</span> steps;
+<a name="l00099"></a>00099         <span class="comment">/* If constant dt used, then this accumulates left over */</span>
+<a name="l00100"></a>00100         cpFloat _timeAccumulator;
+<a name="l00101"></a>00101         
+<a name="l00102"></a>00102         <span class="comment">/* hack to fix rehashing one static */</span>
+<a name="l00103"></a>00103         BOOL _rehashNextStep;
+<a name="l00104"></a>00104         
+<a name="l00105"></a>00105         <span class="comment">/* Options:</span>
+<a name="l00106"></a>00106 <span class="comment">                -cleanupBodyDependencies will also free contraints connected to a free&apos;d shape</span>
+<a name="l00107"></a>00107 <span class="comment">                -constraintCleanupDelegate is the delegate that will be called when the above variable is true</span>
+<a name="l00108"></a>00108 <span class="comment">                -iterateStatic will call _iterateFunc on static shapes</span>
+<a name="l00109"></a>00109 <span class="comment">                -rehashStaticEveryStep will rehash static shapes at the end of every step</span>
+<a name="l00110"></a>00110 <span class="comment">                -iterateFunc; default will update cocosnodes for pos and rotation</span>
+<a name="l00111"></a>00111 <span class="comment">                -constantDt; set this to a non-zero number to always step the simulation with that dt</span>
+<a name="l00112"></a>00112 <span class="comment">        */</span>
+<a name="l00113"></a>00113         BOOL                                                    _cleanupBodyDependencies;
+<a name="l00114"></a>00114         id&lt;cpConstraintCleanupDelegate&gt; _constraintCleanupDelegate;
+<a name="l00115"></a>00115         BOOL                                                    _iterateStatic;
+<a name="l00116"></a>00116         BOOL                                                    _rehashStaticEveryStep;
+<a name="l00117"></a>00117         cpSpaceHashIterator                             _iterateFunc;
+<a name="l00118"></a>00118         cpFloat                                                 _constantDt;
+<a name="l00119"></a>00119 }
+<a name="l00120"></a>00120 
+<a name="l00122"></a><a class="code" href="interface_space_manager.html#a5f359884d473e925851d3e8e4f37313e">00122</a> @property (readonly) cpSpace* space;
 <a name="l00123"></a>00123 
-<a name="l00125"></a><a class="code" href="interface_space_manager.html#a26627b829be1e9bf2642192d437aea4d">00125</a> @property (readonly) cpFloat lastDt;
-<a name="l00126"></a>00126 
-<a name="l00128"></a><a class="code" href="interface_space_manager.html#a27ff7a3ad379646300bf78ddbc4c21a5">00128</a> @property (readwrite, assign) cpVect gravity;
+<a name="l00125"></a>00125 @property (readwrite, assign) cpShape *topWall,*bottomWall,*rightWall,*leftWall;
+<a name="l00126"></a>00126  
+<a name="l00128"></a><a class="code" href="interface_space_manager.html#a6e410d7ff783651e6b9efc0a857976db">00128</a> @property (readwrite, assign) <span class="keywordtype">int</span> steps;
 <a name="l00129"></a>00129 
-<a name="l00131"></a><a class="code" href="interface_space_manager.html#a9f0c103e7c34cf9a687ed8aaf3a4f08a">00131</a> @property (readwrite, assign) cpFloat damping;
+<a name="l00131"></a><a class="code" href="interface_space_manager.html#abe4e900dfacd8d1a1d48443b2ea1edb9">00131</a> @property (readonly) cpFloat lastDt;
 <a name="l00132"></a>00132 
-<a name="l00134"></a><a class="code" href="interface_space_manager.html#ac6f12141c75548051464d1d23a03b052">00134</a> @property (readwrite, assign) BOOL iterateStatic;
+<a name="l00134"></a><a class="code" href="interface_space_manager.html#af143216370385ebe7ab5a9ad72eb1116">00134</a> @property (readwrite, assign) cpVect gravity;
 <a name="l00135"></a>00135 
-<a name="l00137"></a><a class="code" href="interface_space_manager.html#a3009126f90ebeb93d13152fc52a263e3">00137</a> @property (readwrite, assign) BOOL rehashStaticEveryStep;
+<a name="l00137"></a><a class="code" href="interface_space_manager.html#a92c000bbf56f5154015779faf0ae7b18">00137</a> @property (readwrite, assign) cpFloat damping;
 <a name="l00138"></a>00138 
-<a name="l00140"></a><a class="code" href="interface_space_manager.html#a98aa7b92f3aef63a985a43e8dff644eb">00140</a> @property (readwrite, assign) cpSpaceHashIterator iterateFunc;
+<a name="l00140"></a><a class="code" href="interface_space_manager.html#a5549fc3fe442279cce4dae120610ff39">00140</a> @property (readwrite, assign) BOOL iterateStatic;
 <a name="l00141"></a>00141 
-<a name="l00143"></a><a class="code" href="interface_space_manager.html#af8be3374868aaef6304a8fb9ddac2719">00143</a> @property (readonly) cpBody *staticBody;
+<a name="l00143"></a><a class="code" href="interface_space_manager.html#a55aa7b95d7ca1c941acb7def6eadedfe">00143</a> @property (readwrite, assign) BOOL rehashStaticEveryStep;
 <a name="l00144"></a>00144 
-<a name="l00147"></a><a class="code" href="interface_space_manager.html#ad0c509e8f4370c9537e1534ae8fc29fb">00147</a> @property (readwrite, assign) cpFloat constantDt;
-<a name="l00148"></a>00148 
-<a name="l00150"></a><a class="code" href="interface_space_manager.html#abfbbe75698bd7ec523f6127f158e170f">00150</a> @property (readwrite, assign) BOOL cleanupBodyDependencies;
-<a name="l00151"></a>00151 
-<a name="l00153"></a><a class="code" href="interface_space_manager.html#a49e471c95cecfa125aa93ab1663f1019">00153</a> @property (readwrite, retain) <span class="keywordtype">id</span>&lt;cpConstraintCleanupDelegate&gt; constraintCleanupDelegate;
+<a name="l00146"></a><a class="code" href="interface_space_manager.html#a5e8937bed8a5856ac424cd5790c98c23">00146</a> @property (readwrite, assign) cpSpaceHashIterator iterateFunc;
+<a name="l00147"></a>00147 
+<a name="l00149"></a><a class="code" href="interface_space_manager.html#a87615c84b4b3c1a1b9e30366f6fc98ff">00149</a> @property (readonly) cpBody *staticBody;
+<a name="l00150"></a>00150 
+<a name="l00153"></a><a class="code" href="interface_space_manager.html#acb26d8360ee6f829c01ad4a23e25f579">00153</a> @property (readwrite, assign) cpFloat constantDt;
 <a name="l00154"></a>00154 
-<a name="l00159"></a>00159 -(<span class="keywordtype">id</span>) initWithSize:(<span class="keywordtype">int</span>)size count:(<span class="keywordtype">int</span>)count;
+<a name="l00156"></a><a class="code" href="interface_space_manager.html#a62b65b7e4410b236a2e93f35b1847446">00156</a> @property (readwrite, assign) BOOL cleanupBodyDependencies;
+<a name="l00157"></a>00157 
+<a name="l00159"></a><a class="code" href="interface_space_manager.html#a66488206fecdf7b496c6382abfe3d3bd">00159</a> @property (readwrite, retain) <span class="keywordtype">id</span>&lt;cpConstraintCleanupDelegate&gt; constraintCleanupDelegate;
 <a name="l00160"></a>00160 
-<a name="l00161"></a>00161 <span class="comment">/* initialization method that takes a precreated space */</span>
-<a name="l00162"></a>00162 -(<span class="keywordtype">id</span>) initWithSpace:(cpSpace*)space;
-<a name="l00163"></a>00163 
-<a name="l00165"></a>00165 - (BOOL) loadSpaceFromUserDocs:(NSString*)file delegate:(NSObject&lt;SpaceManagerSerializeDelegate&gt;*)delegate;
+<a name="l00165"></a>00165 -(<span class="keywordtype">id</span>) initWithSize:(<span class="keywordtype">int</span>)size count:(<span class="keywordtype">int</span>)count;
 <a name="l00166"></a>00166 
-<a name="l00168"></a>00168 - (BOOL) saveSpaceToUserDocs:(NSString*)file delegate:(NSObject&lt;SpaceManagerSerializeDelegate&gt;*)delegate;
+<a name="l00167"></a>00167 <span class="comment">/* initialization method that takes a precreated space */</span>
+<a name="l00168"></a>00168 -(<span class="keywordtype">id</span>) initWithSpace:(cpSpace*)space;
 <a name="l00169"></a>00169 
-<a name="l00171"></a>00171 - (BOOL) loadSpaceFromPath:(NSString*)path delegate:(NSObject&lt;SpaceManagerSerializeDelegate&gt;*)delegate;
+<a name="l00171"></a>00171 -(BOOL) loadSpaceFromUserDocs:(NSString*)file delegate:(NSObject&lt;SpaceManagerSerializeDelegate&gt;*)delegate;
 <a name="l00172"></a>00172 
-<a name="l00174"></a>00174 - (BOOL) saveSpaceToPath:(NSString*)path delegate:(NSObject&lt;SpaceManagerSerializeDelegate&gt;*)delegate;
+<a name="l00174"></a>00174 -(BOOL) saveSpaceToUserDocs:(NSString*)file delegate:(NSObject&lt;SpaceManagerSerializeDelegate&gt;*)delegate;
 <a name="l00175"></a>00175 
-<a name="l00176"></a>00176 <span class="preprocessor">#ifdef _SPACE_MANAGER_FOR_COCOS2D</span>
-<a name="l00177"></a>00177 <span class="preprocessor"></span>
-<a name="l00179"></a>00179 -(void) start;
-<a name="l00180"></a>00180 
-<a name="l00182"></a>00182 -(void) start:(<span class="keywordtype">float</span>)dt;
+<a name="l00177"></a>00177 -(BOOL) loadSpaceFromPath:(NSString*)path delegate:(NSObject&lt;SpaceManagerSerializeDelegate&gt;*)delegate;
+<a name="l00178"></a>00178 
+<a name="l00180"></a>00180 -(BOOL) saveSpaceToPath:(NSString*)path delegate:(NSObject&lt;SpaceManagerSerializeDelegate&gt;*)delegate;
+<a name="l00181"></a>00181 
+<a name="l00182"></a>00182 -(<span class="keywordtype">void</span>) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity size:(CGSize)wins inset:(cpVect)inset radius:(cpFloat)radius;
 <a name="l00183"></a>00183 
-<a name="l00185"></a>00185 -(void) stop;
+<a name="l00185"></a>00185 -(<span class="keywordtype">void</span>) step: (cpFloat) delta;
 <a name="l00186"></a>00186 
-<a name="l00188"></a>00188 -(CCLayer*) createDebugLayer;
+<a name="l00188"></a>00188 -(cpShape*) addCircleAt:(cpVect)pos mass:(cpFloat)mass radius:(cpFloat)radius;
 <a name="l00189"></a>00189 
-<a name="l00191"></a>00191 -(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset;
-<a name="l00192"></a>00192 -(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity inset:(cpVect)inset radius:(cpFloat)radius;
-<a name="l00193"></a>00193 <span class="preprocessor">#endif</span>
-<a name="l00194"></a>00194 <span class="preprocessor"></span>-(void) addWindowContainmentWithFriction:(cpFloat)friction elasticity:(cpFloat)elasticity size:(CGSize)wins inset:(cpVect)inset radius:(cpFloat)radius;
+<a name="l00191"></a>00191 -(cpShape*) addRectAt:(cpVect)pos mass:(cpFloat)mass width:(cpFloat)width height:(cpFloat)height rotation:(cpFloat)r;
+<a name="l00192"></a>00192 
+<a name="l00194"></a>00194 -(cpShape*) addPolyAt:(cpVect)pos mass:(cpFloat)mass rotation:(cpFloat)r numPoints:(<span class="keywordtype">int</span>)numPoints points:(cpVect)pt, ... ;
 <a name="l00195"></a>00195 
-<a name="l00197"></a>00197 -(void) step: (cpFloat) delta;
+<a name="l00196"></a>00196 <span class="comment">/* add a segment shape using world coordinates */</span>
+<a name="l00197"></a>00197 -(cpShape*) addSegmentAtWorldAnchor:(cpVect)fromPos toWorldAnchor:(cpVect)toPos mass:(cpFloat)mass radius:(cpFloat)radius;
 <a name="l00198"></a>00198 
-<a name="l00200"></a>00200 -(cpShape*) addCircleAt:(cpVect)pos mass:(cpFloat)mass radius:(cpFloat)radius;
+<a name="l00199"></a>00199 <span class="comment">/* add a segment shape using local coordinates */</span>
+<a name="l00200"></a>00200 -(cpShape*) addSegmentAt:(cpVect)pos fromLocalAnchor:(cpVect)fromPos toLocalAnchor:(cpVect)toPos mass:(cpFloat)mass radius:(cpFloat)radius;
 <a name="l00201"></a>00201 
-<a name="l00203"></a>00203 -(cpShape*) addRectAt:(cpVect)pos mass:(cpFloat)mass width:(cpFloat)width height:(cpFloat)height rotation:(cpFloat)r;
+<a name="l00203"></a>00203 -(cpShape*) getShapeAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group;
 <a name="l00204"></a>00204 
-<a name="l00206"></a>00206 -(cpShape*) addPolyAt:(cpVect)pos mass:(cpFloat)mass rotation:(cpFloat)r numPoints:(<span class="keywordtype">int</span>)numPoints points:(cpVect)pt, ... ;
+<a name="l00206"></a>00206 -(cpShape*) getShapeAt:(cpVect)pos;
 <a name="l00207"></a>00207 
-<a name="l00208"></a>00208 <span class="comment">/* add a segment shape using world coordinates */</span>
-<a name="l00209"></a>00209 -(cpShape*) addSegmentAtWorldAnchor:(cpVect)fromPos toWorldAnchor:(cpVect)toPos mass:(cpFloat)mass radius:(cpFloat)radius;
+<a name="l00209"></a>00209 -(<span class="keywordtype">void</span>) rehashActiveShapes;
 <a name="l00210"></a>00210 
-<a name="l00211"></a>00211 <span class="comment">/* add a segment shape using local coordinates */</span>
-<a name="l00212"></a>00212 -(cpShape*) addSegmentAt:(cpVect)pos fromLocalAnchor:(cpVect)fromPos toLocalAnchor:(cpVect)toPos mass:(cpFloat)mass radius:(cpFloat)radius;
+<a name="l00212"></a>00212 -(<span class="keywordtype">void</span>) rehashStaticShapes;
 <a name="l00213"></a>00213 
-<a name="l00215"></a>00215 -(cpShape*) getShapeAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group;
+<a name="l00215"></a>00215 -(<span class="keywordtype">void</span>) rehashShape:(cpShape*)shape;
 <a name="l00216"></a>00216 
-<a name="l00218"></a>00218 -(cpShape*) getShapeAt:(cpVect)pos;
-<a name="l00219"></a>00219 
-<a name="l00221"></a>00221 -(void) rehashActiveShapes;
-<a name="l00222"></a>00222 
-<a name="l00224"></a>00224 -(void) rehashStaticShapes;
-<a name="l00225"></a>00225 
-<a name="l00227"></a>00227 -(void) rehashStaticShape:(cpShape*)shape;
-<a name="l00228"></a>00228 
-<a name="l00230"></a>00230 -(NSArray*) getShapesAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group;
-<a name="l00232"></a>00232 -(NSArray*) getShapesAt:(cpVect)pos;
-<a name="l00233"></a>00233 
-<a name="l00235"></a>00235 -(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
-<a name="l00237"></a>00237 -(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end;
-<a name="l00238"></a>00238 
-<a name="l00240"></a>00240 -(cpSegmentQueryInfo) getInfoFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
-<a name="l00242"></a>00242 -(cpSegmentQueryInfo) getInfoFromRayCastSegment:(cpVect)start end:(cpVect)end;
-<a name="l00243"></a>00243 
-<a name="l00245"></a>00245 -(NSArray*) getShapesFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
-<a name="l00247"></a>00247 -(NSArray*) getShapesFromRayCastSegment:(cpVect)start end:(cpVect)end;
-<a name="l00248"></a>00248 
-<a name="l00250"></a>00250 -(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
-<a name="l00252"></a>00252 -(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end;
-<a name="l00253"></a>00253 
-<a name="l00255"></a>00255 -(BOOL) isPersistentContactOnShape:(cpShape*)shape contactShape:(cpShape*)shape2;
-<a name="l00256"></a>00256 
-<a name="l00258"></a>00258 -(cpArbiter*) persistentContactInfoOnShape:(cpShape*)shape;
-<a name="l00259"></a>00259 
-<a name="l00262"></a>00262 -(cpShape*) persistentContactOnShape:(cpShape*)shape;
-<a name="l00263"></a>00263 
-<a name="l00265"></a>00265 -(NSArray*) getConstraints;
-<a name="l00266"></a>00266 
-<a name="l00268"></a>00268 -(NSArray*) getConstraintsOnBody:(cpBody*)body;
-<a name="l00269"></a>00269 
-<a name="l00271"></a>00271 -(void) scheduleToRemoveAndFreeShape:(cpShape*)shape;
-<a name="l00272"></a>00272 
-<a name="l00274"></a>00274 -(void) removeAndFreeShape:(cpShape*)shape;
-<a name="l00275"></a>00275 
-<a name="l00277"></a>00277 -(void) scheduleToRemoveShape:(cpShape*)shape;
-<a name="l00278"></a>00278 
-<a name="l00280"></a>00280 -(cpShape*) removeShape:(cpShape*)shape;
-<a name="l00281"></a>00281 
-<a name="l00283"></a>00283 -(void) addShape:(cpShape*)shape;
-<a name="l00284"></a>00284 
-<a name="l00286"></a>00286 -(cpShape*) morphShapeToStatic:(cpShape*)shape;
-<a name="l00287"></a>00287 
-<a name="l00289"></a>00289 -(cpShape*) morphShapeToActive:(cpShape*)shape mass:(cpFloat)mass;
+<a name="l00218"></a>00218 -(NSArray*) getShapesAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group;
+<a name="l00220"></a>00220 -(NSArray*) getShapesAt:(cpVect)pos;
+<a name="l00221"></a>00221 
+<a name="l00223"></a>00223 -(NSArray*) getShapesAt:(cpVect)pos radius:(<span class="keywordtype">float</span>)radius layers:(cpLayers)layers group:(cpLayers)group;
+<a name="l00225"></a>00225 -(NSArray*) getShapesAt:(cpVect)pos radius:(<span class="keywordtype">float</span>)radius;
+<a name="l00226"></a>00226 
+<a name="l00228"></a>00228 -(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
+<a name="l00230"></a>00230 -(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end;
+<a name="l00231"></a>00231 
+<a name="l00233"></a>00233 -(cpSegmentQueryInfo) getInfoFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
+<a name="l00235"></a>00235 -(cpSegmentQueryInfo) getInfoFromRayCastSegment:(cpVect)start end:(cpVect)end;
+<a name="l00236"></a>00236 
+<a name="l00238"></a>00238 -(NSArray*) getShapesFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
+<a name="l00240"></a>00240 -(NSArray*) getShapesFromRayCastSegment:(cpVect)start end:(cpVect)end;
+<a name="l00241"></a>00241 
+<a name="l00243"></a>00243 -(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;
+<a name="l00245"></a>00245 -(NSArray*) getInfosFromRayCastSegment:(cpVect)start end:(cpVect)end;
+<a name="l00246"></a>00246 
+<a name="l00248"></a>00248 -(<span class="keywordtype">void</span>) applyLinearExplosionAt:(cpVect)at radius:(cpFloat)radius maxForce:(cpFloat)maxForce;
+<a name="l00250"></a>00250 -(<span class="keywordtype">void</span>) applyLinearExplosionAt:(cpVect)at radius:(cpFloat)radius maxForce:(cpFloat)maxForce layers:(cpLayers)layers group:(cpGroup)group;
+<a name="l00251"></a>00251 
+<a name="l00253"></a>00253 -(BOOL) isPersistentContactOnShape:(cpShape*)shape contactShape:(cpShape*)shape2;
+<a name="l00254"></a>00254 
+<a name="l00256"></a>00256 -(cpArbiter*) persistentContactInfoOnShape:(cpShape*)shape;
+<a name="l00257"></a>00257 
+<a name="l00260"></a>00260 -(cpShape*) persistentContactOnShape:(cpShape*)shape;
+<a name="l00261"></a>00261 
+<a name="l00263"></a>00263 -(NSArray*) getConstraints;
+<a name="l00264"></a>00264 
+<a name="l00266"></a>00266 -(NSArray*) getConstraintsOnBody:(cpBody*)body;
+<a name="l00267"></a>00267 
+<a name="l00269"></a>00269 -(<span class="keywordtype">void</span>) removeAndFreeShape:(cpShape*)shape;
+<a name="l00270"></a>00270 
+<a name="l00272"></a>00272 -(cpShape*) removeShape:(cpShape*)shape;
+<a name="l00273"></a>00273 
+<a name="l00275"></a>00275 -(<span class="keywordtype">void</span>) addShape:(cpShape*)shape;
+<a name="l00276"></a>00276 
+<a name="l00278"></a>00278 -(cpShape*) morphShapeToStatic:(cpShape*)shape;
+<a name="l00279"></a>00279 
+<a name="l00281"></a>00281 -(cpShape*) morphShapeToActive:(cpShape*)shape mass:(cpFloat)mass;
+<a name="l00282"></a>00282 
+<a name="l00284"></a>00284 -(cpShape*) morphShapeToKinematic:(cpShape*)shape;
+<a name="l00285"></a>00285 
+<a name="l00289"></a>00289 -(NSArray*) fragmentShape:(cpShape*)shape piecesNum:(<span class="keywordtype">int</span>)pieces eachMass:(<span class="keywordtype">float</span>)mass;
 <a name="l00290"></a>00290 
-<a name="l00292"></a>00292 -(cpShape*) morphShapeToKinematic:(cpShape*)shape;
-<a name="l00293"></a>00293 
-<a name="l00297"></a>00297 -(NSArray*) fragmentShape:(cpShape*)shape piecesNum:(<span class="keywordtype">int</span>)pieces eachMass:(<span class="keywordtype">float</span>)mass;
-<a name="l00298"></a>00298 
-<a name="l00302"></a>00302 -(NSArray*) fragmentRect:(cpPolyShape*)poly rowPiecesNum:(<span class="keywordtype">int</span>)rows colPiecesNum:(<span class="keywordtype">int</span>)cols eachMass:(<span class="keywordtype">float</span>)mass;
-<a name="l00303"></a>00303 
-<a name="l00307"></a>00307 -(NSArray*) fragmentCircle:(cpCircleShape*)circle piecesNum:(<span class="keywordtype">int</span>)pieces eachMass:(<span class="keywordtype">float</span>)mass;
+<a name="l00294"></a>00294 -(NSArray*) fragmentRect:(cpPolyShape*)poly rowPiecesNum:(<span class="keywordtype">int</span>)rows colPiecesNum:(<span class="keywordtype">int</span>)cols eachMass:(<span class="keywordtype">float</span>)mass;
+<a name="l00295"></a>00295 
+<a name="l00299"></a>00299 -(NSArray*) fragmentCircle:(cpCircleShape*)circle piecesNum:(<span class="keywordtype">int</span>)pieces eachMass:(<span class="keywordtype">float</span>)mass;
+<a name="l00300"></a>00300 
+<a name="l00304"></a>00304 -(NSArray*) fragmentSegment:(cpSegmentShape*)segment piecesNum:(<span class="keywordtype">int</span>)pieces eachMass:(<span class="keywordtype">float</span>)mass;
+<a name="l00305"></a>00305 
+<a name="l00307"></a>00307 -(<span class="keywordtype">void</span>) combineShapes:(cpShape*)shape, ... NS_REQUIRES_NIL_TERMINATION;
 <a name="l00308"></a>00308 
-<a name="l00312"></a>00312 -(NSArray*) fragmentSegment:(cpSegmentShape*)segment piecesNum:(<span class="keywordtype">int</span>)pieces eachMass:(<span class="keywordtype">float</span>)mass;
-<a name="l00313"></a>00313 
-<a name="l00315"></a>00315 -(void) combineShapes:(cpShape*)shape, ... NS_REQUIRES_NIL_TERMINATION;
-<a name="l00316"></a>00316 
-<a name="l00318"></a>00318 -(void) offsetShape:(cpShape*)shape offset:(cpVect)offset;
-<a name="l00319"></a>00319 
-<a name="l00321"></a>00321 -(void) ignoreCollionBetweenType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type1 otherType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type2;
-<a name="l00322"></a>00322 
-<a name="l00324"></a>00324 -(void) addCollisionCallbackBetweenType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type1 otherType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type2 target:(<span class="keywordtype">id</span>)target selector:(<span class="keywordtype">SEL</span>)selector;
-<a name="l00325"></a>00325 
-<a name="l00327"></a>00327 -(void) addCollisionCallbackBetweenType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type1 
-<a name="l00328"></a>00328                                                           otherType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type2 
-<a name="l00329"></a>00329                                                                  target:(<span class="keywordtype">id</span>)target 
-<a name="l00330"></a>00330                                                            selector:(<span class="keywordtype">SEL</span>)selector
-<a name="l00331"></a>00331                                                                 moments:(CollisionMoment)moment, ... NS_REQUIRES_NIL_TERMINATION;
-<a name="l00332"></a>00332 
-<a name="l00334"></a>00334 -(void) removeCollisionCallbackBetweenType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type1 otherType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type2;
-<a name="l00335"></a>00335 
-<a name="l00337"></a>00337 -(cpConstraint*) removeConstraint:(cpConstraint*)constraint;
-<a name="l00338"></a>00338 
-<a name="l00340"></a>00340 -(void) removeAndFreeConstraint:(cpConstraint*)constraint;
-<a name="l00341"></a>00341 
-<a name="l00343"></a>00343 -(void) removeAndFreeConstraintsOnBody:(cpBody*)body;
-<a name="l00344"></a>00344 
-<a name="l00346"></a>00346 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2 restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp;
-<a name="l00348"></a>00348 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp;
-<a name="l00350"></a>00350 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody stiffness:(cpFloat)stiff;
-<a name="l00351"></a>00351 
-<a name="l00353"></a>00353 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveAnchor1:(cpVect)groove1 grooveAnchor2:(cpVect)groove2 fromBodyAnchor:(cpVect)anchor2;
-<a name="l00355"></a>00355 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveLength:(cpFloat)length isHorizontal:(<span class="keywordtype">bool</span>)horiz fromBodyAnchor:(cpVect)anchor2;
-<a name="l00357"></a>00357 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveLength:(cpFloat)length isHorizontal:(<span class="keywordtype">bool</span>)horiz;
-<a name="l00358"></a>00358 
-<a name="l00360"></a>00360 -(cpConstraint*) addSlideToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2 minLength:(cpFloat)min maxLength:(cpFloat)max;
-<a name="l00362"></a>00362 -(cpConstraint*) addSlideToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody minLength:(cpFloat)min maxLength:(cpFloat)max;
-<a name="l00363"></a>00363 
-<a name="l00365"></a>00365 -(cpConstraint*) addPinToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2;
-<a name="l00367"></a>00367 -(cpConstraint*) addPinToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody;
-<a name="l00368"></a>00368 
-<a name="l00370"></a>00370 -(cpConstraint*) addPivotToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2;
-<a name="l00372"></a>00372 -(cpConstraint*) addPivotToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody worldAnchor:(cpVect)anchr;
-<a name="l00374"></a>00374 -(cpConstraint*) addPivotToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody;
-<a name="l00375"></a>00375 
-<a name="l00377"></a>00377 -(cpConstraint*) addMotorToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody rate:(cpFloat)rate;
-<a name="l00379"></a>00379 -(cpConstraint*) addMotorToBody:(cpBody*)toBody rate:(cpFloat)rate;
+<a name="l00310"></a>00310 -(<span class="keywordtype">void</span>) offsetShape:(cpShape*)shape offset:(cpVect)offset;
+<a name="l00311"></a>00311 
+<a name="l00313"></a>00313 -(<span class="keywordtype">void</span>) ignoreCollionBetweenType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type1 otherType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type2;
+<a name="l00314"></a>00314 
+<a name="l00316"></a>00316 -(<span class="keywordtype">void</span>) addCollisionCallbackBetweenType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type1 otherType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type2 target:(<span class="keywordtype">id</span>)target selector:(<span class="keywordtype">SEL</span>)selector;
+<a name="l00317"></a>00317 
+<a name="l00319"></a>00319 -(<span class="keywordtype">void</span>) addCollisionCallbackBetweenType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type1 
+<a name="l00320"></a>00320                                                           otherType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type2 
+<a name="l00321"></a>00321                                                                  target:(<span class="keywordtype">id</span>)target 
+<a name="l00322"></a>00322                                                            selector:(<span class="keywordtype">SEL</span>)selector
+<a name="l00323"></a>00323                                                                 moments:(CollisionMoment)moment, ... NS_REQUIRES_NIL_TERMINATION;
+<a name="l00324"></a>00324 
+<a name="l00326"></a>00326 -(<span class="keywordtype">void</span>) removeCollisionCallbackBetweenType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type1 otherType:(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)type2;
+<a name="l00327"></a>00327 
+<a name="l00329"></a>00329 -(cpConstraint*) removeConstraint:(cpConstraint*)constraint;
+<a name="l00330"></a>00330 
+<a name="l00332"></a>00332 -(<span class="keywordtype">void</span>) removeAndFreeConstraint:(cpConstraint*)constraint;
+<a name="l00333"></a>00333 
+<a name="l00335"></a>00335 -(<span class="keywordtype">void</span>) removeAndFreeConstraintsOnBody:(cpBody*)body;
+<a name="l00336"></a>00336 
+<a name="l00338"></a>00338 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2 restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp;
+<a name="l00340"></a>00340 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restLength:(cpFloat)rest stiffness:(cpFloat)stiff damping:(cpFloat)damp;
+<a name="l00342"></a>00342 -(cpConstraint*) addSpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody stiffness:(cpFloat)stiff;
+<a name="l00343"></a>00343 
+<a name="l00345"></a>00345 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveAnchor1:(cpVect)groove1 grooveAnchor2:(cpVect)groove2 fromBodyAnchor:(cpVect)anchor2;
+<a name="l00347"></a>00347 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveLength:(cpFloat)length isHorizontal:(<span class="keywordtype">bool</span>)horiz fromBodyAnchor:(cpVect)anchor2;
+<a name="l00349"></a>00349 -(cpConstraint*) addGrooveToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody grooveLength:(cpFloat)length isHorizontal:(<span class="keywordtype">bool</span>)horiz;
+<a name="l00350"></a>00350 
+<a name="l00352"></a>00352 -(cpConstraint*) addSlideToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2 minLength:(cpFloat)min maxLength:(cpFloat)max;
+<a name="l00354"></a>00354 -(cpConstraint*) addSlideToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody minLength:(cpFloat)min maxLength:(cpFloat)max;
+<a name="l00355"></a>00355 
+<a name="l00357"></a>00357 -(cpConstraint*) addPinToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2;
+<a name="l00359"></a>00359 -(cpConstraint*) addPinToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody;
+<a name="l00360"></a>00360 
+<a name="l00362"></a>00362 -(cpConstraint*) addPivotToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody toBodyAnchor:(cpVect)anchr1 fromBodyAnchor:(cpVect)anchr2;
+<a name="l00364"></a>00364 -(cpConstraint*) addPivotToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody worldAnchor:(cpVect)anchr;
+<a name="l00366"></a>00366 -(cpConstraint*) addPivotToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody;
+<a name="l00367"></a>00367 
+<a name="l00369"></a>00369 -(cpConstraint*) addMotorToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody rate:(cpFloat)rate;
+<a name="l00371"></a>00371 -(cpConstraint*) addMotorToBody:(cpBody*)toBody rate:(cpFloat)rate;
+<a name="l00372"></a>00372 
+<a name="l00374"></a>00374 -(cpConstraint*) addGearToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody phase:(cpFloat)phase ratio:(cpFloat)ratio;
+<a name="l00376"></a>00376 -(cpConstraint*) addGearToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody ratio:(cpFloat)ratio;
+<a name="l00377"></a>00377 
+<a name="l00379"></a>00379 -(cpConstraint*) addBreakableToConstraint:(cpConstraint*)breakConstraint maxForce:(cpFloat)max;
 <a name="l00380"></a>00380 
-<a name="l00382"></a>00382 -(cpConstraint*) addGearToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody phase:(cpFloat)phase ratio:(cpFloat)ratio;
-<a name="l00384"></a>00384 -(cpConstraint*) addGearToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody ratio:(cpFloat)ratio;
+<a name="l00382"></a>00382 -(cpConstraint*) addRotaryLimitToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody min:(cpFloat)min max:(cpFloat)max;
+<a name="l00384"></a>00384 -(cpConstraint*) addRotaryLimitToBody:(cpBody*)toBody min:(cpFloat)min max:(cpFloat)max;
 <a name="l00385"></a>00385 
-<a name="l00387"></a>00387 -(cpConstraint*) addBreakableToConstraint:(cpConstraint*)breakConstraint maxForce:(cpFloat)max;
-<a name="l00388"></a>00388 
-<a name="l00390"></a>00390 -(cpConstraint*) addRotaryLimitToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody min:(cpFloat)min max:(cpFloat)max;
-<a name="l00391"></a>00391 -(cpConstraint*) addRotaryLimitToBody:(cpBody*)toBody min:(cpFloat)min max:(cpFloat)max;
-<a name="l00392"></a>00392 
-<a name="l00394"></a>00394 -(cpConstraint*) addRatchetToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody phase:(cpFloat)phase rachet:(cpFloat)ratchet;
-<a name="l00395"></a>00395 -(cpConstraint*) addRatchetToBody:(cpBody*)toBody phase:(cpFloat)phase rachet:(cpFloat)ratchet;
-<a name="l00396"></a>00396 
-<a name="l00398"></a>00398 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp;
-<a name="l00399"></a>00399 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp;
-<a name="l00400"></a>00400 
-<a name="l00401"></a>00401 <span class="keyword">@end</span>
+<a name="l00387"></a>00387 -(cpConstraint*) addRatchetToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody phase:(cpFloat)phase rachet:(cpFloat)ratchet;
+<a name="l00389"></a>00389 -(cpConstraint*) addRatchetToBody:(cpBody*)toBody phase:(cpFloat)phase rachet:(cpFloat)ratchet;
+<a name="l00390"></a>00390 
+<a name="l00392"></a>00392 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp;
+<a name="l00394"></a>00394 -(cpConstraint*) addRotarySpringToBody:(cpBody*)toBody restAngle:(cpFloat)restAngle stiffness:(cpFloat)stiff damping:(cpFloat)damp;
+<a name="l00395"></a>00395 
+<a name="l00397"></a>00397 -(cpConstraint*) addPulleyToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody pulleyBody:(cpBody*)pulleyBody
+<a name="l00398"></a>00398                                         toBodyAnchor:(cpVect)anchor1 fromBodyAnchor:(cpVect)anchor2
+<a name="l00399"></a>00399                                   toPulleyAnchor:(cpVect)anchor3a fromPulleyAnchor:(cpVect)anchor3b
+<a name="l00400"></a>00400                                                    ratio:(cpFloat)ratio;
+<a name="l00402"></a>00402 -(cpConstraint*) addPulleyToBody:(cpBody*)toBody fromBody:(cpBody*)fromBody
+<a name="l00403"></a>00403                                         toBodyAnchor:(cpVect)anchor1 fromBodyAnchor:(cpVect)anchor2
+<a name="l00404"></a>00404                                   toPulleyWorldAnchor:(cpVect)anchor3a fromPulleyWorldAnchor:(cpVect)anchor3b
+<a name="l00405"></a>00405                                                    ratio:(cpFloat)ratio;
+<a name="l00406"></a>00406 @end
 </pre></div></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Fri Jun 4 16:03:59 2010 for SpaceManager by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Wed Jan 12 23:33:38 2011 for SpaceManager by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

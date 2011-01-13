@@ -43,7 +43,7 @@
 
 -(void)save
 {
-	[smgr saveSpaceToUserDocs:@"cpSerialized.xml" delegate:self];
+	[smgr saveSpaceToUserDocs:@"cpSerializeTest.xml" delegate:self];
 }
 
 - (void) dealloc
@@ -61,7 +61,7 @@
 	smgr.constantDt = 1.0/55.0;
 	
 	//Try to load it from file, if not create from scratch
-	if (![smgr loadSpaceFromUserDocs:@"cpSerialized.xml" delegate:self])
+	if (![smgr loadSpaceFromUserDocs:@"cpSerializeTest.xml" delegate:self])
 	{
 		//add four walls to our screen
 		[smgr addWindowContainmentWithFriction:1.0 elasticity:1.0 inset:cpvzero];
@@ -82,14 +82,14 @@
 		pinn.color = ccGREEN;
 		[self addChild:pinn];
 		
-		cpCCSprite *three = [balls objectAtIndex:1];
+		/*cpCCSprite *three = [balls objectAtIndex:1];
 		cpCCSprite *four = [balls objectAtIndex:10];
 		cpConstraint *pulley = [smgr addPulleyToBody:three.shape->body fromBody:four.shape->body 
 										toBodyAnchor:cpvzero fromBodyAnchor:cpvzero
 									  toPulleyWorldAnchor:cpv(200,270) fromPulleyWorldAnchor:cpv(300,270) ratio:1];
 		cpConstraintNode *pulleyn = [cpConstraintNode nodeWithConstraint:pulley];
 		pulleyn.color = ccORANGE;
-		[self addChild:pulleyn];
+		[self addChild:pulleyn];*/
 	}
 		
 	//start the manager!

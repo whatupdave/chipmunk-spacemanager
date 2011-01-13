@@ -14,8 +14,7 @@
 #import "cpShapeNode.h"
 #import "cpConstraintNode.h"
 
-/* A specialized sub-class of SpaceManager that add specific Cocos2d functionality */
-
+/*! A specialized sub-class of SpaceManager that adds specific Cocos2d functionality */
 @interface SpaceManagerCocos2d : SpaceManager
 
 /*! Schedule a timed loop (against step:) using Cocos2d's default dt */
