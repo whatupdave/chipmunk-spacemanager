@@ -693,7 +693,16 @@ TiXmlElement *cpSpaceSerializer::createBodyElm(cpBody *body)
 {
 	TiXmlElement *elm = new TiXmlElement("body");
 	
-	elm->LinkEndChild(createValueElm("id", CPSS_DEFAULT_MAKE_ID(body)));
+	long id;
+	if (delegate)
+	{
+		id = delegate->makeId(body);
+		delegate->writing(body, id);
+	}
+	else
+		id = CPSS_DEFAULT_MAKE_ID(body);
+	
+	elm->LinkEndChild(createValueElm("id", id));
 	elm->LinkEndChild(createValueElm("mass", body->m));
 	elm->LinkEndChild(createValueElm("inertia", body->i));
 	elm->LinkEndChild(createPointElm("p", body->p));
