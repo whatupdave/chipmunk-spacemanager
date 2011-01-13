@@ -12,6 +12,11 @@
 #import "cpShapeNode.h"
 #import "cpConstraintNode.h"
 
+@interface Retina (OtherTests)
+- (void) raycastTest:(CGPoint)ballPos boxPos:(CGPoint)boxPos;
+- (void) shapeQueryTest:(CGPoint)ballPos boxPos:(CGPoint)boxPos;
+@end
+
 
 @implementation Retina
 
@@ -48,18 +53,10 @@
 		
 		[smgr addMotorToBody:ball.shape->body rate:3];
 		
-		//// Quick Ray test
-		[smgr step:1/60.0];
-		CGPoint dir = ccpNormalize(ccpSub(ball.position, box.position));
-		CGPoint pt1 = ccpAdd(ball.position, ccpMult(dir, -100));
-		CGPoint pt2 = ccpAdd(box.position, ccpMult(dir, 100));
-
-		NSArray *array = [smgr getShapesFromRayCastSegment:pt1 end:pt2];
-		NSAssert([array count] == 2, @"Raycast did not find ball and box");
-		
-		array = [smgr getInfosFromRayCastSegment:pt1 end:pt2];
-		NSAssert([array count] == 2, @"Raycast did not find ball and box infos");
-		/////////////////////
+		//// Quick Shape Query test
+		[self shapeQueryTest:ball.position boxPos:box.position];
+		//// Ray test
+		[self raycastTest:ball.position boxPos:box.position];
 		
 		[self schedule: @selector(step:)];
 	}
@@ -71,6 +68,27 @@
 {
 	[smgr release];
 	[super dealloc];
+}
+
+-(void) raycastTest:(CGPoint)ballPos boxPos:(CGPoint)boxPos
+{
+	[smgr step:1/60.0];
+	CGPoint dir = ccpNormalize(ccpSub(ballPos, boxPos));
+	CGPoint pt1 = ccpAdd(ballPos, ccpMult(dir, -100));
+	CGPoint pt2 = ccpAdd(boxPos, ccpMult(dir, 100));
+	
+	NSArray *array = [smgr getShapesFromRayCastSegment:pt1 end:pt2];
+	NSAssert([array count] == 2, @"Raycast did not find ball and box (count: %d)", [array count]);
+	
+	array = [smgr getInfosFromRayCastSegment:pt1 end:pt2];
+	NSAssert([array count] == 2, @"Raycast did not find ball and box infos (count: %d)", [array count]);	
+}
+
+-(void) shapeQueryTest:(CGPoint)ballPos boxPos:(CGPoint)boxPos
+{
+	NSArray *array = [smgr getShapesAt:ballPos radius:ccpDistance(ballPos, boxPos)];
+	
+	NSAssert([array count] == 2, @"Shape Query did not find ball and box (count: %d)", [array count]);
 }
 
 -(void) onEnter

@@ -214,10 +214,15 @@ typedef enum {
 /*! Use to only rehash one shape */
 -(void) rehashShape:(cpShape*)shape;
 
-/*! Return an array of NSValues with a pointer to a cpShape */
+/*! Given a point, return an array of NSValues with a pointer to a cpShape */
 -(NSArray*) getShapesAt:(cpVect)pos layers:(cpLayers)layers group:(cpLayers)group;
 /*! @see getShapesAt:layers:group: */
 -(NSArray*) getShapesAt:(cpVect)pos;
+
+/*! Given a point and a radius, return an array of NSValues with a pointer to a cpShape */
+-(NSArray*) getShapesAt:(cpVect)pos radius:(float)radius layers:(cpLayers)layers group:(cpLayers)group;
+/*! @see getShapesAt:radius:layers:group: */
+-(NSArray*) getShapesAt:(cpVect)pos radius:(float)radius;
 
 /*! Return first shape hit by the given raycast */
 -(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group;

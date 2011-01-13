@@ -205,6 +205,11 @@ static void collectAllShapes(cpShape *shape, NSMutableArray *outShapes)
 	[outShapes addObject:[NSValue valueWithPointer:shape]];
 }
 
+static void collectAllCollidingShapes(cpShape *shape, cpContactPointSet *points, NSMutableArray *outShapes)
+{
+	[outShapes addObject:[NSValue valueWithPointer:shape]];	
+}
+
 static void collectAllSegmentQueryInfos(cpShape *shape, cpFloat t, cpVect n, NSMutableArray *outInfos)
 {
 	cpSegmentQueryInfo *info = (cpSegmentQueryInfo*)malloc(sizeof(cpSegmentQueryInfo));
@@ -674,6 +679,25 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 -(NSArray*) getShapesAt:(cpVect)pos
 {
 	return [self getShapesAt:pos layers:CP_ALL_LAYERS group:CP_NO_GROUP];
+}
+
+-(NSArray*) getShapesAt:(cpVect)pos radius:(float)radius layers:(cpLayers)layers group:(cpLayers)group;
+{
+	NSMutableArray *shapes = [[[NSMutableArray alloc] init] autorelease];
+	
+	cpCircleShape circle;
+	cpCircleShapeInit(&circle, [self staticBody], radius, pos);
+	circle.shape.layers = layers;
+	circle.shape.group = group;
+	
+	cpSpaceShapeQuery(_space, (cpShape*)(&circle), (cpSpaceShapeQueryFunc)collectAllCollidingShapes, shapes);
+	
+	return shapes;
+}
+
+-(NSArray*) getShapesAt:(cpVect)pos radius:(float)radius
+{
+	return [self getShapesAt:pos radius:radius layers:CP_ALL_LAYERS group:CP_NO_GROUP];
 }
 
 -(cpShape*) getShapeFromRayCastSegment:(cpVect)start end:(cpVect)end layers:(cpLayers)layers group:(cpGroup)group
