@@ -27,7 +27,7 @@
 
 // 0x00 HI ME LO
 // 00   00 00 06
-#define SPACE_MANAGER_VERSION 0x00000006
+#define SPACE_MANAGER_VERSION 0x00000007
 
 #import "chipmunk.h"
 

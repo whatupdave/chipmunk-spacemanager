@@ -239,6 +239,22 @@ static void removeAndFreeShape(cpSpace *space, void *shape, void *data)
 	[(SpaceManager*)(data) removeAndMaybeFreeShape:(cpShape*)(shape) freeShape:YES];
 }
 
+static void freeStaticBodyHelper(void *ptr, void *data)
+{
+	cpSpace *space = (cpSpace*)data;
+	cpShape *shape = (cpShape*)ptr;
+	if (shape && shape->body && shape->body != &space->staticBody)
+	{
+		cpBody* body = shape->body;
+		
+		//clear refs from all shapes
+		for(cpShape *sh = body->shapesList; sh; sh=sh->next)
+			sh->body = NULL;
+		
+		cpBodyFree(body);
+	}
+}
+
 static void addShape(cpSpace *space, void *obj, void *data)
 {
 	cpShape *shape = (cpShape*)(obj);
@@ -341,6 +357,9 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 {		
 	if (_space != nil)
 	{
+		//Clear all "unowned" static bodies
+		cpSpaceHashEach(_space->staticShapes, freeStaticBodyHelper, _space);
+		
 		cpSpaceFreeChildren(_space);
 		cpSpaceFree(_space);
 	}	

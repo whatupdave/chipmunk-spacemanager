@@ -111,11 +111,14 @@ cpSpace* cpSpaceSerializer::load(cpSpace *space, const char* filename)
 		cpShape *shape = createShape(child);
 		if (shape)
 		{
-			cpSpaceAddShape(space, shape);
-			
 			//This should not happen like this, need to reflect reality -rkb
 			if (shape->body->m != INFINITY)
+			{
+				cpSpaceAddShape(space, shape);
 				cpSpaceAddBody(space, shape->body);
+			}
+			else
+				cpSpaceAddStaticShape(space, shape);
 		}
 		
 		//Next!
