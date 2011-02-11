@@ -505,7 +505,7 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 }
 
 -(void) removeAndMaybeFreeShape:(cpShape*)shape freeShape:(BOOL)freeShape
-{
+{	
 	if (shape->body->m == STATIC_MASS)
 		cpSpaceRemoveStaticShape(_space, shape);
 	else		
@@ -515,30 +515,30 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 	if (shape->body != &_space->staticBody)
 	{
 		//Checking if this body is shared....!
-		if (shape->body->space == _space)
-		{
-			BOOL shared = NO;
+		BOOL shared = NO;
+		
+		//anyone else have this body?
+		for(cpShape *sh = shape->body->shapesList; sh && !shared; sh=sh->next)
+			shared = (sh != shape);
 			
-			//anyone else have this body?
-			for(cpShape *sh = shape->body->shapesList; sh && !shared; sh=sh->next)
-				shared = (sh != shape);
-				
-			//if not then get rid of it
-			if (!shared)
-			{
+		//if not then get rid of it
+		if (!shared)
+		{
+			//in this space?
+			if (shape->body->space == _space)
 				cpSpaceRemoveBody(_space, shape->body);
+			
+			//Free it
+			if (freeShape)
+			{
+				//cleanup any constraints
+				if (_cleanupBodyDependencies)
+					[self removeAndFreeConstraintsOnBody:shape->body];
 				
-				//Free it
-				if (freeShape)
-				{
-					//cleanup any constraints
-					if (_cleanupBodyDependencies)
-						[self removeAndFreeConstraintsOnBody:shape->body];
-					
-					cpBodyFree(shape->body);
-				}
+				cpBodyFree(shape->body);
 			}
 		}
+		
 	}
 	
 	if (freeShape)
@@ -1099,8 +1099,12 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 			//Remove all but first body (for reuse)
 			if (i)
 			{
-				cpSpaceRemoveBody(_space, body);
-				cpBodyFree(body);
+				if (body->space == _space)
+					cpSpaceRemoveBody(_space, body);
+				
+				if (body != &_space->staticBody)
+					cpBodyFree(body);
+					
 				
 				//New body for this shape
 				shape->body = first_shape->body;
@@ -1147,7 +1151,9 @@ static void removeCollision(cpSpace *space, void *collision, void *inv_list)
 			cpPolyShapeSetVerts(shape, numVerts, verts, offset);
 			
 			free(verts);
+			break;
 		}
+		default:
 			break;
 	}	
 }
